@@ -1,0 +1,10 @@
+export { Navbar3 } from "./Navbar3";
+export { Header44 } from "./Header44";
+export { Layout1 } from "./Layout1";
+export { Layout240 } from "./Layout240";
+export { Layout249 } from "./Layout249";
+export { Layout12 } from "./Layout12";
+export { Testimonial1 } from "./Testimonial1";
+export { Cta27 } from "./Cta27";
+export { Faq2 } from "./Faq2";
+export { Footer1 } from "./Footer1";

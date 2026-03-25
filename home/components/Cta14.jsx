@@ -18,8 +18,13 @@ export function Cta14() {
             insider tips. Discover new destinations and experiences in Zimbabwe!
           </p>
           <div className="mt-6 md:mt-8">
-            <form className="rb-4 mb-4 grid max-w-sm grid-cols-1 gap-y-3 sm:grid-cols-[1fr_max-content] sm:gap-4">
-              <Input id="email" type="email" placeholder="Enter your email" />
+            <form className="newsletter-form max-w-sm">
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                className="input"
+              />
               <Button title="Sign up">Sign up</Button>
             </form>
             <p className="text-xs">

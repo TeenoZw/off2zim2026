@@ -1,0 +1,483 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font face declarations */
+@font-face {
+  font-family: "Century Gothic";
+  src: url("/fonts/centurygothic.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Century Gothic";
+  src: url("/fonts/centurygothic_bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Base styles */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease;
+  }
+
+  html.dark body {
+    background:
+      radial-gradient(circle at top, rgba(255, 86, 48, 0.1), transparent 30%),
+      linear-gradient(180deg, #050505 0%, #050505 100%);
+  }
+
+  html.light body {
+    background:
+      radial-gradient(circle at top, rgba(255, 86, 48, 0.08), transparent 28%),
+      linear-gradient(180deg, #f7f2ee 0%, #ffffff 100%);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Remove default margins and ensure consistent styling */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold leading-tight;
+  }
+
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl lg:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl lg:text-2xl;
+  }
+
+  h5 {
+    @apply text-lg lg:text-xl;
+  }
+
+  h6 {
+    @apply text-base lg:text-lg;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+
+  /* Focus styles for accessibility */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+}
+
+/* Component styles */
+@layer components {
+  /* Button variants */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary text-secondary-foreground hover:bg-secondary/80 px-6 py-3;
+  }
+
+  .btn-outline {
+    @apply btn border border-input bg-background hover:bg-accent hover:text-accent-foreground px-6 py-3;
+  }
+
+  .btn-ghost {
+    @apply btn hover:bg-accent hover:text-accent-foreground px-6 py-3;
+  }
+
+  .btn-link {
+    @apply btn text-primary underline-offset-4 hover:underline px-0 py-0 h-auto;
+  }
+
+  /* Card component */
+  .card {
+    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+  }
+
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-6;
+  }
+
+  .card-title {
+    @apply text-2xl font-semibold leading-none tracking-tight;
+  }
+
+  .card-description {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .card-content {
+    @apply p-6 pt-0;
+  }
+
+  .card-footer {
+    @apply flex items-center p-6 pt-0;
+  }
+
+  /* Input components */
+  .input {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Navigation styles */
+  .nav-link {
+    @apply text-sm font-medium transition-colors hover:text-primary;
+  }
+
+  .nav-link-active {
+    @apply nav-link text-primary;
+  }
+
+  /* Container utilities */
+  .container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .off2zim-shell {
+    @apply border border-white/10 bg-[#121212] text-white shadow-[0_24px_80px_rgba(0,0,0,0.35)];
+  }
+
+  .off2zim-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur;
+  }
+
+  .off2zim-card {
+    @apply rounded-[32px] border border-white/10 bg-[#141414] text-white;
+  }
+
+  .theme-page {
+    @apply text-slate-950 dark:text-white;
+    background:
+      radial-gradient(circle at top, rgba(255, 86, 48, 0.08), transparent 30%),
+      linear-gradient(180deg, #f7f2ee 0%, #ffffff 100%);
+  }
+
+  .dark .theme-page {
+    background:
+      radial-gradient(circle at top, rgba(255, 86, 48, 0.1), transparent 30%),
+      linear-gradient(180deg, #050505 0%, #050505 100%);
+  }
+
+  .theme-panel {
+    @apply border border-black/10 bg-white/85 text-slate-950 dark:border-white/10 dark:bg-[#111111] dark:text-white;
+  }
+
+  .theme-panel-strong {
+    @apply border border-black/10 bg-white text-slate-950 dark:border-white/10 dark:bg-[#121212] dark:text-white;
+  }
+
+  .theme-panel-soft {
+    @apply border border-black/10 bg-black/[0.03] text-slate-800 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80;
+  }
+
+  .theme-heading {
+    @apply text-slate-950 dark:text-white;
+  }
+
+  .theme-muted {
+    @apply text-slate-600 dark:text-white/60;
+  }
+
+  .theme-subtle {
+    @apply text-slate-500 dark:text-white/45;
+  }
+
+  .theme-label {
+    @apply text-slate-500 dark:text-white/40;
+  }
+
+  .theme-input {
+    @apply border border-black/10 bg-white text-slate-900 placeholder:text-slate-400 focus:border-black/20 focus:outline-none dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/35 dark:focus:border-white/20;
+  }
+
+  .theme-chip {
+    @apply border border-black/10 bg-black/[0.04] text-slate-700 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/75;
+  }
+
+  .theme-button-secondary {
+    @apply border border-black/10 bg-black/[0.04] text-slate-800 hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:bg-white/[0.08];
+  }
+
+  .theme-card {
+    @apply rounded-[32px] border border-black/10 bg-white/90 text-slate-950 dark:border-white/10 dark:bg-[#141414] dark:text-white;
+  }
+
+  .theme-card-soft {
+    @apply rounded-[28px] border border-black/10 bg-black/[0.03] text-slate-800 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/80;
+  }
+
+  /* Section spacing */
+  .section {
+    @apply py-16 lg:py-24;
+  }
+
+  .section-sm {
+    @apply py-12 lg:py-16;
+  }
+
+  .section-lg {
+    @apply py-20 lg:py-32;
+  }
+
+  /* Text utilities */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite];
+  }
+
+  /* Search form specific styles */
+  .search-tabs {
+    @apply flex flex-wrap gap-2 mb-6;
+  }
+
+  .search-tab {
+    @apply px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer hover:bg-accent;
+  }
+
+  .search-tab.active {
+    @apply bg-primary text-primary-foreground border-primary;
+  }
+
+  .search-form {
+    @apply bg-white rounded-lg shadow-medium p-6 border;
+  }
+
+  .form-group {
+    @apply flex flex-col gap-2;
+  }
+
+  .form-row {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+  }
+
+  /* Dropdown styles */
+  .dropdown {
+    @apply relative inline-block;
+  }
+
+  .dropdown-menu {
+    @apply absolute top-full left-0 mt-2 w-48 rounded-md bg-background border shadow-lg z-50 opacity-0 invisible transition-all duration-200;
+  }
+
+  .dropdown:hover .dropdown-menu,
+  .dropdown-menu.show {
+    @apply opacity-100 visible;
+  }
+
+  .dropdown-item {
+    @apply block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors;
+  }
+
+  /* Gallery styles */
+  .gallery-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  .gallery-item {
+    @apply relative overflow-hidden rounded-lg group cursor-pointer;
+  }
+
+  .gallery-item img {
+    @apply w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105;
+  }
+
+  .gallery-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300;
+  }
+
+  /* Testimonial styles */
+  .testimonial {
+    @apply bg-card rounded-lg p-6 shadow-soft border;
+  }
+
+  .testimonial-content {
+    @apply text-card-foreground mb-4 italic;
+  }
+
+  .testimonial-author {
+    @apply flex items-center gap-3;
+  }
+
+  .testimonial-avatar {
+    @apply w-12 h-12 rounded-full object-cover;
+  }
+
+  /* Weather display styles */
+  .weather-item {
+    @apply flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors;
+  }
+
+  .temp-high-hot {
+    @apply text-temperature-hot font-semibold;
+  }
+
+  .temp-high-warm {
+    @apply text-temperature-warm font-semibold;
+  }
+
+  .temp-low-cold {
+    @apply text-temperature-cold font-semibold;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    @apply animate-fade-in;
+  }
+
+  .animate-slide-up {
+    @apply animate-slide-up;
+  }
+
+  .animate-scale-in {
+    @apply animate-scale-in;
+  }
+
+  /* Responsive utilities */
+  .hide-mobile {
+    @apply hidden md:block;
+  }
+
+  .show-mobile {
+    @apply block md:hidden;
+  }
+}
+
+/* Component overrides for consistent rounded corners theme */
+@layer components {
+  /* Relume UI Button component overrides */
+  [data-relume-button],
+  .relume-button,
+  button[class*="focus-visible:ring-border-primary"],
+  button[class*="inline-flex"],
+  [role="button"][class*="inline-flex"] {
+    border-radius: 16px !important;
+  }
+
+  /* Override specific Relume UI button variants */
+  button[class*="px-4"][class*="py-1"],
+  button[class*="px-6"][class*="py-2"],
+  button[class*="px-6"][class*="py-3"] {
+    border-radius: 16px !important;
+  }
+
+  /* Input field overrides for consistency */
+  input[class*="focus-visible:ring-border-primary"],
+  .relume-input {
+    border-radius: 16px !important;
+  }
+
+  /* Exception: Keep counter buttons circular */
+  .counter-btn {
+    border-radius: 50% !important;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-black/10 backdrop-blur-md border border-black/20;
+  }
+}

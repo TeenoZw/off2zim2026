@@ -1,0 +1,210 @@
+import {
+  PlannerCatalogItem,
+  PlannerItemType,
+  TripPlannerItem,
+} from "@/types/trip-planner";
+
+export const tripPlannerCatalog: PlannerCatalogItem[] = [
+  {
+    id: 1,
+    name: "Palm River Hotel",
+    type: "accommodation",
+    category: "Luxury Hotel",
+    location: "Victoria Falls",
+    price: "$320",
+    priceUnit: "/night",
+    rating: 4.8,
+    reviews: 1567,
+    image: "/images/palm-river-hotel-604329-original.jpg",
+    description:
+      "Riverfront luxury with polished service and a serene Falls-side atmosphere.",
+    maxGuests: 4,
+    amenities: ["WiFi", "Pool", "Spa", "Transfers", "Breakfast"],
+    availability: "Verified",
+    featured: true,
+  },
+  {
+    id: 2,
+    name: "Victoria Falls from Above",
+    type: "activity",
+    category: "Adventure",
+    location: "Victoria Falls",
+    price: "$165",
+    priceUnit: "per person",
+    rating: 4.9,
+    reviews: 1247,
+    image: "/images/victoria-falls.jpg",
+    description:
+      "A premium scenic experience built around aerial views, drama, and high-value memory making.",
+    duration: "15 minutes",
+    difficulty: "Easy",
+    groupSize: "1-6 people",
+    highlights: ["Aerial views", "Photography", "Professional crew"],
+    availability: "Available",
+    featured: true,
+  },
+  {
+    id: 3,
+    name: "Private Transfer to Victoria Falls",
+    type: "transport",
+    category: "Private Transfer",
+    location: "Harare to Victoria Falls",
+    price: "$180",
+    priceUnit: "per vehicle",
+    rating: 4.7,
+    reviews: 234,
+    image: "/images/slide1.jpg",
+    description: "Comfortable private transfer with professional driver.",
+    duration: "4.5 hours",
+    maxGuests: 4,
+    amenities: ["Air Conditioning", "WiFi", "Refreshments"],
+    availability: "Available",
+    featured: true,
+  },
+  {
+    id: 4,
+    name: "Hwange Safari Lodge",
+    type: "accommodation",
+    category: "Safari Lodge",
+    location: "Hwange National Park",
+    price: "$189",
+    priceUnit: "/night",
+    rating: 4.9,
+    reviews: 234,
+    image: "/images/hwange-bush-camp-548548-original.jpg",
+    description: "Authentic safari experience in the heart of Hwange.",
+    maxGuests: 3,
+    amenities: ["Game Drives", "All Meals", "WiFi", "Pool", "Bar"],
+    availability: "Available",
+    featured: true,
+  },
+  {
+    id: 5,
+    name: "White Water Rafting on the Zambezi",
+    type: "activity",
+    category: "Adventure Sports",
+    location: "Victoria Falls",
+    price: "$135",
+    priceUnit: "per person",
+    rating: 4.8,
+    reviews: 892,
+    image: "/images/rafting.jpg",
+    description: "World-class rapids adventure on one of the world's great rivers.",
+    duration: "Full day",
+    difficulty: "Challenging",
+    groupSize: "6-12 people",
+    highlights: ["Grade 5 Rapids", "Professional Guide", "Lunch Included"],
+    availability: "Available",
+    featured: true,
+  },
+  {
+    id: 6,
+    name: "Domestic Flight Harare-Victoria Falls",
+    type: "transport",
+    category: "Domestic Flight",
+    location: "Harare to Victoria Falls",
+    price: "$145",
+    priceUnit: "per person",
+    rating: 4.6,
+    reviews: 567,
+    image: "/images/jacaranda.JPG",
+    description: "Quick and convenient domestic flight with scenic views.",
+    duration: "1.5 hours",
+    amenities: ["Carry-on Baggage", "In-flight Service", "Online Check-in"],
+    availability: "Available",
+    featured: false,
+  },
+  {
+    id: 7,
+    name: "Mana Pools Safari Camp",
+    type: "accommodation",
+    category: "Safari Camp",
+    location: "Mana Pools",
+    price: "$349",
+    priceUnit: "/night",
+    rating: 4.9,
+    reviews: 189,
+    image: "/images/safariCamp1.jpg",
+    description: "Authentic tented camp experience by the Zambezi River.",
+    maxGuests: 2,
+    amenities: ["Canvas Tents", "Game Drives", "Walking Safaris", "All Meals"],
+    availability: "Limited",
+    featured: true,
+  },
+  {
+    id: 8,
+    name: "Hwange Game Drive",
+    type: "activity",
+    category: "Wildlife Safari",
+    location: "Hwange National Park",
+    price: "$189",
+    priceUnit: "per person",
+    rating: 4.9,
+    reviews: 567,
+    image: "/images/hwange.jpg",
+    description: "Full day safari experience in Zimbabwe's largest national park.",
+    duration: "8 hours",
+    difficulty: "Easy",
+    groupSize: "4-8 people",
+    highlights: ["Big Five", "Professional Guide", "Lunch", "Binoculars"],
+    availability: "Available",
+    featured: true,
+  },
+];
+
+export function getPlannerCatalogItem(id: number) {
+  return tripPlannerCatalog.find((item) => item.id === id);
+}
+
+function getDefaultEndTime(startTime: string, type: PlannerItemType) {
+  const [hourString] = startTime.split(":");
+  const hour = Number(hourString);
+  const durationHours =
+    type === "accommodation" ? 18 : type === "transport" ? 2 : 3;
+  const endHour = Math.min(hour + durationHours, 23);
+  return `${String(endHour).padStart(2, "0")}:00`;
+}
+
+function getDefaultQuantity(type: PlannerItemType) {
+  return type === "accommodation" ? 1 : 1;
+}
+
+function getDefaultPricingUnit(item: PlannerCatalogItem) {
+  const unit = item.priceUnit.replace(/^\//, "");
+  return unit || "item";
+}
+
+export function toTripPlannerItem(
+  item: PlannerCatalogItem,
+  overrides: Partial<TripPlannerItem> = {}
+): TripPlannerItem {
+  const startTime = overrides.startTime ?? "09:00";
+  const quantity = overrides.quantity ?? getDefaultQuantity(item.type);
+  const unitCost =
+    overrides.unitCost ?? Number(item.price.replace(/[^0-9.]/g, ""));
+  const pricingUnit = overrides.pricingUnit ?? getDefaultPricingUnit(item);
+
+  return {
+    id: overrides.id ?? `${item.type}-${item.id}-${Date.now()}`,
+    sourceId: item.id,
+    title: item.name,
+    type: item.type,
+    location: item.location,
+    date: overrides.date ?? new Date().toISOString().slice(0, 10),
+    endDate: overrides.endDate,
+    startTime,
+    endTime: overrides.endTime ?? getDefaultEndTime(startTime, item.type),
+    duration:
+      overrides.duration ??
+      item.duration ??
+      (item.type === "accommodation" ? "1 night" : "Flexible"),
+    cost: overrides.cost ?? unitCost * quantity,
+    unitCost,
+    quantity,
+    pricingUnit,
+    description: overrides.description ?? item.description,
+    rating: overrides.rating ?? item.rating,
+    image: overrides.image ?? item.image,
+    category: overrides.category ?? item.category,
+  };
+}

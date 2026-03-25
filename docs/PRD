@@ -1,0 +1,124 @@
+1. Introduction & Vision
+   This document outlines the product requirements for Off2Zim, a comprehensive digital tourism platform for Zimbabwe. It serves as the official blueprint for the development, design, and strategic direction of the platform.
+   1.1. Core Purpose
+   The core purpose of Off2Zim is to be the trusted digital gateway to authentic Zimbabwean experiences.
+   We connect tourists, travelers, and locals with the very best Zimbabwe has to offer, from accommodation and transport to unique activities and cultural events. Our platform is designed to be an all-in-one tool that makes exploring the country seamless, secure, and deeply rewarding. We aim to empower local businesses while providing users with an indispensable companion for their Zimbabwean adventures.
+   1.2. Slogan
+   Explore | Experience | Enjoy
+   1.3. Core Values
+   These three values are the guiding principles behind every feature, decision, and interaction on the Off2Zim platform.
+   • Community-Centric: We are more than a platform; we are a community. We build tools that foster mutual respect and positive relationships between our Explorers and our Service Providers.
+   • Driven by Authenticity: We prioritize genuine, high-quality, and unique local experiences over everything else. Our mission is to showcase the real Zimbabwe, from its iconic landmarks to its hidden gems.
+   • Unwavering Trust & Safety: The peace of mind of our users is our highest priority. We ensure this through rigorous provider verification, secure payment systems, and transparent, fair policies that protect every member of our community.
+
+2. User Roles & Management
+   This section defines the primary user categories within the Off2Zim platform. Each role has specific permissions, capabilities, and workflows.
+   2.1. The Explorer
+   • Definition: An Explorer is the primary consumer on the platform. This role encompasses tourists, travelers, adventure seekers, business travelers, and locals seeking to explore Zimbabwe.
+   • Access: Explorers can browse all public content (listings, destinations, articles) without an account. To book, purchase, review, or interact with community features, they must sign up or log in.
+   • Key Features:
+   o Account creation is available via email/password or social logins (Google, Facebook).
+   o Users can optionally self-identify as "Local" or "Foreign" during signup to help tailor their experience.
+   o Each Explorer has an "Explorer Score" which reflects their reliability (e.g., completed bookings vs. last-minute cancellations) and positive contributions to the community.
+   o They can create and manage their "Trip Planner," save favorite listings, and manage their bookings and payments.
+   2.2. The Service Provider
+   • Definition: A Service Provider is a business entity that partners with Off2Zim. They create a single Core Company Profile which acts as a central hub to manage a diverse portfolio of listings across multiple categories (e.g., Accommodation, Transport, Activities, etc.).
+   • Onboarding: All providers undergo a mandatory, internal-only Basic Review by an Admin to ensure legitimacy. A public-facing "Verified" badge is available as a paid premium feature, detailed in Section 3.3.
+   2.3. The Community Guide
+   • Definition: The Community Guide is a specialized, trusted role granted to knowledgeable and passionate Local Explorers. Their status is earned through demonstrated expertise, not payment.
+   • Vetting: To become a Community Guide, a Local Explorer must apply and be vetted by an Off2Zim Administrator.
+   • Dual Function: They provide free advice in the "Ask a Local" forum and can offer paid "Guide+ Services."
+   2.4. The Off2Zim Administrator
+   • Definition: The Administrator is a trusted internal user with high-level privileges to manage, maintain, and oversee the entire platform.
+   • Key Responsibilities:
+   o User Management: Overseeing the two-tier provider verification process (Basic Review & paid "Verified" badge). Vetting and approving applications for the Community Guide role.
+   o Content Curation: Creating and managing the official "Destinations" content and approving/managing all community-submitted content (Guide articles, reviews).
+   o Platform Integrity: Overseeing the "Featured Section" according to the Fairness Framework and handling any disputes or reported issues.
+   o Support: Providing top-level customer and technical support to all user types.
+
+3. The Service Provider Ecosystem
+   This section defines the unified structure for all business entities that partner with Off2Zim. The platform is built on a "One Business, Many Services" model, allowing a single company to manage a diverse portfolio of offerings from one central account.
+   3.1. The Core Company Profile
+   • This is the mandatory parent account every business creates upon registration. It serves as the central identity and management hub for the provider.
+   • Required Information:
+   o Company Name & Trading Name
+   o Main Contact Person, Phone Number, and Email
+   o Physical Address of Headquarters
+   o Business Registration Number / Company Number
+   • Dashboard: The Core Company Profile includes a dashboard that provides an overview of all listings, aggregate performance analytics, and access to all management tools.
+   3.2. Listing Management From their central dashboard, a provider can add multiple, distinct service listings. They will use a prominent “+ Add New Listing” button, which will prompt them to choose a primary category for their new service.
+   3.2.1. Listing Type: Accommodation
+   • For: Hotels, lodges, BnBs, campsites.
+   • Process: When selected, a dedicated form opens containing all necessary fields, including Room Information (with dynamic management of types, pricing, and calendars), Hotel Amenities (as a searchable checklist), Booking Policies, and high-resolution photo uploads.
+   3.2.2. Listing Type: Transportation
+   • For: Bus, flight, taxi, and car rental operators.
+   • Process: The provider first selects a sub-type (e.g., Car Rental), which opens the specific form tailored to that service, including fleet management, route/zone definitions, availability calendars, and pricing rules.
+   3.2.3. Listing Type: Experience
+   • For: Tour operators, restaurants, event organizers.
+   • Process: The provider selects a sub-type (Wine & Dine, Activity, or Event) to access the relevant form, which includes tools for menu uploads, activity scheduling, or event ticket management.
+   3.2.4. Listing Type: Shopping Product
+   • For: Artisans, craft markets, apparel brands, and other sellers of physical goods.
+   • Pick-up Lead Time: This setting determines the earliest possible date and time an item can be collected, ensuring the vendor has adequate preparation time. When booking a pick-up slot, Explorers will see the first available time based on this lead time and can freely select any valid date/time after that minimum threshold, within the vendor's specified operating hours.
+   3.3. Verification & Premium Status Off2Zim employs a two-tier verification system to ensure both platform safety and to create a premium revenue opportunity.
+   3.3.1. Basic Review (Free, Internal)
+   • Process: Upon initial registration, every new Core Company Profile is submitted to the Off2Zim Admin queue. The Admin performs a basic, internal check of the business registration details to ensure the entity is legitimate and to prevent spam/fraud.
+   • Result: This is a mandatory, behind-the-scenes step required for a provider to be able to publish any listings. It does not result in a public-facing badge.
+   3.3.2. "Verified" Badge (Paid Premium Feature)
+   • Process: This is a premium status available for purchase via a subscription model (e.g., monthly or annual fee). Providers who subscribe are subject to a more thorough vetting process by the Admin team.
+   • Result: Upon successful payment and vetting, the provider receives a prominent "Verified" or "Premium Partner" badge.
+   • Benefits for the Provider:
+   o The badge is displayed on their Core Company Profile and across all of their individual service listings.
+   o Significantly increases trust and confidence from Explorers.
+   o May be a prerequisite for eligibility in certain promotional campaigns or premium "Featured" section placements.
+   3.4. Service Provider Dashboard - Core Functionalities The dashboard for any Service Provider with sellable listings or bookable services must include a robust Order Management interface.
+   3.4.1. Order Management View
+   • The dashboard must provide clear, distinct, and sortable views for all orders, allowing providers to easily track their status:
+   o New Orders: Awaiting provider acknowledgement or confirmation.
+   o Upcoming Bookings / Awaiting Pick-up: A list of confirmed services or product pick-ups with their scheduled dates clearly visible.
+   o Shipped Orders: A list of items currently in transit to the customer.
+   o Completed Orders: A historical archive of all fulfilled transactions.
+   o Disputed Orders: A view of any orders currently under Admin mediation.
+
+4. Key Platform Features & Workflows
+   This section details the major platform-wide features that drive the core user experience, combining various services into a single, seamless journey.
+   4.1. The Off2Zim Trip Planner
+   • Vision: An intelligent tool that allows individual Explorers to visually build, organize, and manage their entire Zimbabwean itinerary.
+   • Features: Visual Timeline Builder, a "Logistics Assistant" to warn of travel gaps, an Integrated Budget Tracker, and simple PDF/link sharing. It also integrates with "Guide+ Services" for personalized planning.
+   4.2. "Ask a Local" & "Community Guide+" Services System
+   • Vision: A two-tier system to connect Explorers with knowledgeable locals.
+   • Features: A free "Ask a Local" Q&A forum where answers from Community Guides are highlighted. A paid "Community Guide+" marketplace for services like personalized planning, video calls, and in-person tours, with a 25% platform commission.
+   4.3. The Two-Way Rating System
+   • Vision: A system to foster mutual respect and accountability.
+   • Features: Explorers rate providers after a service. Providers also rate Explorers, generating an "Explorer Score" visible on future booking requests. A "blind" system ensures honest reviews.
+   4.4. The Shopping Marketplace Flow
+   • Vision: A seamless e-commerce experience for purchasing physical goods from local Vendors.
+   • Features: A standard shopping cart and checkout process. The system supports both Shipping (with vendor-defined fees) and In-Store Pick-up. Pick-up is secured by a unique Pick-up PIN system to verify collection and protect the seller. A one-way option to change from "Pick-up" to "Shipping" is available.
+   4.5. Dispute Resolution & Refund System
+   • Vision: A structured and fair process for handling exceptions, mediated by the platform Administrator.
+   • Features: Both users and providers can initiate a dispute. The Admin mediates and has the authority to process refunds. An automated payment release rule protects sellers of shipped goods.
+   4.6. The Featured Section & Fairness Framework
+   • Vision: A premium showcase governed by strict rules for transparency and fairness.
+   • Features: A multi-pathway system for getting featured:
+   o Paid: Algorithmic rotation for subscribers, labeled "Sponsored."
+   o Performance: Data-driven criteria for top performers, labeled "Top Rated."
+   o Curation: Manual selection by Admins for campaigns, labeled "Editor's Choice" and requiring public justification.
+   • Prerequisite: All featured providers must have the paid "Verified" status.
+
+5. Monetization Strategy
+   Vision: Off2Zim will generate revenue through a multi-stream model focused on commissions from successful transactions and premium services for providers.
+   5.1. Transaction-Based Commissions
+   • Booking Commissions: A standard commission of [to be determined]% on completed bookings (Accommodation, Activities, etc.).
+   • "Community Guide+" Services Commission: A fixed 25% commission on all Guide earnings.
+   • Marketplace Sales Commission: A commission of [to be determined]% on the product price of items sold.
+   5.2. Premium Provider Subscriptions
+   • "Verified" Badge Subscription: A recurring fee for providers to receive the public-facing "Verified" badge.
+   • "Featured Section" Placement Subscription: An additional recurring fee for "Verified" providers to be included in the sponsored "Featured Pool."
+
+6. Future Considerations
+   This section outlines features and functionalities considered valuable for future releases (Version 2.0 and beyond).
+   6.1. Collaborative Trip Planning
+   • An enhancement to the Trip Planner allowing multiple users to share and edit an itinerary in real-time.
+   6.2. Direct Airline API/GDS Integration
+   • A technical integration to pull real-time flight data from major airlines, automating the "Flights" section.
+   6.3. Off2Zim-Fulfilled Merchandise
+   • Introduction of Off2Zim's own branded merchandise, where the platform manages inventory and shipping.

@@ -66,7 +66,7 @@ export function Footer1() {
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 items-start gap-y-10 sm:grid-cols-3 sm:gap-x-6 md:gap-x-8 md:gap-y-4">
+          <div className="grid items-start grid-cols-1 gap-y-10 sm:grid-cols-3 sm:gap-x-6 md:gap-x-8 md:gap-y-4">
             <div className="flex flex-col items-start justify-start">
               <h2 className="mb-3 font-semibold md:mb-4">Quick Links</h2>
               <ul>
@@ -82,7 +82,7 @@ export function Footer1() {
                 </li>
                 <li className="py-2 text-sm">
                   <a href="#" className="flex items-center gap-3">
-                    <span>Contact Us</span>
+                    <span>Contact Us - 0777708105</span>
                   </a>
                 </li>
                 <li className="py-2 text-sm">
@@ -164,8 +164,8 @@ export function Footer1() {
             </div>
           </div>
         </div>
-        <div className="h-px w-full bg-black" />
-        <div className="flex flex-col-reverse items-start justify-between pb-4 pt-6 text-sm md:flex-row md:items-center md:pb-0 md:pt-8">
+        <div className="w-full h-px bg-black" />
+        <div className="flex flex-col-reverse items-start justify-between pt-6 pb-4 text-sm md:flex-row md:items-center md:pb-0 md:pt-8">
           <p className="mt-6 md:mt-0">© 2024 Off2Zim. All rights reserved.</p>
           <ul className="grid grid-flow-row grid-cols-[max-content] justify-center gap-y-4 text-sm md:grid-flow-col md:gap-x-6 md:gap-y-0">
             <li className="underline">
