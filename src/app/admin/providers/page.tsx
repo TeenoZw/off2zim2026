@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AdminShell from "@/components/admin/AdminShell";
 import { apiFetch } from "@/lib/client-api";
 import type { ProviderCompanyRecord } from "@/types/platform";
 
@@ -86,36 +86,11 @@ function AdminProvidersContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080808] px-4 py-8 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Provider onboarding review</h1>
-              <p className="mt-2 max-w-3xl text-sm text-white/60">
-                Internal operations workspace for Off2Zim to verify legitimacy, approve
-                suppliers, and manage the PRD’s provider onboarding pipeline.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black">
-                Provider reviews
-              </div>
-              <Link
-                href="/admin/bookings"
-                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75"
-              >
-                Bookings
-              </Link>
-              <Link
-                href="/admin/disputes"
-                className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75"
-              >
-                Disputes
-              </Link>
-            </div>
-          </div>
-        </div>
+    <AdminShell
+      activePath="/admin/providers"
+      title="Provider reviews"
+      description="Review onboarding submissions, documents, and business readiness before approving platform visibility."
+    >
 
         {error ? (
           <div className="mb-6 rounded-2xl border border-[#ff5630]/30 bg-[#2d1714] px-4 py-3 text-sm text-[#ffb09c]">
@@ -283,8 +258,7 @@ function AdminProvidersContent() {
             )}
           </section>
         </div>
-      </div>
-    </div>
+    </AdminShell>
   );
 }
 

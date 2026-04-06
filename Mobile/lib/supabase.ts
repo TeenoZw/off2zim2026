@@ -1,13 +1,12 @@
+import type { MobileAuthUser, MobileSession } from '@/core/auth/types';
+import { buildSession, subscribeToAuth } from './api';
+import { apiFetch } from '@/core/http/apiClient';
 import {
-  apiFetch,
-  buildSession,
-  clearSession,
-  MobileAuthUser,
-  MobileSession,
-  persistSession,
-  persistUser,
-  subscribeToAuth,
-} from './api';
+  registerMobileUser,
+  signInMobileUser,
+  signOutMobileUser,
+  updateMobileUserEmail,
+} from '@/core/auth/service';
 
 export type User = MobileAuthUser;
 export type Session = MobileSession;
@@ -167,32 +166,6 @@ class QueryBuilder implements PromiseLike<any> {
   }
 }
 
-function mapAuthUser(rawUser: any): MobileAuthUser {
-  return {
-    id: rawUser.id,
-    email: rawUser.email,
-    user_metadata: {
-      full_name:
-        rawUser.profile?.fullName ||
-        rawUser.name ||
-        [rawUser.firstName, rawUser.lastName].filter(Boolean).join(' ').trim(),
-      first_name: rawUser.firstName,
-      last_name: rawUser.lastName,
-      phone: rawUser.profile?.phone,
-      nationality: rawUser.profile?.nationality || rawUser.profile?.location,
-      business_name: rawUser.profile?.companyName,
-      user_type: rawUser.role === 'provider' ? 'business' : 'individual',
-      avatar_url: rawUser.avatar,
-      title: rawUser.profile?.title,
-      gender: rawUser.profile?.gender,
-      id_type: rawUser.profile?.idType,
-      identity_number: rawUser.profile?.identityNumber,
-      date_of_birth: rawUser.profile?.dateOfBirth,
-      rating: rawUser.explorerScore?.rating ?? 0,
-    },
-  };
-}
-
 export const supabase = {
   auth: {
     async getSession() {
@@ -215,13 +188,8 @@ export const supabase = {
       password: string;
     }) {
       try {
-        const payload = await apiFetch<{ token: string; user: any }>('/api/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ email, password }),
-        });
-        const user = mapAuthUser(payload.user);
-        await persistSession(payload.token, user);
-        return { data: { session: { access_token: payload.token, user }, user }, error: null };
+        const session = await signInMobileUser(email, password);
+        return { data: { session, user: session.user }, error: null };
       } catch (error) {
         return {
           data: { session: null, user: null },
@@ -240,37 +208,38 @@ export const supabase = {
     }) {
       try {
         const metadata = options?.data ?? {};
-        const fullName = typeof metadata.full_name === 'string' ? metadata.full_name.trim() : '';
-        const [firstName, ...rest] = fullName.split(/\s+/).filter(Boolean);
-        const lastName = rest.join(' ');
         const isBusiness = metadata.user_type === 'business';
-
-        const payload = await apiFetch<{ token: string; user: any }>('/api/auth/register', {
-          method: 'POST',
-          body: JSON.stringify({
-            email,
-            password,
-            firstName: firstName || (isBusiness ? 'Business' : 'Off2Zim'),
-            lastName: lastName || (isBusiness ? 'User' : 'Explorer'),
-            role: isBusiness ? 'provider' : 'explorer',
-            explorerType: 'foreign',
-            companyName: isBusiness ? metadata.business_name || 'Off2Zim Business' : undefined,
-            tradingName: isBusiness ? metadata.business_name || 'Off2Zim Business' : undefined,
-            businessRegistrationNumber: isBusiness ? 'PENDING' : undefined,
-            mainContactPerson: isBusiness ? fullName || 'Business User' : undefined,
-            businessPhone: isBusiness ? metadata.phone || '+263000000000' : undefined,
-            businessEmail: isBusiness ? email : undefined,
-            physicalAddress: isBusiness ? 'Pending address' : undefined,
-          }),
-        });
-
-        const user = mapAuthUser(payload.user);
-        user.user_metadata = {
-          ...user.user_metadata,
-          ...metadata,
-        };
-        await persistSession(payload.token, user);
-        return { data: { session: { access_token: payload.token, user }, user }, error: null };
+        const session = await registerMobileUser(
+          email,
+          password,
+          typeof metadata.full_name === 'string' ? metadata.full_name.trim() : '',
+          isBusiness ? 'business' : 'individual',
+          isBusiness ? metadata.business_name || 'Off2Zim Business' : undefined,
+          isBusiness
+            ? undefined
+            : {
+                title: metadata.title,
+                gender: metadata.gender,
+                id_type: metadata.id_type,
+                identity_number: metadata.identity_number,
+                date_of_birth: metadata.date_of_birth,
+                nationality: metadata.nationality,
+                phone: metadata.phone,
+              },
+          {
+            explorerType: metadata.explorer_type || 'foreign',
+            providerProfile: isBusiness
+              ? {
+                  tradingName: metadata.business_name || 'Off2Zim Business',
+                  businessRegistrationNumber: 'PENDING',
+                  mainContactPerson: metadata.full_name || 'Business User',
+                  businessPhone: metadata.phone || '+263000000000',
+                  physicalAddress: 'Pending address',
+                }
+              : undefined,
+          }
+        );
+        return { data: { session, user: session.user }, error: null };
       } catch (error) {
         return {
           data: { session: null, user: null },
@@ -279,12 +248,7 @@ export const supabase = {
       }
     },
     async signOut() {
-      try {
-        await apiFetch('/api/auth/logout', { method: 'POST' });
-      } catch {
-        // Ignore logout failures and clear client state.
-      }
-      await clearSession();
+      await signOutMobileUser();
       return { error: null };
     },
     async resetPasswordForEmail(_email?: string) {
@@ -301,19 +265,8 @@ export const supabase = {
     },
     async updateUser({ email }: { email?: string }) {
       try {
-        const payload = await apiFetch<{ profile: any }>('/api/profile', {
-          method: 'PATCH',
-          body: JSON.stringify({ email }),
-        });
-        const session = await buildSession();
-        if (session) {
-          const nextUser = {
-            ...session.user,
-            email: payload.profile.email,
-          };
-          await persistUser(nextUser);
-        }
-        return { data: { user: session?.user ?? null }, error: null };
+        const user = await updateMobileUserEmail(email);
+        return { data: { user }, error: null };
       } catch (error) {
         return {
           data: { user: null },

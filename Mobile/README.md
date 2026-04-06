@@ -1,50 +1,80 @@
-# Welcome to your Expo app 👋
+# Off2Zim Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This mobile workspace now supports three audience-specific app variants on one shared backend:
 
-## Get started
+- `explorer` for customers and trip planning
+- `provider` for service providers and listing operations
+- `admin` for platform operations
 
-1. Install dependencies
+## Local development
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Run the explorer app:
 
 ```bash
-npm run reset-project
+npm run start:explorer
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Run the provider app:
 
-## Learn more
+```bash
+npm run start:provider
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Run the admin app:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run start:admin
+```
 
-## Join the community
+You can also target simulators directly:
 
-Join our community of developers creating universal apps.
+```bash
+npm run ios:explorer
+npm run ios:provider
+npm run android:explorer
+npm run android:provider
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Variant control
+
+The mobile surface is controlled by:
+
+```bash
+EXPO_PUBLIC_APP_VARIANT=explorer
+EXPO_PUBLIC_APP_VARIANT=provider
+EXPO_PUBLIC_APP_VARIANT=admin
+```
+
+Variant config is resolved in:
+
+- [Mobile/app.config.ts](/Users/tinotendamutami/Off2Zim/off2zim-v.3/Mobile/app.config.ts)
+- [Mobile/config/appVariant.ts](/Users/tinotendamutami/Off2Zim/off2zim-v.3/Mobile/config/appVariant.ts)
+
+## Build profiles
+
+EAS profiles are defined in [Mobile/eas.json](/Users/tinotendamutami/Off2Zim/off2zim-v.3/Mobile/eas.json).
+
+Examples:
+
+```bash
+eas build --platform ios --profile explorer-production
+eas build --platform ios --profile provider-production
+eas build --platform android --profile explorer-production
+eas build --platform android --profile provider-production
+```
+
+## App identities
+
+Each app variant gets its own identifiers:
+
+- Explorer
+  - iOS: `zw.co.off2zim.explorer`
+  - Android: `zw.co.off2zim.explorer`
+- Provider
+  - iOS: `zw.co.off2zim.provider`
+  - Android: `zw.co.off2zim.provider`
+- Admin
+  - iOS: `zw.co.off2zim.admin`
+  - Android: `zw.co.off2zim.admin`
+
+This keeps explorer and provider releases independent while preserving a shared backend, auth model, and service layer.

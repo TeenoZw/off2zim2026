@@ -367,6 +367,24 @@ export const serviceProviderService = {
     }
   },
 
+  getMyListings: async (): Promise<ServiceResult<ProviderListingRecord[]>> => {
+    try {
+      const payload = await getProviderListings();
+      return success(payload.listings);
+    } catch (error) {
+      return failure<ProviderListingRecord[]>([], error);
+    }
+  },
+
+  getMyOrders: async (): Promise<ServiceResult<ProviderOrderRecord[]>> => {
+    try {
+      const payload = await getProviderOrders();
+      return success(payload.orders);
+    } catch (error) {
+      return failure<ProviderOrderRecord[]>([], error);
+    }
+  },
+
   updateProfile: async (
     updates: Partial<ServiceProvider>
   ): Promise<ServiceResult<ServiceProvider | null>> => {

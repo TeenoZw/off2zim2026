@@ -387,6 +387,59 @@ Open concerns:
 - The email verification UI path is still compatibility-shaped and should either be backed by a real backend flow or removed in a future product pass.
 - Password reset remains intentionally unsupported in the shared mobile backend.
 
+### Pass 13 - 2026-04-06
+
+Completed:
+
+- Brought the mobile sign-up flow closer to the PRD by adding explicit `Local` / `Foreign` explorer selection in the mobile auth screen.
+- Replaced placeholder provider registration payloads with real mobile form capture for:
+- business name
+- trading name
+- business registration number
+- main contact person
+- business phone
+- physical address
+- Updated the mobile auth context to submit those real provider fields and explorer type to the shared backend registration route.
+- Removed the misleading mobile sign-up copy that claimed a verification code was being sent even though the current shared backend signs the user in immediately.
+- Added explorer type into the mobile auth user metadata mapping so the mobile session shape now preserves that PRD field.
+
+In progress:
+
+- Mobile authentication now reflects the currently supported backend registration model more accurately, but the social and verification affordances still need either real backend support or UI cleanup.
+
+Open concerns:
+
+- Mobile still shows social sign-up options, but they are not yet wired to real backend OAuth flows.
+- The dedicated verification/resend flow in `Mobile/app/auth.tsx` still depends on compatibility stubs and does not represent a production-ready verification backend.
+- Password reset remains unsupported in the shared mobile backend and still needs a real implementation if it is required by the PRD.
+
+### Pass 14 - 2026-04-06
+
+Completed:
+
+- Added shared backend email verification and password reset routes for mobile and web:
+- `/api/auth/verify-email/request`
+- `/api/auth/verify-email/confirm`
+- `/api/auth/password-reset/request`
+- `/api/auth/password-reset/confirm`
+- Added token lifecycle helpers for verification and password reset in `src/lib/auth-tokens.ts`.
+- Added shared auth email delivery helpers in `src/lib/auth-email.ts` with fallback URLs when outbound email is not configured.
+- Updated the register route so new accounts trigger a real verification flow instead of fake mobile verification messaging.
+- Wired the mobile auth stack to backend-backed password reset requests and verification-aware session mapping.
+- Updated the mobile auth screen so sign-up now surfaces real verification next steps and forgot-password now starts a real reset flow.
+- Updated the mobile profile screen so password reset now uses the shared backend instead of a stub.
+- Added email delivery environment variables to `.env.example`.
+
+In progress:
+
+- Mobile and web now share real verification and password reset endpoints, but the resend-verification affordance is not yet surfaced prominently in the signed-in mobile UI.
+
+Open concerns:
+
+- Social login remains intentionally deferred and is still not wired to backend OAuth.
+- If `RESEND_API_KEY` and `AUTH_EMAIL_FROM` are not configured, verification and password reset fall back to direct links instead of delivered emails.
+- `Mobile/app/auth.tsx` still carries now-unused legacy verification styles that can be cleaned up in a future pass without affecting behavior.
+
 ## Verification Checklist
 
 - Auth works on web and mobile against the same backend flow

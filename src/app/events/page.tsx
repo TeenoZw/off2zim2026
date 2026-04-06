@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import SectionHeader from "@/components/ui/SectionHeader";
 import {
   CalendarDaysIcon,
   ClockIcon,
@@ -263,15 +265,17 @@ export default function EventsPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Events" />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="theme-panel rounded-[30px] p-6 md:p-8">
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="theme-label text-xs uppercase tracking-[0.24em]">Featured</p>
-              <h2 className="theme-heading mt-2 text-2xl font-semibold">
-                Event picks with the strongest travel pull
-              </h2>
-            </div>
+            <SectionHeader
+              eyebrow="Featured"
+              title="Event picks with the strongest travel pull"
+            />
             <div className="theme-chip rounded-full px-4 py-2 text-sm">
               {featured.length} highlighted
             </div>
@@ -288,12 +292,10 @@ export default function EventsPage() {
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="theme-panel rounded-[30px] p-6 md:p-8">
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="theme-label text-xs uppercase tracking-[0.24em]">Explore more</p>
-              <h2 className="theme-heading mt-2 text-2xl font-semibold">
-                Build the itinerary around what is actually happening
-              </h2>
-            </div>
+            <SectionHeader
+              eyebrow="Explore more"
+              title="Build the itinerary around what is actually happening"
+            />
             <div className="theme-muted text-sm">{filteredEvents.length} results</div>
           </div>
 

@@ -42,9 +42,9 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { navigateToStayProfile } from '@/utils/navigationUtils';
 import { pickBestImageUrl, normalizeStorageImageUrl } from '@/utils/imageUtils';
 import { isFavorited as isFavoritedUtil, toggleFavorite as toggleFavoriteUtil } from '@/utils/favoritesUtils';
-import { type Database } from '@/lib/supabase';
 import { destinationsService } from '@/services/database';
 import { weatherService } from '@/services/weather';
+import type { BackendDestination } from '@/types/backend';
 
 const { width: screenWidth } = Dimensions.get('window');
 // Match Featured card widths
@@ -71,10 +71,6 @@ const GALLERY_CARD_WIDTH = (AVAILABLE_GALLERY_WIDTH - GALLERY_CARD_GAP) / 2;
 interface RouteParams {
   destinationId: string;
 }
-
-// Database destination type
-type Destination = Database['public']['Tables']['destinations']['Row'];
-type DatabaseDestination = Destination;
 
 interface WeatherDay {
   day: string;
@@ -126,7 +122,7 @@ export default function DestinationDetail() {
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Helper function to get destination image
-  const getDestinationImageUri = useCallback((dest: DatabaseDestination) => {
+  const getDestinationImageUri = useCallback((dest: BackendDestination) => {
     return (
       pickBestImageUrl(dest.image_url, Array.isArray(dest.images) ? dest.images : undefined) ||
       `https://picsum.photos/800/500?random=${dest.id.slice(-4)}`
@@ -134,7 +130,7 @@ export default function DestinationDetail() {
   }, []);
 
   // State for database destination
-  const [destination, setDestination] = useState<DatabaseDestination | null>(null);
+  const [destination, setDestination] = useState<BackendDestination | null>(null);
   const [forecast, setForecast] = useState<WeatherDay[] | null>(null);
 
   // Fetch destination from database

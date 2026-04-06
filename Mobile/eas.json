@@ -1,0 +1,51 @@
+{
+  "cli": {
+    "version": ">= 16.12.0"
+  },
+  "build": {
+    "explorer-preview": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_VARIANT": "explorer"
+      }
+    },
+    "provider-preview": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_VARIANT": "provider"
+      }
+    },
+    "admin-preview": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_APP_VARIANT": "admin"
+      }
+    },
+    "explorer-production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_APP_VARIANT": "explorer"
+      }
+    },
+    "provider-production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_APP_VARIANT": "provider"
+      }
+    },
+    "admin-production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_APP_VARIANT": "admin"
+      }
+    }
+  },
+  "submit": {
+    "explorer-production": {},
+    "provider-production": {},
+    "admin-production": {}
+  }
+}

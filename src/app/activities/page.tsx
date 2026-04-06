@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { Clock3, MapPin, Search, Star, Users } from "lucide-react";
 import { apiFetch } from "@/lib/client-api";
 import type { PublicListingRecord } from "@/types/platform";
@@ -64,6 +66,10 @@ export default function ActivitiesPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Things To Do" />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="theme-panel rounded-[32px] p-4 md:p-5">
           <div className="grid gap-3 lg:grid-cols-[1.2fr_auto]">
@@ -101,7 +107,12 @@ export default function ActivitiesPage() {
             <p className="theme-muted text-sm">No experiences found.</p>
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <>
+            <SectionHeader
+              eyebrow="Live catalog"
+              title="Provider-led experiences worth adding to the route"
+            />
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {activities.map((activity) => (
               <article key={activity.id} className="theme-card overflow-hidden">
                 <div
@@ -158,7 +169,8 @@ export default function ActivitiesPage() {
                 </div>
               </article>
             ))}
-          </div>
+            </div>
+          </>
         )}
       </section>
     </div>

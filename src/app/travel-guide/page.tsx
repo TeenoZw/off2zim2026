@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import FavoriteButton from "@/components/ui/FavoriteButton";
+import SectionHeader from "@/components/ui/SectionHeader";
 import WeatherBadge from "@/components/ui/WeatherBadge";
 import { useMemo, useState } from "react";
 import {
@@ -201,6 +203,10 @@ export default function TravelGuidePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Destinations" />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="theme-panel rounded-[32px] p-4 md:p-5">
           <div className="relative mx-auto max-w-3xl">
@@ -217,14 +223,10 @@ export default function TravelGuidePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <p className="theme-label text-sm uppercase tracking-[0.28em]">Top destinations</p>
-            <h2 className="theme-heading mt-2 text-3xl font-semibold">
-              Browse Zimbabwe by mood, season, and story
-            </h2>
-          </div>
-        </div>
+        <SectionHeader
+          eyebrow="Top destinations"
+          title="Browse Zimbabwe by mood, season, and story"
+        />
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {filteredDestinations.map((destination) => (

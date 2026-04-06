@@ -3,6 +3,7 @@
 import { useEffect, ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/auth";
+import { getAccountRoute } from "@/lib/auth-routing";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -18,6 +19,7 @@ const ProtectedRoute = ({
   fallback,
 }: ProtectedRouteProps) => {
   const { user, isLoading, hasRole, isVerified } = useAuth();
+  const accountRoute = getAccountRoute(user);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -73,10 +75,10 @@ const ProtectedRoute = ({
             {requiredRole}
           </p>
           <a
-            href="/dashboard"
+            href={accountRoute}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Go to Dashboard
+            Go to workspace
           </a>
         </div>
       </div>
@@ -102,10 +104,10 @@ const ProtectedRoute = ({
               Verify Account
             </a>
             <a
-              href="/dashboard"
+              href={accountRoute}
               className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
             >
-              Go to Dashboard
+              Go to workspace
             </a>
           </div>
         </div>

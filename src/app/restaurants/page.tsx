@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { Clock3, MapPin, Star, UtensilsCrossed } from "lucide-react";
 import { usePayment } from "@/contexts/PaymentContext";
 import { BookingItem } from "@/types/payment";
@@ -111,7 +113,15 @@ export default function RestaurantsPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Restaurants" />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          eyebrow="Dining moments"
+          title="Place the right meal in the right stop"
+        />
         <div className="grid gap-5 lg:grid-cols-3">
           {sampleRestaurants.map((restaurant) => (
             <article key={restaurant.id} className="theme-card overflow-hidden">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, CalendarDays, MapPin, MessageCircle } from "lucide-react";
+import { getSurfaceHref } from "@/lib/app-surface";
 
 const footerColumns = [
   {
@@ -21,11 +22,11 @@ const footerColumns = [
     ],
   },
   {
-    title: "Partner",
+    title: "Account",
     links: [
-      { label: "Provider Dashboard", href: "/provider-dashboard" },
-      { label: "Register", href: "/register" },
-      { label: "Login", href: "/login" },
+      { label: "Explorer sign in", href: getSurfaceHref("explorer", "/login") },
+      { label: "Explorer account", href: getSurfaceHref("explorer", "/register") },
+      { label: "Provider access", href: getSurfaceHref("provider", "/login") },
       { label: "Contact", href: "/contact" },
     ],
   },
@@ -59,7 +60,7 @@ export default function Footer() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/provider-dashboard"
+                href={getSurfaceHref("provider", "/register")}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Partner with Off2Zim

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import SectionHeader from "@/components/ui/SectionHeader";
 import {
   ArrowRight,
   BadgeCheck,
@@ -107,6 +109,10 @@ export default function CommunityGuidesPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Ask a Local" />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="theme-panel rounded-[30px] p-5">
@@ -191,14 +197,10 @@ export default function CommunityGuidesPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <p className="theme-label text-sm uppercase tracking-[0.28em]">
-            Forum snapshot
-          </p>
-          <h2 className="theme-heading mt-2 text-3xl font-semibold">
-            Popular traveler questions
-          </h2>
-        </div>
+        <SectionHeader
+          eyebrow="Forum snapshot"
+          title="Popular traveler questions"
+        />
         <div className="space-y-4">
           {featuredQuestions.map((question) => (
             <article
@@ -228,14 +230,10 @@ export default function CommunityGuidesPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-end justify-between">
-          <div>
-            <p className="theme-label text-sm uppercase tracking-[0.28em]">
-              Guide+ services
-            </p>
-            <h2 className="theme-heading mt-2 text-3xl font-semibold">
-              Featured local experts
-            </h2>
-          </div>
+          <SectionHeader
+            eyebrow="Guide+ services"
+            title="Featured local experts"
+          />
           <Link
             href="/register"
             className="theme-muted hidden items-center gap-2 text-sm hover:text-slate-950 dark:hover:text-white md:inline-flex"

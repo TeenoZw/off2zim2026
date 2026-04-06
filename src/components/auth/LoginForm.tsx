@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import { Eye, EyeOff, KeyRound, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface LoginFormProps {
@@ -24,8 +26,8 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
       if (redirectTo) {
         window.location.href = redirectTo;
       }
-    } catch (err) {
-      // Error is handled by the AuthContext
+    } catch {
+      return;
     }
   };
 
@@ -36,59 +38,33 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
     }));
   };
 
-  const demoAccounts = [
-    {
-      role: "Foreign Explorer",
-      email: "explorer@demo.com",
-      description: "Tourist/Foreign Visitor Account",
-    },
-    {
-      role: "Local Explorer",
-      email: "local.explorer@demo.com",
-      description: "Local Zimbabwean Explorer",
-    },
-    {
-      role: "Service Provider",
-      email: "provider@demo.com",
-      description: "Tourism Business Account",
-    },
-    {
-      role: "Community Guide",
-      email: "guide@demo.com",
-      description: "Vetted Local Expert Guide",
-    },
-    {
-      role: "Admin",
-      email: "admin@demo.com",
-      description: "Platform Administrator",
-    },
-  ];
-
-  const fillDemoAccount = (email: string) => {
-    setFormData({ email, password: "demo12345" });
-  };
-
   return (
-    <div className="theme-card w-full max-w-md rounded-[30px] p-6 shadow-xl md:p-7">
-      <div className="text-center mb-6">
-        <h2 className="theme-heading text-2xl font-bold">Welcome back</h2>
-        <p className="theme-muted mt-2 text-sm">Sign in to continue your Off2Zim journey</p>
+    <div className="theme-panel w-full max-w-[28rem] rounded-[32px] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:p-8">
+      <div className="border-b border-black/10 pb-6 dark:border-white/10">
+        <div className="theme-chip inline-flex rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.28em]">
+          Sign in
+        </div>
+        <h2 className="theme-heading mt-4 text-3xl font-semibold">
+          Welcome back
+        </h2>
+        <p className="theme-muted mt-3 max-w-sm text-sm leading-6">
+          Access your planner, bookings, saved places, and account workspace.
+        </p>
       </div>
 
-      {error && (
-        <div className="mb-4 rounded-[18px] border border-rose-200 bg-rose-50 p-4 dark:border-rose-500/20 dark:bg-rose-500/10">
+      {error ? (
+        <div className="mt-5 rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 dark:border-rose-500/20 dark:bg-rose-500/10">
           <p className="text-sm text-rose-600 dark:text-rose-200">{error}</p>
         </div>
-      )}
+      ) : null}
 
-      {/* Social Login Options */}
-      <div className="mb-6">
+      <div className="mt-6">
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
+            className="theme-button-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[18px] px-4 text-sm font-medium"
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -108,15 +84,15 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
             </svg>
             Google
           </button>
-
           <button
             type="button"
-            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
+            className="theme-button-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[18px] px-4 text-sm font-medium"
           >
             <svg
-              className="w-5 h-5 mr-2"
+              className="h-5 w-5"
               fill="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
@@ -126,44 +102,48 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-black/10 dark:border-white/10" />
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="theme-muted theme-panel-strong rounded-full px-3 py-1 text-xs">
+          <div className="relative flex justify-center">
+            <span className="theme-panel rounded-full px-3 py-1 text-xs font-medium text-slate-500 dark:text-white/45">
               Or continue with email
             </span>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div>
           <label
             htmlFor="email"
-            className="theme-muted mb-1 block text-sm font-medium"
+            className="theme-muted mb-2 block text-sm font-medium"
           >
-            Email Address
+            Email
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="theme-input w-full rounded-[18px] px-3 py-2"
-            placeholder="Enter your email"
-          />
+          <div className="relative">
+            <Mail className="theme-subtle absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="theme-input h-12 w-full rounded-[18px] pl-11 pr-4"
+              placeholder="you@example.com"
+            />
+          </div>
         </div>
 
         <div>
           <label
             htmlFor="password"
-            className="theme-muted mb-1 block text-sm font-medium"
+            className="theme-muted mb-2 block text-sm font-medium"
           >
             Password
           </label>
           <div className="relative">
+            <KeyRound className="theme-subtle absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" />
             <input
               type={showPassword ? "text" : "password"}
               id="password"
@@ -171,108 +151,57 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="theme-input w-full rounded-[18px] px-3 py-2 pr-10"
+              className="theme-input h-12 w-full rounded-[18px] pl-11 pr-12"
               placeholder="Enter your password"
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="theme-subtle absolute inset-y-0 right-0 flex items-center pr-3 hover:text-slate-700 dark:hover:text-white/70"
+              onClick={() => setShowPassword((current) => !current)}
+              className="theme-subtle absolute inset-y-0 right-0 flex items-center pr-4 transition hover:text-black dark:hover:text-white"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                  />
-                </svg>
+                <EyeOff className="h-4 w-4" />
               ) : (
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
+                <Eye className="h-4 w-4" />
               )}
             </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <label className="flex items-center">
-            <input type="checkbox" className="rounded border-black/20 text-[#ff5630]" />
-            <span className="theme-muted ml-2 text-sm">Remember me</span>
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <label className="theme-muted inline-flex items-center gap-2">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-black/20 text-[#ff5630] dark:border-white/20"
+            />
+            Keep me signed in
           </label>
-          <a href="#" className="text-sm text-[#ff5630] hover:text-[#e44c28]">
-            Forgot password?
-          </a>
+          <Link
+            href="/contact"
+            className="font-medium text-[#ff5630] transition hover:text-[#e44c28]"
+          >
+            Need help?
+          </Link>
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-full bg-[#ff5630] px-4 py-3 text-white transition-colors hover:bg-[#e44c28] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff5630] px-5 text-sm font-semibold text-white transition hover:bg-[#ff6f4d] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isLoading ? "Signing In..." : "Sign In"}
+          {isLoading ? "Signing in..." : "Sign in"}
         </button>
       </form>
 
-      {/* Demo Accounts Section */}
-      <div className="mt-6 border-t border-black/10 pt-6 dark:border-white/10">
-        <p className="theme-muted mb-3 text-center text-sm">
-          Demo Accounts (Development)
-        </p>
-        <div className="space-y-2">
-          {demoAccounts.map((account) => (
-            <button
-              key={account.email}
-              onClick={() => fillDemoAccount(account.email)}
-              className="theme-card-soft w-full rounded-[18px] p-3 text-left transition-colors"
-            >
-              <div className="flex justify-between items-center">
-                <span className="theme-heading text-sm font-medium">
-                  {account.role}
-                </span>
-                <span className="theme-muted text-xs">{account.email}</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {account.description}
-              </p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
-          Don&apos;t have an account?{" "}
-          <a
-            href="/register"
-            className="text-blue-600 hover:text-blue-500 font-medium"
-          >
-            Sign up here
-          </a>
-        </p>
+      <div className="mt-6 border-t border-black/10 pt-5 text-center text-sm dark:border-white/10">
+        <span className="theme-muted">New to Off2Zim?</span>{" "}
+        <Link
+          href="/register"
+          className="font-semibold text-[#ff5630] transition hover:text-[#e44c28]"
+        >
+          Create account
+        </Link>
       </div>
     </div>
   );

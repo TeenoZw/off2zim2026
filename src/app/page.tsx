@@ -1,5 +1,7 @@
 import Link from "next/link";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import FavoriteButton from "@/components/ui/FavoriteButton";
+import SectionHeader from "@/components/ui/SectionHeader";
 import WeatherBadge from "@/components/ui/WeatherBadge";
 import {
   ArrowRight,
@@ -316,18 +318,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="theme-panel rounded-[36px] p-5 backdrop-blur md:p-7">
-          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="theme-subtle text-sm uppercase tracking-[0.28em]">
-                Start here
-              </p>
-              <h2 className="theme-heading mt-2 text-3xl font-semibold">
-                Travel your way
-              </h2>
-            </div>
-          </div>
+          <SectionHeader eyebrow="Start here" title="Travel your way" />
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {marketplaceLanes.map((lane) => {
@@ -361,14 +358,10 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="theme-panel rounded-[36px] p-6 md:p-8">
-          <div className="mb-6">
-            <p className="theme-label text-sm uppercase tracking-[0.28em]">
-              Everything in one place
-            </p>
-            <h2 className="theme-heading mt-2 text-3xl font-semibold">
-              Book the full Zimbabwe trip
-            </h2>
-          </div>
+          <SectionHeader
+            eyebrow="Everything in one place"
+            title="Book the full Zimbabwe trip"
+          />
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {offerGrid.map((offer) => {
@@ -397,22 +390,12 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <p className="theme-label text-sm uppercase tracking-[0.28em]">
-              Popular destinations
-            </p>
-            <h2 className="theme-heading mt-2 text-3xl font-semibold">
-              Popular destinations
-            </h2>
-          </div>
-          <Link
-            href="/travel-guide"
-            className="theme-muted hidden text-sm hover:text-slate-950 dark:hover:text-white md:inline-flex"
-          >
-            View travel guide
-          </Link>
-        </div>
+        <SectionHeader
+          eyebrow="Popular destinations"
+          title="Places travelers keep opening first"
+          actionHref="/travel-guide"
+          actionLabel="View guide"
+        />
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {destinations.map((destination) => (
@@ -515,14 +498,10 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pb-24">
         <div className="theme-panel rounded-[36px] p-6 md:p-8">
           <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="theme-label text-sm uppercase tracking-[0.28em]">
-                Social proof
-              </p>
-              <h2 className="theme-heading mt-2 text-3xl font-semibold">
-                Reviews that reinforce trust
-              </h2>
-            </div>
+            <SectionHeader
+              eyebrow="Social proof"
+              title="Reviews that reinforce trust"
+            />
             <div className="theme-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm">
               <Star className="h-4 w-4 text-[#ffc247]" />
               4.8 average booking confidence

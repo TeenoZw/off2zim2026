@@ -27,6 +27,7 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { DestinationsProvider } from '@/context/DestinationsContext';
 import { FeaturedDataProvider } from '@/context/FeaturedDataContext';
 import { PushDrawer } from '@/components/PushDrawer';
+import { getMobilePostAuthRoute, mobileAppVariant } from '@/config/appVariant';
 
 const fullLogoBlack = require('@/assets/images/full_logo_black.png');
 const fullLogoWhite = require('@/assets/images/full_logo_white.png');
@@ -196,9 +197,25 @@ function AppWithDrawer() {
       (currentAuthState.session || currentAuthState.isGuest) &&
       (currentPathIsAuth || pathname === '/')
     ) {
-      // User is authenticated (or in guest mode) but on auth or root page
-      console.log('Redirecting to tabs: User authenticated but on auth/root page');
-      router.replace('/(tabs)');
+      router.replace(
+        getMobilePostAuthRoute(currentAuthState.session?.user, currentAuthState.isGuest)
+      );
+    } else if (currentAuthState.session) {
+      const isOnExplorerSurface = pathname.startsWith('/(tabs)');
+      const isOnProviderSurface = pathname.startsWith('/provider');
+      const isOnAdminSurface = pathname.startsWith('/admin');
+
+      if (mobileAppVariant === 'provider' && isOnExplorerSurface) {
+        router.replace(getMobilePostAuthRoute(currentAuthState.session.user, false));
+      }
+
+      if (mobileAppVariant === 'admin' && !isOnAdminSurface) {
+        router.replace(getMobilePostAuthRoute(currentAuthState.session.user, false));
+      }
+
+      if (mobileAppVariant === 'explorer' && (isOnProviderSurface || isOnAdminSurface)) {
+        router.replace(getMobilePostAuthRoute(currentAuthState.session.user, false));
+      }
     }
   }, [loading, session, isGuest, pathname, router]);
 

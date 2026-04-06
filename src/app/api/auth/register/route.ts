@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/http";
 import { createSession, hashPassword, serializeUser } from "@/lib/auth";
+import { createEmailVerificationToken } from "@/lib/auth-tokens";
+import { sendEmailVerificationEmail } from "@/lib/auth-email";
 
 export const dynamic = "force-dynamic";
 const registerSchema = z.object({
@@ -119,10 +121,17 @@ export async function POST(request: NextRequest) {
     });
 
     const session = await createSession(user.id);
+    const verificationToken = await createEmailVerificationToken(user.id);
+    const delivery = await sendEmailVerificationEmail(
+      user.email,
+      verificationToken.token
+    );
 
     return NextResponse.json({
       token: session.sessionToken,
       user: serializeUser(user),
+      verificationSent: delivery.delivered,
+      ...(delivery.delivered ? {} : { verificationUrl: delivery.fallbackUrl }),
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

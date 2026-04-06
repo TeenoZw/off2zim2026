@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import { Building2, Eye, EyeOff, Globe2, Mail, Phone, User2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserRole, ExplorerType } from "@/types/auth";
+import { ExplorerType, UserRole } from "@/types/auth";
 
 interface RegisterFormProps {
   onClose?: () => void;
@@ -15,88 +17,76 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
     email: "",
     password: "",
     confirmPassword: "",
-    firstName: "",
-    lastName: "",
+    fullName: "",
     role: "explorer" as UserRole,
-    // Aligns with PRD 2.1: Explorer location identification
     explorerType: "foreign" as ExplorerType,
-    // Aligns with PRD 3.1: Core Company Profile fields
+    title: "",
+    gender: "",
+    idType: "",
+    identityNumber: "",
+    dateOfBirth: "",
+    nationality: "",
+    phone: "",
     companyName: "",
     tradingName: "",
-    businessRegistrationNumber: "",
-    mainContactPerson: "",
-    businessPhone: "",
-    businessEmail: "",
-    physicalAddress: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const passwordsMatch =
+    !formData.confirmPassword || formData.password === formData.confirmPassword;
+
+  const splitFullName = (value: string) => {
+    const parts = value.trim().split(/\s+/).filter(Boolean);
+
+    return {
+      firstName: parts[0] || "",
+      lastName: parts.slice(1).join(" "),
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      return;
-    }
+    if (!passwordsMatch) return;
 
-    // Validate required business fields for Service Providers
-    if (formData.role === "provider") {
-      const requiredBusinessFields = [
-        "companyName",
-        "businessRegistrationNumber",
-        "mainContactPerson",
-        "businessPhone",
-        "businessEmail",
-        "physicalAddress",
-      ];
-
-      for (const field of requiredBusinessFields) {
-        if (!formData[field as keyof typeof formData]?.trim()) {
-          return; // Form validation will show the required field errors
-        }
-      }
-    }
+    const nameParts = splitFullName(formData.fullName);
 
     try {
-      // Aligns with PRD 3.1: Pass Core Company Profile data for providers
       await register({
         email: formData.email,
         password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        firstName: formData.role === "explorer" ? nameParts.firstName : "",
+        lastName: formData.role === "explorer" ? nameParts.lastName : "",
         role: formData.role,
         explorerType:
           formData.role === "explorer" ? formData.explorerType : undefined,
+        title: formData.role === "explorer" ? formData.title : undefined,
+        gender: formData.role === "explorer" ? formData.gender : undefined,
+        idType: formData.role === "explorer" ? formData.idType : undefined,
+        identityNumber:
+          formData.role === "explorer" ? formData.identityNumber : undefined,
+        dateOfBirth:
+          formData.role === "explorer" ? formData.dateOfBirth : undefined,
+        nationality:
+          formData.role === "explorer" ? formData.nationality : undefined,
+        phone: formData.phone,
         companyName:
           formData.role === "provider" ? formData.companyName : undefined,
-        tradingName:
-          formData.role === "provider" ? formData.tradingName : undefined,
-        businessRegistrationNumber:
-          formData.role === "provider"
-            ? formData.businessRegistrationNumber
-            : undefined,
-        mainContactPerson:
-          formData.role === "provider" ? formData.mainContactPerson : undefined,
-        businessPhone:
-          formData.role === "provider" ? formData.businessPhone : undefined,
-        businessEmail:
-          formData.role === "provider" ? formData.businessEmail : undefined,
-        physicalAddress:
-          formData.role === "provider" ? formData.physicalAddress : undefined,
       });
       onClose?.();
       if (redirectTo) {
         window.location.href = redirectTo;
       }
-    } catch (err) {
-      // Error is handled by the AuthContext
+    } catch {
+      return;
     }
   };
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -104,38 +94,44 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
     }));
   };
 
-  const roleDescriptions = {
-    explorer:
-      "Perfect for tourists, travelers, and locals looking to discover Zimbabwe",
-    provider:
-      "For businesses offering tourism services, accommodations, or experiences",
-    guide: "Available only to vetted Local Explorers (application required)", // Aligns with PRD 2.3
-    admin: "Administrative access (by invitation only)",
-  };
+  const isProvider = formData.role === "provider";
+  const explorerProfileComplete =
+    !!formData.title &&
+    !!formData.fullName.trim() &&
+    !!formData.gender &&
+    !!formData.idType &&
+    !!formData.identityNumber &&
+    !!formData.dateOfBirth &&
+    !!formData.nationality &&
+    !!formData.phone;
 
   return (
-    <div className="theme-card w-full max-w-md rounded-[30px] p-6 shadow-xl md:p-7">
-      <div className="text-center mb-6">
-        <h2 className="theme-heading text-2xl font-bold">Join Off2Zim</h2>
-        <p className="theme-muted mt-2 text-sm">
-          Create your account and start exploring
+    <div className="theme-panel w-full max-w-[32rem] rounded-[32px] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:p-8">
+      <div className="border-b border-black/10 pb-6 dark:border-white/10">
+        <div className="theme-chip inline-flex rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.28em]">
+          Create account
+        </div>
+        <h2 className="theme-heading mt-4 text-3xl font-semibold">
+          Join Off2Zim
+        </h2>
+        <p className="theme-muted mt-3 max-w-md text-sm leading-6">
+          Set up your explorer or provider account and step straight into the platform.
         </p>
       </div>
 
-      {error && (
-        <div className="mb-4 rounded-[18px] border border-rose-200 bg-rose-50 p-4 dark:border-rose-500/20 dark:bg-rose-500/10">
+      {error ? (
+        <div className="mt-5 rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 dark:border-rose-500/20 dark:bg-rose-500/10">
           <p className="text-sm text-rose-600 dark:text-rose-200">{error}</p>
         </div>
-      )}
+      ) : null}
 
-      {/* Social Login Options */}
-      <div className="mb-6">
+      <div className="mt-6">
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
+            className="theme-button-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[18px] px-4 text-sm font-medium"
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -155,15 +151,15 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
             </svg>
             Google
           </button>
-
           <button
             type="button"
-            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
+            className="theme-button-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[18px] px-4 text-sm font-medium"
           >
             <svg
-              className="w-5 h-5 mr-2"
+              className="h-5 w-5"
               fill="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
@@ -173,150 +169,295 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-black/10 dark:border-white/10" />
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="theme-muted theme-panel-strong rounded-full px-3 py-1 text-xs">
+          <div className="relative flex justify-center">
+            <span className="theme-panel rounded-full px-3 py-1 text-xs font-medium text-slate-500 dark:text-white/45">
               Or continue with email
             </span>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Role Selection */}
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
         <div>
-          <label
-            htmlFor="role"
-            className="theme-muted mb-1 block text-sm font-medium"
-          >
-            Account Type
-          </label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="theme-input w-full rounded-[18px] px-3 py-2"
-          >
-            <option value="explorer">Explorer</option>
-            <option value="provider">Service Provider</option>
-            {/* Aligns with PRD 2.3: Community Guide registration disabled for direct signup */}
-            <option value="guide" disabled>
-              Community Guide (Apply as Explorer first)
-            </option>
-            <option value="admin" disabled>
-              Administrator
-            </option>
-          </select>
-          <p className="theme-muted mt-1 text-xs">
-            {roleDescriptions[formData.role]}
-          </p>
-        </div>
-
-        {/* Aligns with PRD 2.1: Explorer location identification */}
-        {formData.role === "explorer" && (
-          <div>
-            <label
-              htmlFor="explorerType"
-              className="theme-muted mb-1 block text-sm font-medium"
-            >
-              Are you a local or visiting Zimbabwe?
-            </label>
-            <select
-              id="explorerType"
-              name="explorerType"
-              value={formData.explorerType}
-              onChange={handleChange}
-              className="theme-input w-full rounded-[18px] px-3 py-2"
-            >
-              <option value="foreign">Visiting Zimbabwe (Foreign)</option>
-              <option value="local">Local Zimbabwean</option>
-            </select>
-            <p className="theme-muted mt-1 text-xs">
-              This helps us tailor your experience
-            </p>
+          <div className="theme-muted mb-2 block text-sm font-medium">
+            Account type
           </div>
-        )}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, role: "explorer" }))
+              }
+              className={`rounded-[20px] border px-4 py-4 text-left transition ${
+                formData.role === "explorer"
+                  ? "border-[#ff5630] bg-[#ff5630]/8"
+                  : "border-black/10 bg-black/[0.03] hover:bg-black/[0.05] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffede7] text-[#ff5630] dark:bg-[#2a1614]">
+                  <Globe2 className="h-4 w-4" />
+                </span>
+                <div>
+                    <div className="theme-heading font-semibold">Individual</div>
+                    <div className="theme-muted mt-1 text-xs">Travel, save, plan</div>
+                </div>
+              </div>
+            </button>
 
-        {/* Name Fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-gray-700 mb-1"
+            <button
+              type="button"
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, role: "provider" }))
+              }
+              className={`rounded-[20px] border px-4 py-4 text-left transition ${
+                formData.role === "provider"
+                  ? "border-[#ff5630] bg-[#ff5630]/8"
+                  : "border-black/10 bg-black/[0.03] hover:bg-black/[0.05] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]"
+              }`}
             >
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="First name"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Last name"
-            />
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ffede7] text-[#ff5630] dark:bg-[#2a1614]">
+                  <Building2 className="h-4 w-4" />
+                </span>
+                <div>
+                    <div className="theme-heading font-semibold">Business</div>
+                    <div className="theme-muted mt-1 text-xs">List and manage services</div>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
 
-        {/* Email */}
+        {formData.role === "explorer" ? (
+          <div className="rounded-[24px] border border-black/10 bg-black/[0.03] p-5 dark:border-white/10 dark:bg-white/[0.03]">
+            <div className="theme-heading text-lg font-semibold">
+              Personal details
+            </div>
+
+            <div className="mt-5 grid gap-4">
+              <div>
+                <label
+                  htmlFor="fullName"
+                  className="theme-muted mb-2 block text-sm font-medium"
+                >
+                  Full name
+                </label>
+                <div className="relative">
+                  <User2 className="theme-subtle absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] pl-11 pr-4"
+                    placeholder="Your full name"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="title"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    Title
+                  </label>
+                  <select
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] px-4"
+                  >
+                    <option value="">Select title</option>
+                    <option value="Mr">Mr</option>
+                    <option value="Mrs">Mrs</option>
+                    <option value="Ms">Ms</option>
+                    <option value="Dr">Dr</option>
+                    <option value="Prof">Prof</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    htmlFor="gender"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    Gender
+                  </label>
+                  <select
+                    id="gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] px-4"
+                  >
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="idType"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    ID type
+                  </label>
+                  <select
+                    id="idType"
+                    name="idType"
+                    value={formData.idType}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] px-4"
+                  >
+                    <option value="">Select ID type</option>
+                    <option value="National ID">National ID</option>
+                    <option value="Passport">Passport</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    htmlFor="identityNumber"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    Identity number
+                  </label>
+                  <input
+                    type="text"
+                    id="identityNumber"
+                    name="identityNumber"
+                    value={formData.identityNumber}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] px-4"
+                    placeholder="Enter ID number"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="dateOfBirth"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    Date of birth
+                  </label>
+                  <input
+                    type="date"
+                    id="dateOfBirth"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] px-4"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="nationality"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    Nationality
+                  </label>
+                  <input
+                    type="text"
+                    id="nationality"
+                    name="nationality"
+                    value={formData.nationality}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] px-4"
+                    placeholder="Nationality"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    Cell phone
+                  </label>
+                  <div className="relative">
+                    <Phone className="theme-subtle absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" />
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="theme-input h-12 w-full rounded-[18px] pl-11 pr-4"
+                      placeholder="+263..."
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label
+                    htmlFor="explorerType"
+                    className="theme-muted mb-2 block text-sm font-medium"
+                  >
+                    Explorer profile
+                  </label>
+                  <select
+                    id="explorerType"
+                    name="explorerType"
+                    value={formData.explorerType}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] px-4"
+                  >
+                    <option value="foreign">Visiting Zimbabwe</option>
+                    <option value="local">Local Zimbabwean</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="theme-muted mb-2 block text-sm font-medium"
           >
-            Email Address
+            Email
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your email"
-          />
+          <div className="relative">
+            <Mail className="theme-subtle absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="theme-input h-12 w-full rounded-[18px] pl-11 pr-4"
+              placeholder="you@example.com"
+            />
+          </div>
         </div>
 
-        {/* Aligns with PRD 3.1: Core Company Profile fields for Service Providers */}
-        {formData.role === "provider" && (
-          <div className="space-y-4 border-t pt-4">
-            <h3 className="text-lg font-medium text-gray-900">
-              Business Information
-            </h3>
-            <p className="text-sm text-gray-600">
-              This information will be used for your Core Company Profile and
-              Basic Review.
-            </p>
+        {isProvider ? (
+          <div className="rounded-[24px] border border-black/10 bg-black/[0.03] p-5 dark:border-white/10 dark:bg-white/[0.03]">
+            <div className="theme-heading text-lg font-semibold">
+              Business details
+            </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="mt-5 grid gap-4">
               <div>
                 <label
                   htmlFor="companyName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="theme-muted mb-2 block text-sm font-medium"
                 >
-                  Company Name *
+                  Business name
                 </label>
                 <input
                   type="text"
@@ -325,323 +466,160 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
                   value={formData.companyName}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Legal company name"
+                  className="theme-input h-12 w-full rounded-[18px] px-4"
+                  placeholder="Enter your business name"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="tradingName"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor="phone"
+                  className="theme-muted mb-2 block text-sm font-medium"
                 >
-                  Trading Name
+                  Contact phone
                 </label>
-                <input
-                  type="text"
-                  id="tradingName"
-                  name="tradingName"
-                  value={formData.tradingName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="DBA or trading name"
-                />
+                <div className="relative">
+                  <Phone className="theme-subtle absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="theme-input h-12 w-full rounded-[18px] pl-11 pr-4"
+                    placeholder="+263..."
+                  />
+                </div>
               </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="businessRegistrationNumber"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Business Registration Number *
-              </label>
-              <input
-                type="text"
-                id="businessRegistrationNumber"
-                name="businessRegistrationNumber"
-                value={formData.businessRegistrationNumber}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Government registration number"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="mainContactPerson"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Main Contact Person *
-              </label>
-              <input
-                type="text"
-                id="mainContactPerson"
-                name="mainContactPerson"
-                value={formData.mainContactPerson}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Primary contact person"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="businessPhone"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Phone *
-                </label>
-                <input
-                  type="tel"
-                  id="businessPhone"
-                  name="businessPhone"
-                  value={formData.businessPhone}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="+263..."
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="businessEmail"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business Email *
-                </label>
-                <input
-                  type="email"
-                  id="businessEmail"
-                  name="businessEmail"
-                  value={formData.businessEmail}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="business@company.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="physicalAddress"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Physical Address *
-              </label>
-              <textarea
-                id="physicalAddress"
-                name="physicalAddress"
-                value={formData.physicalAddress}
-                onChange={handleChange}
-                required
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Complete physical address of your business"
-              />
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-700">
-                <strong>Next Steps:</strong> After registration, you'll need to
-                submit documents for Basic Review before your services can be
-                listed on the platform.
-              </p>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Password */}
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-              placeholder="Create a password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label
+              htmlFor="password"
+              className="theme-muted mb-2 block text-sm font-medium"
             >
-              {showPassword ? (
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-              )}
-            </button>
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="theme-input h-12 w-full rounded-[18px] px-4 pr-12"
+                placeholder="Create a password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((current) => !current)}
+                className="theme-subtle absolute inset-y-0 right-0 flex items-center pr-4 transition hover:text-black dark:hover:text-white"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="theme-muted mb-2 block text-sm font-medium"
+            >
+              Confirm password
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                className={`theme-input h-12 w-full rounded-[18px] px-4 pr-12 ${
+                  passwordsMatch ? "" : "border-rose-300 dark:border-rose-500/30"
+                }`}
+                placeholder="Confirm your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((current) => !current)}
+                className="theme-subtle absolute inset-y-0 right-0 flex items-center pr-4 transition hover:text-black dark:hover:text-white"
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+            {!passwordsMatch ? (
+              <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">
+                Passwords do not match.
+              </p>
+            ) : null}
           </div>
         </div>
 
-        {/* Confirm Password */}
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Confirm Password
-          </label>
-          <div className="relative">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10 ${
-                formData.confirmPassword &&
-                formData.password !== formData.confirmPassword
-                  ? "border-red-300"
-                  : "border-gray-300"
-              }`}
-              placeholder="Confirm your password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-            >
-              {showConfirmPassword ? (
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
-          {formData.confirmPassword &&
-            formData.password !== formData.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">
-                Passwords do not match
-              </p>
-            )}
-        </div>
-
-        {/* Terms and Conditions */}
-        <div className="flex items-start">
+        <label className="theme-muted flex items-start gap-3 text-sm leading-6">
           <input
             type="checkbox"
             id="terms"
             required
-            className="rounded border-gray-300 text-blue-600 mt-1"
+            className="mt-1 h-4 w-4 rounded border-black/20 text-[#ff5630] dark:border-white/20"
           />
-          <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
+          <span>
             I agree to the{" "}
-            <a href="/terms" className="text-blue-600 hover:text-blue-500">
+            <Link
+              href="/terms"
+              className="font-medium text-[#ff5630] transition hover:text-[#e44c28]"
+            >
               Terms of Service
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a href="/privacy" className="text-blue-600 hover:text-blue-500">
+            <Link
+              href="/privacy"
+              className="font-medium text-[#ff5630] transition hover:text-[#e44c28]"
+            >
               Privacy Policy
-            </a>
-          </label>
-        </div>
+            </Link>
+            .
+          </span>
+        </label>
 
         <button
           type="submit"
           disabled={
             isLoading ||
-            formData.password !== formData.confirmPassword ||
-            (formData.role === "provider" &&
-              (!formData.companyName.trim() ||
-                !formData.businessRegistrationNumber.trim() ||
-                !formData.mainContactPerson.trim() ||
-                !formData.businessPhone.trim() ||
-                !formData.businessEmail.trim() ||
-                !formData.physicalAddress.trim()))
+            !passwordsMatch ||
+            (isProvider && !formData.companyName.trim()) ||
+            (!isProvider && !explorerProfileComplete)
           }
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#ff5630] px-5 text-sm font-semibold text-white transition hover:bg-[#ff6f4d] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isLoading ? "Creating Account..." : "Create Account"}
+          {isLoading ? "Creating account..." : "Create account"}
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
-          Already have an account?{" "}
-          <a
-            href="/login"
-            className="text-blue-600 hover:text-blue-500 font-medium"
-          >
-            Sign in here
-          </a>
-        </p>
+      <div className="mt-6 border-t border-black/10 pt-5 text-center text-sm dark:border-white/10">
+        <span className="theme-muted">Already have an account?</span>{" "}
+        <Link
+          href="/login"
+          className="font-semibold text-[#ff5630] transition hover:text-[#e44c28]"
+        >
+          Sign in
+        </Link>
       </div>
     </div>
   );

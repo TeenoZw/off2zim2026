@@ -128,6 +128,13 @@ export async function requireSessionUser() {
 
 export function serializeUser(user: NonNullable<UserWithCompany>) {
   const company = user.ownedCompanies[0];
+  const preferences = safeJsonParse<{
+    mobileProfile?: Record<string, string | null | undefined>;
+  }>(user.preferences, {});
+  const mobileProfile =
+    typeof preferences.mobileProfile === "object" && preferences.mobileProfile
+      ? preferences.mobileProfile
+      : {};
   const fullName =
     [user.firstName, user.lastName].filter(Boolean).join(" ").trim() ||
     user.name ||
@@ -149,8 +156,36 @@ export function serializeUser(user: NonNullable<UserWithCompany>) {
     explorerType: user.explorerType ?? undefined,
     companyId: company?.id,
     profile: {
+      fullName:
+        (typeof mobileProfile.full_name === "string" && mobileProfile.full_name) ||
+        fullName,
       phone: user.phone || undefined,
       location: user.nationality || undefined,
+      nationality:
+        user.nationality ||
+        (typeof mobileProfile.nationality === "string"
+          ? mobileProfile.nationality
+          : undefined),
+      title:
+        typeof mobileProfile.title === "string"
+          ? mobileProfile.title
+          : undefined,
+      gender:
+        typeof mobileProfile.gender === "string"
+          ? mobileProfile.gender
+          : undefined,
+      idType:
+        typeof mobileProfile.id_type === "string"
+          ? mobileProfile.id_type
+          : undefined,
+      identityNumber:
+        typeof mobileProfile.identity_number === "string"
+          ? mobileProfile.identity_number
+          : undefined,
+      dateOfBirth:
+        typeof mobileProfile.date_of_birth === "string"
+          ? mobileProfile.date_of_birth
+          : undefined,
       explorerType: user.explorerType ?? undefined,
       companyName: company?.companyName,
       tradingName: company?.tradingName,

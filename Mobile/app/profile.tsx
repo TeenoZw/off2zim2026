@@ -373,10 +373,15 @@ export default function Profile() {
         text: 'Send Reset Link',
         onPress: async () => {
           try {
-            const { error } = await resetPassword(email || user?.email || '');
+            const { data, error } = await resetPassword(email || user?.email || '');
             if (error) throw error;
 
-            Alert.alert('Password Reset Sent', 'Check your email for a password reset link.');
+            Alert.alert(
+              'Password Reset Sent',
+              data?.resetUrl
+                ? 'Email delivery is not configured yet. Use the reset link surfaced in the sign-in flow, or configure email delivery to send the reset email automatically.'
+                : 'Check your email for a password reset link.'
+            );
           } catch (error: any) {
             Alert.alert('Error', 'Failed to send password reset: ' + error.message);
           }

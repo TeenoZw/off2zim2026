@@ -137,7 +137,7 @@ export default function ProviderDashboard() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.editButton} onPress={() => router.push('/profile')}>
+        <TouchableOpacity style={styles.editButton} onPress={() => router.push('/provider/account')}>
           <ThemedText style={styles.editButtonText}>Edit Profile</ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -204,9 +204,7 @@ export default function ProviderDashboard() {
 
         <TouchableOpacity
           style={styles.contentCard}
-          onPress={() =>
-            Alert.alert('Coming Soon', 'Destination management will be available soon')
-          }
+          onPress={() => router.push('/provider/content')}
         >
           <View style={styles.contentHeader}>
             <ThemedText style={styles.contentTitle}>Destinations</ThemedText>
@@ -221,14 +219,12 @@ export default function ProviderDashboard() {
               </View>
             )}
           </View>
-          <ThemedText style={styles.contentDescription}>
-            Manage your destination listings and attractions
-          </ThemedText>
+          <ThemedText style={styles.contentDescription}>Destination listings</ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.contentCard}
-          onPress={() => Alert.alert('Coming Soon', 'Stay management will be available soon')}
+          onPress={() => router.push('/provider/content')}
         >
           <View style={styles.contentHeader}>
             <ThemedText style={styles.contentTitle}>Accommodations</ThemedText>
@@ -243,14 +239,12 @@ export default function ProviderDashboard() {
               </View>
             )}
           </View>
-          <ThemedText style={styles.contentDescription}>
-            Hotels, lodges, and other accommodation options
-          </ThemedText>
+          <ThemedText style={styles.contentDescription}>Accommodation inventory</ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.contentCard}
-          onPress={() => Alert.alert('Coming Soon', 'Event management will be available soon')}
+          onPress={() => router.push('/provider/content')}
         >
           <View style={styles.contentHeader}>
             <ThemedText style={styles.contentTitle}>Events & Activities</ThemedText>
@@ -265,9 +259,7 @@ export default function ProviderDashboard() {
               </View>
             )}
           </View>
-          <ThemedText style={styles.contentDescription}>
-            Tours, experiences, and special events
-          </ThemedText>
+          <ThemedText style={styles.contentDescription}>Events and experiences</ThemedText>
         </TouchableOpacity>
       </ThemedView>
 
@@ -277,29 +269,27 @@ export default function ProviderDashboard() {
         <View style={styles.actionGrid}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() =>
-              Alert.alert('Coming Soon', 'Add destination feature will be available soon')
-            }
+            onPress={() => router.push('/provider/content')}
           >
             <ThemedText style={styles.actionButtonText}>+ Add Destination</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => Alert.alert('Coming Soon', 'Add stay feature will be available soon')}
+            onPress={() => router.push('/provider/content')}
           >
             <ThemedText style={styles.actionButtonText}>+ Add Stay</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => Alert.alert('Coming Soon', 'Bookings management will be available soon')}
+            onPress={() => router.push('/provider/orders')}
           >
             <ThemedText style={styles.actionButtonText}>View Bookings</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => Alert.alert('Coming Soon', 'Analytics will be available soon')}
+            onPress={() => router.push('/provider/account')}
           >
-            <ThemedText style={styles.actionButtonText}>Analytics</ThemedText>
+            <ThemedText style={styles.actionButtonText}>Account</ThemedText>
           </TouchableOpacity>
         </View>
       </ThemedView>

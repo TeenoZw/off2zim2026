@@ -2,9 +2,11 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Compass, MapPinned, ReceiptText } from "lucide-react";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import { ArrowRight, Compass, Heart, MapPinned, ReceiptText } from "lucide-react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { explorerWorkspaceCards } from "@/lib/surface-config";
 
 function ExplorerDashboardShell() {
   const { user } = useAuth();
@@ -16,51 +18,128 @@ function ExplorerDashboardShell() {
           <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
             <div className="p-6 md:p-8 lg:p-10">
               <p className="theme-label text-xs uppercase tracking-[0.24em]">
-                Explorer dashboard
+                Explorer workspace
               </p>
               <h1 className="theme-heading mt-3 text-4xl font-semibold">
                 {user?.firstName ? `Welcome back, ${user.firstName}` : "Welcome back"}
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-sm leading-7">
-                This dashboard is the calmer operating surface for your Off2Zim
-                account. From here you can move back into discovery, planning, and
-                booking without breaking the journey context.
+                Trips, bookings, saved places, and planning tools stay connected here.
               </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/trip-planner"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6f4d]"
+                >
+                  Open planner
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/travel-guide"
+                  className="theme-button-secondary inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold"
+                >
+                  Explore destinations
+                </Link>
+                <Link
+                  href="/community-guides"
+                  className="theme-button-secondary inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold"
+                >
+                  Ask a local
+                </Link>
+              </div>
             </div>
-            <div
-              className="min-h-[220px] bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.48)), url('/images/eastern-highlands.jpg')",
-              }}
-            />
+            <div className="grid gap-3 bg-black/[0.03] p-6 dark:bg-white/[0.02] md:grid-cols-2 md:p-8">
+              <WorkspaceStat
+                label="Saved places"
+                value="12"
+                meta="Ready to revisit"
+                icon={<Heart className="h-5 w-5 text-[#ff7352]" />}
+              />
+              <WorkspaceStat
+                label="Trip plans"
+                value="3"
+                meta="Active itineraries"
+                icon={<MapPinned className="h-5 w-5 text-[#5aa7ff]" />}
+              />
+              <WorkspaceStat
+                label="Bookings"
+                value="5"
+                meta="Current trip activity"
+                icon={<ReceiptText className="h-5 w-5 text-[#8cf0a1]" />}
+              />
+              <WorkspaceStat
+                label="Account"
+                value={user?.explorerType === "local" ? "Local" : "Explorer"}
+                meta="Profile status"
+                icon={<Compass className="h-5 w-5 text-[#ffc247]" />}
+              />
+            </div>
           </div>
         </section>
 
+        <section>
+          <AppServiceStrip activeLabel="Trip Planner" />
+        </section>
+
         <section className="grid gap-5 md:grid-cols-3">
-          <DashboardCard
-            title="Profile"
-            body="Review traveler details, preferences, and account settings."
-            href="/profile"
-            label="Open profile"
-            icon={<Compass className="h-5 w-5 text-[#ff7352]" />}
-          />
-          <DashboardCard
-            title="Bookings"
-            body="Track your current reservations and move back into checkout when needed."
-            href="/checkout"
-            label="View bookings"
-            icon={<ReceiptText className="h-5 w-5 text-[#8cf0a1]" />}
-          />
-          <DashboardCard
-            title="Explore"
-            body="Return to destinations, stays, activities, and trip planning."
-            href="/trip-planner"
-            label="Continue planning"
-            icon={<MapPinned className="h-5 w-5 text-[#5aa7ff]" />}
-          />
+          {explorerWorkspaceCards.map((card) => {
+            const Icon = card.icon;
+
+            return (
+              <DashboardCard
+                key={card.title}
+                title={card.title}
+                body={card.body}
+                href={card.href}
+                label={card.label}
+                icon={<Icon className={`h-5 w-5 ${card.accent}`} />}
+              />
+            );
+          })}
+        </section>
+
+        <section className="theme-panel rounded-[32px] p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="theme-heading text-2xl font-semibold">
+                Continue where the trip is moving next
+              </h2>
+              <p className="theme-muted mt-2 text-sm leading-6">
+                Use the explorer surface for planning, saved places, and confirmed travel activity.
+              </p>
+            </div>
+            <Link
+              href="/travel-guide"
+              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80 dark:hover:bg-white/[0.08]"
+            >
+              Open explorer surface
+            </Link>
+          </div>
         </section>
       </div>
+    </div>
+  );
+}
+
+function WorkspaceStat({
+  label,
+  value,
+  meta,
+  icon,
+}: {
+  label: string;
+  value: string;
+  meta: string;
+  icon: ReactNode;
+}) {
+  return (
+    <div className="theme-card-soft rounded-[26px] p-4">
+      <div className="theme-subtle flex items-center gap-2 text-sm">
+        {icon}
+        {label}
+      </div>
+      <div className="theme-heading mt-3 text-3xl font-semibold">{value}</div>
+      <div className="theme-subtle mt-1 text-xs">{meta}</div>
     </div>
   );
 }

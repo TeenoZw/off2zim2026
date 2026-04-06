@@ -127,6 +127,20 @@ function mapProfileToProviderPayload(profile: UserProfile) {
   };
 }
 
+function buildRegisterProfilePayload(data: RegisterData) {
+  return {
+    full_name: `${data.firstName} ${data.lastName}`.trim(),
+    phone: data.phone || null,
+    user_type: "individual",
+    title: data.title || null,
+    gender: data.gender || null,
+    id_type: data.idType || null,
+    identity_number: data.identityNumber || null,
+    date_of_birth: data.dateOfBirth || null,
+    nationality: data.nationality || null,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
@@ -184,13 +198,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "LOGIN_START" });
 
     try {
+      const registerPayload = {
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName || (data.role === "provider" ? "Business" : "Off2Zim"),
+        lastName: data.lastName || (data.role === "provider" ? "User" : "Explorer"),
+        role: data.role,
+        explorerType: data.role === "explorer" ? data.explorerType || "foreign" : undefined,
+        companyName:
+          data.role === "provider"
+            ? data.companyName || data.tradingName || "Off2Zim Business"
+            : undefined,
+        tradingName:
+          data.role === "provider"
+            ? data.tradingName || data.companyName || "Off2Zim Business"
+            : undefined,
+        businessRegistrationNumber:
+          data.role === "provider"
+            ? data.businessRegistrationNumber || "PENDING"
+            : undefined,
+        mainContactPerson:
+          data.role === "provider"
+            ? `${data.firstName} ${data.lastName}`.trim() || "Business User"
+            : undefined,
+        businessPhone:
+          data.role === "provider"
+            ? data.businessPhone || data.phone || "+263000000000"
+            : undefined,
+        businessEmail:
+          data.role === "provider" ? data.businessEmail || data.email : undefined,
+        physicalAddress:
+          data.role === "provider"
+            ? data.physicalAddress || "Pending address"
+            : undefined,
+      };
+
       const payload = await apiFetch<AuthPayload>("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(registerPayload),
       });
 
-      persistAuth(payload);
-      dispatch({ type: "LOGIN_SUCCESS", payload: payload.user });
+      let nextUser = payload.user;
+
+      if (data.role === "explorer") {
+        await apiFetch<{ profile: unknown }>("/api/profile", {
+          method: "PATCH",
+          body: JSON.stringify(buildRegisterProfilePayload(data)),
+        });
+
+        const refreshed = await apiFetch<{ user: User }>("/api/auth/session");
+        nextUser = refreshed.user;
+      }
+
+      persistAuth({ token: payload.token, user: nextUser });
+      dispatch({ type: "LOGIN_SUCCESS", payload: nextUser });
     } catch (error) {
       const message =
         error instanceof Error

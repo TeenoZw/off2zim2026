@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   Badge,
   Bell,
@@ -151,15 +152,24 @@ export default function ProviderDashboardHeader() {
 
           <div className="border-t border-black/10 px-6 py-5 dark:border-white/10 md:px-8">
             <div className="flex flex-wrap gap-3">
-              <button className="rounded-full bg-[#16361e] px-4 py-2 text-sm font-medium text-[#8cf0a1]">
+              <Link
+                href="/provider-dashboard?tab=listings"
+                className="rounded-full bg-[#16361e] px-4 py-2 text-sm font-medium text-[#8cf0a1]"
+              >
                 + Add new listing
-              </button>
-              <button className="rounded-full bg-[#13283a] px-4 py-2 text-sm font-medium text-[#8dc9ff]">
+              </Link>
+              <Link
+                href="/provider-dashboard?tab=orders"
+                className="rounded-full bg-[#13283a] px-4 py-2 text-sm font-medium text-[#8dc9ff]"
+              >
                 Manage calendar
-              </button>
-              <button className="rounded-full bg-[#2d1714] px-4 py-2 text-sm font-medium text-[#ff8a63]">
+              </Link>
+              <Link
+                href="/provider-dashboard?tab=profile"
+                className="rounded-full bg-[#2d1714] px-4 py-2 text-sm font-medium text-[#ff8a63]"
+              >
                 Update company profile
-              </button>
+              </Link>
             </div>
           </div>
         </div>

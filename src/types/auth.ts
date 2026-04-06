@@ -51,9 +51,16 @@ export interface User {
 }
 
 export interface UserProfile {
+  fullName?: string;
   bio?: string;
   phone?: string;
   location?: string;
+  nationality?: string;
+  title?: string;
+  gender?: string;
+  idType?: string;
+  identityNumber?: string;
+  dateOfBirth?: string;
   interests?: string[];
   languages?: string[];
 
@@ -168,9 +175,14 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
   role: UserRole;
-  // Aligns with PRD 2.1: Optional Explorer location identification
   explorerType?: ExplorerType;
-  // Aligns with PRD 3.1: Core Company Profile required fields for providers
+  phone?: string;
+  nationality?: string;
+  title?: string;
+  gender?: string;
+  idType?: string;
+  identityNumber?: string;
+  dateOfBirth?: string;
   companyName?: string;
   tradingName?: string;
   businessRegistrationNumber?: string;

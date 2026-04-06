@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { Platform, Animated, Text } from 'react-native';
 
@@ -9,6 +9,7 @@ import { TabBarIcon } from '@/components/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { Fonts } from '@/constants/Fonts';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { getMobilePostAuthRoute, mobileAppVariant } from '@/config/appVariant';
 
 function AnimatedTabLabel({
   focused,
@@ -56,6 +57,10 @@ function AnimatedTabLabel({
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+
+  if (mobileAppVariant !== 'explorer') {
+    return <Redirect href={getMobilePostAuthRoute()} />;
+  }
 
   return (
     <Tabs

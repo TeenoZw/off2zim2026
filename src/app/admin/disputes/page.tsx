@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AdminShell from "@/components/admin/AdminShell";
 import { apiFetch } from "@/lib/client-api";
 import type { DisputeRecord } from "@/types/platform";
 
@@ -105,34 +105,11 @@ function AdminDisputesContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080808] px-4 py-8 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Dispute operations</h1>
-            <p className="mt-2 max-w-3xl text-sm text-white/60">
-              Trust-and-safety queue for booking escalations, provider conflicts,
-              and traveler resolution work tied directly to live booking records.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              href="/admin/providers"
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75"
-            >
-              Provider reviews
-            </Link>
-            <Link
-              href="/admin/bookings"
-              className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75"
-            >
-              Bookings
-            </Link>
-            <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black">
-              Disputes
-            </div>
-          </div>
-        </div>
+    <AdminShell
+      activePath="/admin/disputes"
+      title="Dispute operations"
+      description="Handle escalations, assign ownership, and document outcomes against live bookings and providers."
+    >
 
         {error ? (
           <div className="mb-6 rounded-2xl border border-[#ff5630]/30 bg-[#2d1714] px-4 py-3 text-sm text-[#ffb09c]">
@@ -296,7 +273,6 @@ function AdminDisputesContent() {
             ))
           )}
         </div>
-      </div>
-    </div>
+    </AdminShell>
   );
 }

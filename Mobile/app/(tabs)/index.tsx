@@ -1,9 +1,10 @@
-import React, { useCallback, useRef, useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { View, StyleSheet, Text, Pressable, ScrollView } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { registerHomeTabNavigation } from '../../components/HomeTabButton';
 
 // Components
@@ -27,6 +28,13 @@ import Bus from '@/app/screens/Bus';
 import Flights from '@/app/screens/Flights';
 
 const TopTab = createMaterialTopTabNavigator();
+
+const QUICK_ACTIONS = [
+  { label: 'Itinerary', icon: 'calendar-outline', route: '/screens/itinerary' as const },
+  { label: 'Favorites', icon: 'heart-outline', route: '/likes' as const },
+  { label: 'Flights', icon: 'airplane-outline', route: '/flight-search' as const },
+  { label: 'Transport', icon: 'bus-outline', route: '/bus-search' as const },
+] as const;
 
 // Navigation registration component
 function NavigationRegistrar() {
@@ -59,8 +67,8 @@ const TAB_SCREENS = [
   { name: 'Destinations', component: DestinationsScreen, label: 'Destinations' },
   { name: 'Stays', component: Stays, label: 'Stays' },
   { name: 'Events', component: Events, label: 'Events' },
-  { name: 'ThingsToDo', component: ThingsToDoScreen, label: 'Things To Do' },
-  { name: 'Bus', component: Bus, label: 'Bus' },
+  { name: 'ThingsToDo', component: ThingsToDoScreen, label: 'Experiences' },
+  { name: 'Bus', component: Bus, label: 'Transport' },
   { name: 'Flights', component: Flights, label: 'Flights' },
 ] as const;
 
@@ -101,6 +109,12 @@ export default function HomeScreen() {
     };
   };
 
+  const actionSurface = isDark ? 'rgba(28, 28, 28, 0.98)' : '#FFFFFF';
+  const heroSurface = isDark ? '#1B1B1B' : '#FFFFFF';
+  const heroBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(17,24,28,0.08)';
+  const mutedText = isDark ? 'rgba(236, 237, 238, 0.7)' : 'rgba(17, 24, 28, 0.68)';
+  const accent = '#FF3B30';
+
   return (
     <ThemedView
       style={styles.container}
@@ -132,6 +146,54 @@ export default function HomeScreen() {
           />
 
           <View style={styles.tabBarContainer}>
+            <View
+              style={[
+                styles.heroPanel,
+                {
+                  backgroundColor: heroSurface,
+                  borderColor: heroBorder,
+                },
+              ]}
+            >
+              <Text style={[styles.heroEyebrow, { color: accent }]}>Explore | Experience | Enjoy</Text>
+              <Text style={[styles.heroTitle, { color: Colors[colorScheme ?? 'light'].text }]}>
+                Build every part of your Zimbabwe trip from one place.
+              </Text>
+              <Text style={[styles.heroSubtitle, { color: mutedText }]}>
+                Discover stays, flights, transport, dining, and live experiences.
+              </Text>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.actionRail}
+              >
+                {QUICK_ACTIONS.map((action) => (
+                  <Pressable
+                    key={action.label}
+                    onPress={() => router.push(action.route)}
+                    style={[
+                      styles.actionChip,
+                      {
+                        backgroundColor: actionSurface,
+                        borderColor: heroBorder,
+                      },
+                    ]}
+                  >
+                    <Ionicons name={action.icon} size={18} color={accent} />
+                    <Text
+                      style={[
+                        styles.actionLabel,
+                        { color: Colors[colorScheme ?? 'light'].text },
+                      ]}
+                    >
+                      {action.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+
             <TopTab.Navigator initialRouteName="Featured" screenOptions={getTabBarOptions()}>
               {TAB_SCREENS.map(({ name, component, label }) => (
                 <TopTab.Screen
@@ -179,6 +241,50 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     flex: 1,
     position: 'relative',
+  },
+  heroPanel: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    borderRadius: 26,
+    borderWidth: 1,
+  },
+  heroEyebrow: {
+    fontFamily: Fonts.bold,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  heroTitle: {
+    fontFamily: Fonts.bold,
+    fontSize: 24,
+    lineHeight: 30,
+  },
+  heroSubtitle: {
+    marginTop: 8,
+    fontFamily: Fonts.regular,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  actionRail: {
+    gap: 10,
+    paddingTop: 16,
+    paddingRight: 10,
+  },
+  actionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  actionLabel: {
+    fontFamily: Fonts.bold,
+    fontSize: 13,
   },
   tabBar: {
     // backgroundColor will be set dynamically based on theme

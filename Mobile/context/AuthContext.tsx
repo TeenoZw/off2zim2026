@@ -1,7 +1,24 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { clearAllFavorites, initFavorites } from '@/utils/favoritesUtils';
-import { apiFetch, buildSession, clearSession, persistSession } from '@/lib/api';
-import { Session, supabase, User } from '@/lib/supabase';
+import {
+  buildSession,
+  MobileAuthUser,
+  MobileSession,
+  subscribeToAuth,
+} from '@/lib/api';
+import {
+  fetchMobileProfile,
+  hydrateAuthenticatedUser,
+  patchMobileProfile,
+  requestEmailVerification as requestEmailVerificationEmail,
+  requestPasswordReset,
+  registerMobileUser,
+  signInMobileUser,
+  signOutMobileUser,
+} from '@/core/auth/service';
+
+type Session = MobileSession;
+type User = MobileAuthUser;
 
 interface AuthContextType {
   session: Session | null;
@@ -25,6 +42,16 @@ interface AuthContextType {
       date_of_birth?: string | null;
       nationality?: string | null;
       phone?: string | null;
+    },
+    options?: {
+      explorerType?: 'local' | 'foreign';
+      providerProfile?: {
+        tradingName?: string | null;
+        businessRegistrationNumber?: string | null;
+        mainContactPerson?: string | null;
+        businessPhone?: string | null;
+        physicalAddress?: string | null;
+      };
     }
   ) => Promise<{ data: any; error: { message: string } | null }>;
   signIn: (
@@ -34,17 +61,10 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   setGuestMode: (isGuest: boolean) => void;
   resetPassword: (email: string) => Promise<any>;
+  requestEmailVerification: (email: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-function splitFullName(fullName?: string) {
-  const parts = (fullName || '').trim().split(/\s+/).filter(Boolean);
-  return {
-    firstName: parts[0] || '',
-    lastName: parts.slice(1).join(' '),
-  };
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -70,42 +90,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (existingSession) {
           try {
-            const payload = await apiFetch<{ user: any }>('/api/auth/session');
-            const refreshedUser: User = {
-              ...existingSession.user,
-              email: payload.user.email,
-              user_metadata: {
-                ...existingSession.user.user_metadata,
-                full_name:
-                  payload.user.profile?.fullName ||
-                  payload.user.name ||
-                  existingSession.user.user_metadata?.full_name,
-                first_name: payload.user.firstName,
-                last_name: payload.user.lastName,
-                phone:
-                  payload.user.profile?.phone ||
-                  existingSession.user.user_metadata?.phone,
-                nationality:
-                  payload.user.profile?.nationality ||
-                  payload.user.profile?.location ||
-                  existingSession.user.user_metadata?.nationality,
-                business_name:
-                  payload.user.profile?.companyName ||
-                  existingSession.user.user_metadata?.business_name,
-                user_type: payload.user.role === 'provider' ? 'business' : 'individual',
-                rating: payload.user.explorerScore?.rating ?? 0,
-              },
-            };
-
-            const nextSession = {
-              access_token: existingSession.access_token,
-              user: refreshedUser,
-            };
+            const nextSession = await hydrateAuthenticatedUser();
+            if (!nextSession) {
+              throw new Error('Unable to hydrate session');
+            }
             setSession(nextSession);
-            setUser(refreshedUser);
-            await persistSession(existingSession.access_token, refreshedUser);
+            setUser(nextSession.user);
           } catch {
-            await clearSession();
+            await signOutMobileUser();
             setSession(null);
             setUser(null);
           }
@@ -122,9 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     hydrateSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const subscription = subscribeToAuth((_event, nextSession) => {
       if (!mounted) {
         return;
       }
@@ -165,71 +155,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       date_of_birth?: string | null;
       nationality?: string | null;
       phone?: string | null;
+    },
+    options?: {
+      explorerType?: 'local' | 'foreign';
+      providerProfile?: {
+        tradingName?: string | null;
+        businessRegistrationNumber?: string | null;
+        mainContactPerson?: string | null;
+        businessPhone?: string | null;
+        physicalAddress?: string | null;
+      };
     }
   ) => {
-    const { firstName, lastName } = splitFullName(fullName);
-
     try {
-      const payload = await apiFetch<{ token: string; user: any }>('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          email,
-          password,
-          firstName: firstName || (userType === 'business' ? 'Business' : 'Off2Zim'),
-          lastName: lastName || (userType === 'business' ? 'User' : 'Explorer'),
-          role: userType === 'business' ? 'provider' : 'explorer',
-          explorerType: 'foreign',
-          companyName: userType === 'business' ? businessName || 'Off2Zim Business' : undefined,
-          tradingName: userType === 'business' ? businessName || 'Off2Zim Business' : undefined,
-          businessRegistrationNumber: userType === 'business' ? 'PENDING' : undefined,
-          mainContactPerson: userType === 'business' ? fullName || 'Business User' : undefined,
-          businessPhone: userType === 'business' ? individualMetadata?.phone || '+263000000000' : undefined,
-          businessEmail: userType === 'business' ? email : undefined,
-          physicalAddress: userType === 'business' ? 'Pending address' : undefined,
-        }),
-      });
-
-      const signedIn = await supabase.auth.signInWithPassword({ email, password });
-      if (!signedIn.error) {
-        const mergedMetadata = {
-          ...(signedIn.data.user?.user_metadata || {}),
-          ...(individualMetadata || {}),
-          full_name: fullName || signedIn.data.user?.user_metadata?.full_name,
-          business_name: businessName || signedIn.data.user?.user_metadata?.business_name,
-          user_type: userType,
-        };
-
-        const nextUser = {
-          ...(signedIn.data.user as User),
-          user_metadata: mergedMetadata,
-        };
-        await persistSession(payload.token, nextUser);
-        setSession({ access_token: payload.token, user: nextUser });
-        setUser(nextUser);
-        setIsGuest(false);
-
-        if (individualMetadata) {
-          await apiFetch('/api/profile', {
-            method: 'PATCH',
-            body: JSON.stringify({
-              full_name: fullName,
-              business_name: businessName || null,
-              phone: individualMetadata.phone || null,
-              user_type: userType,
-              title: individualMetadata.title || null,
-              gender: individualMetadata.gender || null,
-              id_type: individualMetadata.id_type || null,
-              identity_number: individualMetadata.identity_number || null,
-              date_of_birth: individualMetadata.date_of_birth || null,
-              nationality: individualMetadata.nationality || null,
-            }),
-          });
-        }
-      }
+      const nextSession = await registerMobileUser(
+        email,
+        password,
+        fullName,
+        userType,
+        businessName,
+        individualMetadata,
+        options
+      );
+      setSession(nextSession);
+      setUser(nextSession.user);
+      setIsGuest(false);
 
       return {
         data: {
-          session: { access_token: payload.token, user: user || null },
+          session: nextSession,
         },
         error: null,
       };
@@ -244,17 +198,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const result = await supabase.auth.signInWithPassword({ email, password });
-    if (!result.error && result.data.session) {
-      setSession(result.data.session);
-      setUser(result.data.user);
+    try {
+      const nextSession = await signInMobileUser(email, password);
+      setSession(nextSession);
+      setUser(nextSession.user);
       setIsGuest(false);
+      return { data: { session: nextSession, user: nextSession.user }, error: null };
+    } catch (error) {
+      return {
+        data: { session: null, user: null },
+        error: {
+          message: error instanceof Error ? error.message : 'Unable to sign in.',
+        },
+      };
     }
-    return result;
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await signOutMobileUser();
     setSession(null);
     setUser(null);
     setIsGuest(false);
@@ -269,7 +230,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    return supabase.auth.resetPasswordForEmail(email);
+    try {
+      const data = await requestPasswordReset(email);
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message: error instanceof Error ? error.message : 'Unable to start password reset.',
+        },
+      };
+    }
+  };
+
+  const requestEmailVerification = async (email: string) => {
+    try {
+      const data = await requestEmailVerificationEmail(email);
+      return { data, error: null };
+    } catch (error) {
+      return {
+        data: null,
+        error: {
+          message:
+            error instanceof Error ? error.message : 'Unable to send verification email.',
+        },
+      };
+    }
   };
 
   return (
@@ -287,6 +273,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         setGuestMode,
         resetPassword,
+        requestEmailVerification,
       }}
     >
       {children}
@@ -304,11 +291,11 @@ export function useAuth() {
 
 export const getProfile = async (userId: string) => {
   try {
-    const payload = await apiFetch<{ profile: any }>('/api/profile');
-    if (payload.profile?.id && payload.profile.id !== userId) {
+    const profile = await fetchMobileProfile();
+    if (profile?.id && profile.id !== userId) {
       return { data: null, error: { message: 'Profile mismatch' } };
     }
-    return { data: payload.profile, error: null };
+    return { data: profile, error: null };
   } catch (error) {
     return {
       data: null,
@@ -319,11 +306,8 @@ export const getProfile = async (userId: string) => {
 
 export const updateProfile = async (_userId: string, updates: any) => {
   try {
-    const payload = await apiFetch<{ profile: any }>('/api/profile', {
-      method: 'PATCH',
-      body: JSON.stringify(updates),
-    });
-    return { data: payload.profile, error: null };
+    const profile = await patchMobileProfile(updates);
+    return { data: profile, error: null };
   } catch (error) {
     return {
       data: null,

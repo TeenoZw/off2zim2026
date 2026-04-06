@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "../styles/globals.css";
 import { Providers } from "./providers";
 import GlobalBackground from "../components/GlobalBackground";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import PortalChrome from "../components/layout/PortalChrome";
+import { resolveAppSurface } from "@/lib/app-surface";
 
 export const metadata: Metadata = {
   title: "Off2Zim - Explore | Experience | Enjoy",
@@ -64,11 +67,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const headerStore = await headers();
+  const host = headerStore.get("host");
+  const surface = resolveAppSurface(host);
+  const isPublicSurface = surface === "public";
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -92,9 +100,9 @@ export default function RootLayout({
       <body className="font-century-gothic antialiased">
         <GlobalBackground />
         <Providers>
-          <Header />
+          {isPublicSurface ? <Header /> : <PortalChrome surface={surface} />}
           <main className="min-h-screen">{children}</main>
-          <Footer />
+          {isPublicSurface ? <Footer /> : null}
         </Providers>
       </body>
     </html>

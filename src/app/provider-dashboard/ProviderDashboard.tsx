@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProviderDashboardHeader from "../../components/provider-dashboard/ProviderDashboardHeader";
 import ProviderOverview from "../../components/provider-dashboard/ProviderOverview";
 import ListingManagement from "../../components/provider-dashboard/ListingManagement";
@@ -17,7 +18,9 @@ import {
 } from "lucide-react";
 
 export default function ProviderDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   // Mock data for notification badges
   const notificationData = {
@@ -74,6 +77,24 @@ export default function ProviderDashboard() {
           : "bg-blue-100 text-blue-800",
     },
   ];
+
+  const activeTab =
+    tabs.find((tab) => tab.id === searchParams.get("tab"))?.id || "overview";
+
+  const setActiveTab = (tabId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (tabId === "overview") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tabId);
+    }
+
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+      scroll: false,
+    });
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {

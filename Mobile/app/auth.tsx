@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Animated,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   ScrollView,
@@ -26,9 +28,9 @@ import { Colors } from '@/constants/Colors';
 import { cardSurfaceBaseStyle, getCardSurfaceColors } from '@/constants/CardStyles';
 import { Fonts } from '@/constants/Fonts';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { countries } from '@/countries-fixed';
+import { getMobilePostAuthRoute, getMobileVariantConfig } from '@/config/appVariant';
 
 type AuthMode = 'sign-in' | 'sign-up';
 
@@ -41,6 +43,8 @@ type SocialProviderConfig = {
   renderIcon: (props: { size: number; color: string }) => React.ReactNode;
   getIconColor?: (theme: 'light' | 'dark') => string;
 };
+
+type ExplorerType = 'local' | 'foreign';
 
 const gmailAsset = Asset.fromModule(require('@/assets/images/gmail.svg'));
 
@@ -164,7 +168,8 @@ export default function AuthScreen() {
   const palette = Colors[colorScheme ?? 'light'];
   const isDark = colorScheme === 'dark';
   const headerHeight = useHeaderHeight();
-  const { loading, user, signIn, signUp, signOut, setGuestMode } = useAuth();
+  const { loading, user, signIn, signUp, signOut, setGuestMode, resetPassword } = useAuth();
+  const variantConfig = getMobileVariantConfig();
 
   const [mode, setMode] = useState<AuthMode>('sign-in');
   const [email, setEmail] = useState('');
@@ -172,7 +177,8 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [businessName, setBusinessName] = useState('');
-  const [userType, setUserType] = useState<'individual' | 'business'>('individual');
+  const [userType, setUserType] = useState<'individual' | 'business'>(variantConfig.defaultUserType);
+  const [explorerType, setExplorerType] = useState<ExplorerType>('foreign');
   const [submitting, setSubmitting] = useState(false);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [title, setTitle] = useState('');
@@ -182,6 +188,11 @@ export default function AuthScreen() {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [nationality, setNationality] = useState('');
   const [phone, setPhone] = useState('');
+  const [tradingName, setTradingName] = useState('');
+  const [businessRegistrationNumber, setBusinessRegistrationNumber] = useState('');
+  const [mainContactPerson, setMainContactPerson] = useState('');
+  const [businessPhone, setBusinessPhone] = useState('');
+  const [physicalAddress, setPhysicalAddress] = useState('');
   const [nationalitySearch, setNationalitySearch] = useState('');
   const [showTitlePicker, setShowTitlePicker] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
@@ -194,14 +205,6 @@ export default function AuthScreen() {
   const [isAnimating, setIsAnimating] = useState(false);
   const opacityAnim = useRef(new Animated.Value(1)).current;
   const panGestureRef = useRef(null);
-
-  const [showVerification, setShowVerification] = useState(false);
-  const [verificationEmail, setVerificationEmail] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [verificationCountdown, setVerificationCountdown] = useState(0);
-  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
-  const [isResendingCode, setIsResendingCode] = useState(false);
-  const [verificationError, setVerificationError] = useState('');
 
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [notificationTitle, setNotificationTitle] = useState('');
@@ -319,134 +322,6 @@ export default function AuthScreen() {
     setNotificationMessage('');
   };
 
-  useEffect(() => {
-    if (!showVerification || verificationCountdown <= 0) {
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      setVerificationCountdown(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [showVerification, verificationCountdown]);
-
-  const beginVerificationStep = (targetEmail: string) => {
-    setShowVerification(true);
-    setVerificationEmail(targetEmail);
-    setVerificationCode('');
-    setVerificationError('');
-    setVerificationCountdown(60);
-  };
-
-  const handleResendVerificationCode = async () => {
-    if (verificationCountdown > 0 || isResendingCode) {
-      return;
-    }
-
-    setIsResendingCode(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: verificationEmail,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      setVerificationCountdown(60);
-      showNotification('Verification code sent', `We've sent a new code to ${verificationEmail}.`);
-    } catch (error: any) {
-      const message =
-        error?.message ?? 'Unable to resend the code right now. Please try again later.';
-      showNotification('Resend failed', message);
-    } finally {
-      setIsResendingCode(false);
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    if (verificationCode.trim().length !== 6) {
-      setVerificationError('Enter the 6-digit code.');
-      return;
-    }
-
-    setVerificationError('');
-    setIsVerifyingCode(true);
-
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: verificationEmail,
-        token: verificationCode.trim(),
-        type: 'email',
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      hideNotification();
-      setShowVerification(false);
-      setMode('sign-in');
-      setEmail(verificationEmail);
-      setPassword('');
-      setConfirmPassword('');
-      setFullName('');
-      setBusinessName('');
-
-      showNotification('Email verified', 'Your account is ready. Redirecting you to explore.');
-      router.replace('/(tabs)');
-    } catch (error: any) {
-      console.error('verifyOtp failed', error);
-      const message = error?.message ?? 'Invalid verification code. Please try again.';
-      const normalizedMessage = message.toLowerCase();
-
-      if (normalizedMessage.includes('expired')) {
-        setVerificationError('This code has expired. Request a new one below.');
-        return;
-      }
-
-      if (normalizedMessage.includes('already') && normalizedMessage.includes('confirm')) {
-        hideNotification();
-        setShowVerification(false);
-        setMode('sign-in');
-        setEmail(verificationEmail);
-        setPassword('');
-        setConfirmPassword('');
-        setFullName('');
-        setBusinessName('');
-        showNotification(
-          'Email already verified',
-          'Your email address is already confirmed. Sign in with your password to continue.'
-        );
-        return;
-      }
-
-      if (normalizedMessage.includes('rate limit') || normalizedMessage.includes('retry limit')) {
-        setVerificationError('Too many attempts. Please wait a moment before trying again.');
-        return;
-      }
-
-      if (normalizedMessage.includes('used')) {
-        setVerificationError('This code was already used. Request a new one below.');
-        return;
-      }
-
-      setVerificationError(message || 'That code did not work. Double-check and try again.');
-    } finally {
-      setIsVerifyingCode(false);
-    }
-  };
-
-  const handleChangeEmail = () => {
-    setShowVerification(false);
-    setVerificationCode('');
-    setVerificationCountdown(0);
-    setVerificationError('');
-    setMode('sign-up');
-  };
-
   const handleDobSelect = (isoDate: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const [year, month, day] = isoDate.split('-');
@@ -544,6 +419,11 @@ export default function AuthScreen() {
     const normalizedDob = normalizeDateOfBirthInput(trimmedDobDisplay);
     const trimmedNationality = nationality.trim();
     const trimmedPhone = phone.trim();
+    const trimmedTradingName = tradingName.trim();
+    const trimmedBusinessRegistrationNumber = businessRegistrationNumber.trim();
+    const trimmedMainContactPerson = mainContactPerson.trim();
+    const trimmedBusinessPhone = businessPhone.trim();
+    const trimmedPhysicalAddress = physicalAddress.trim();
 
     const missingFields: string[] = [];
 
@@ -563,6 +443,21 @@ export default function AuthScreen() {
       if (userType === 'business') {
         if (!trimmedBusinessName) {
           missingFields.push('Business Name');
+        }
+        if (!trimmedTradingName) {
+          missingFields.push('Trading Name');
+        }
+        if (!trimmedBusinessRegistrationNumber) {
+          missingFields.push('Business Registration Number');
+        }
+        if (!trimmedMainContactPerson) {
+          missingFields.push('Main Contact Person');
+        }
+        if (!trimmedBusinessPhone) {
+          missingFields.push('Business Phone Number');
+        }
+        if (!trimmedPhysicalAddress) {
+          missingFields.push('Physical Address');
         }
       } else {
         if (!trimmedTitle) {
@@ -625,7 +520,7 @@ export default function AuthScreen() {
           return;
         }
 
-        router.replace('/(tabs)');
+        router.replace(getMobilePostAuthRoute({ id: 'signed-in', email: trimmedEmail, user_metadata: { user_type: userType } }, false));
         return;
       }
 
@@ -635,8 +530,8 @@ export default function AuthScreen() {
           return;
         }
 
-        showLoadingNotification('Creating account', 'Sending a verification code to your email...');
-        const { error } = await signUp(
+        showLoadingNotification('Creating account', 'Setting up your Off2Zim profile...');
+        const { data, error } = await signUp(
           trimmedEmail,
           trimmedPassword,
           userType === 'business' ? undefined : trimmedFullName,
@@ -652,7 +547,20 @@ export default function AuthScreen() {
                 nationality: trimmedNationality,
                 phone: trimmedPhone,
               }
-            : undefined
+            : undefined,
+          {
+            explorerType,
+            providerProfile:
+              userType === 'business'
+                ? {
+                    tradingName: trimmedTradingName,
+                    businessRegistrationNumber: trimmedBusinessRegistrationNumber,
+                    mainContactPerson: trimmedMainContactPerson,
+                    businessPhone: trimmedBusinessPhone,
+                    physicalAddress: trimmedPhysicalAddress,
+                  }
+                : undefined,
+          }
         );
         hideNotification();
 
@@ -676,8 +584,53 @@ export default function AuthScreen() {
           return;
         }
 
-        showNotification('Account ready', 'Your account has been created and signed in.');
-        router.replace('/(tabs)');
+        const verificationUrl = data?.session?.verificationUrl || data?.verificationUrl;
+        const verificationSent = data?.session?.verificationSent ?? data?.verificationSent;
+        const postAuthRoute = getMobilePostAuthRoute(
+          {
+            id: 'new-account',
+            email: trimmedEmail,
+            user_metadata: { user_type: userType },
+          },
+          false
+        );
+
+        if (verificationUrl) {
+          Alert.alert(
+            'Account ready',
+            'Your account has been created. Email delivery is not configured yet, so open the verification link now to verify your email address.',
+            [
+              {
+                text: 'Open Verification Link',
+                onPress: async () => {
+                  try {
+                    await Linking.openURL(verificationUrl);
+                  } catch {
+                    showNotification(
+                      'Verification link',
+                      'Copy and open this link in your browser: ' + verificationUrl
+                    );
+                  }
+                  router.replace(postAuthRoute);
+                },
+              },
+              {
+                text: 'Continue',
+                onPress: () => router.replace(postAuthRoute),
+              },
+            ]
+          );
+          return;
+        }
+
+        Alert.alert(
+          'Account ready',
+          verificationSent
+            ? 'Your account has been created and a verification email has been sent. Please check your inbox.'
+            : 'Your account has been created and you are now signed in.',
+          [{ text: 'Continue', onPress: () => router.replace(postAuthRoute) }]
+        );
+        return;
       }
     } catch (error: any) {
       const message = error?.message ?? 'Something went wrong. Please try again.';
@@ -690,7 +643,7 @@ export default function AuthScreen() {
 
   const handleGuest = () => {
     setGuestMode(true);
-    router.replace('/(tabs)');
+    router.replace(getMobilePostAuthRoute(null, true));
   };
 
   const handleSocialSignUp = (provider: SocialProvider) => {
@@ -717,6 +670,16 @@ export default function AuthScreen() {
     setIsLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (!variantConfig.allowSelfSignup && mode !== 'sign-in') {
+      setMode('sign-in');
+    }
+
+    if (!variantConfig.showAccountTypeSwitch && userType !== variantConfig.defaultUserType) {
+      setUserType(variantConfig.defaultUserType);
+    }
+  }, [mode, userType, variantConfig]);
+
   if (loading) {
     return null;
   }
@@ -727,7 +690,9 @@ export default function AuthScreen() {
         <WallpaperPattern offsetTop={0} />
         <View style={[styles.signedInCard, { backgroundColor: cardSurface }]}>
           <Logo size="large" />
-          <Text style={[styles.signedInTitle, { color: palette.text }]}>You are signed in</Text>
+          <Text style={[styles.signedInTitle, { color: palette.text }]}>
+            {variantConfig.label} access active
+          </Text>
           <Text style={[styles.signedInSubtitle, { color: palette.text }]}>{user.email}</Text>
           <TouchableOpacity
             style={[styles.primaryButton, { backgroundColor: palette.tint }]}
@@ -763,96 +728,15 @@ export default function AuthScreen() {
                 { backgroundColor: cardBackground, borderColor: cardBorderColor },
               ]}
             >
-              {showVerification ? (
-                <View style={styles.verificationContainer}>
-                  <View style={styles.verificationHeader}>
-                    <Text style={[styles.verificationTitle, { color: palette.text }]}>
-                      Verify your email
-                    </Text>
-                    <Text
-                      style={[
-                        styles.verificationDescription,
-                        {
-                          color:
-                            colorScheme === 'dark' ? 'rgba(255,255,255,0.72)' : 'rgba(0,0,0,0.72)',
-                        },
-                      ]}
-                    >
-                      Enter the 6-digit code we sent to {verificationEmail} to activate your
-                      account.
-                    </Text>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.verificationCodeWrapper,
-                      {
-                        borderColor:
-                          colorScheme === 'dark' ? 'rgba(255,255,255,0.24)' : 'rgba(0,0,0,0.12)',
-                        backgroundColor: colorScheme === 'dark' ? '#1C1C1E' : '#f8f9fa',
-                      },
-                    ]}
-                  >
-                    <TextInput
-                      value={verificationCode}
-                      onChangeText={text => setVerificationCode(text.replace(/[^0-9]/g, ''))}
-                      keyboardType="number-pad"
-                      maxLength={6}
-                      autoFocus
-                      style={[styles.verificationCodeInput, { color: palette.text }]}
-                      placeholder="000000"
-                      placeholderTextColor={
-                        colorScheme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
-                      }
-                      returnKeyType="done"
-                      onSubmitEditing={handleVerifyCode}
-                    />
-                  </View>
-
-                  {verificationError ? (
-                    <Text style={[styles.verificationError, { color: palette.tint }]}>
-                      {verificationError}
-                    </Text>
-                  ) : null}
-
-                  <TouchableOpacity
-                    style={[styles.signInButton, { backgroundColor: palette.tint }]}
-                    onPress={handleVerifyCode}
-                    disabled={isVerifyingCode}
-                  >
-                    {isVerifyingCode ? (
-                      <ActivityIndicator color={primaryButtonTextColor} />
-                    ) : (
-                      <Text style={[styles.signInButtonText, { color: primaryButtonTextColor }]}>
-                        Confirm & Continue
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-
-                  <View style={styles.verificationFooter}>
-                    <TouchableOpacity
-                      onPress={handleResendVerificationCode}
-                      disabled={verificationCountdown > 0 || isResendingCode}
-                    >
-                      <Text style={[styles.verificationResend, { color: palette.tint }]}>
-                        {verificationCountdown > 0
-                          ? `Resend code in ${verificationCountdown}s`
-                          : isResendingCode
-                            ? 'Sending...'
-                            : 'Resend code'}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleChangeEmail}>
-                      <Text
-                        style={[styles.verificationChangeEmail, { color: inactiveTabTextColor }]}
-                      >
-                        Use a different email
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : (
-                <>
+              <View style={styles.authIntro}>
+                <Text style={[styles.authIntroTitle, { color: palette.text }]}>
+                  {variantConfig.authTitle}
+                </Text>
+                <Text style={[styles.authIntroSubtitle, { color: inactiveTabTextColor }]}>
+                  {variantConfig.authSubtitle}
+                </Text>
+              </View>
+              <>
                   <View
                     style={[
                       styles.modeSwitch,
@@ -885,32 +769,34 @@ export default function AuthScreen() {
                         Sign In
                       </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        styles.modeButton,
-                        mode === 'sign-up' && { backgroundColor: activeTabBackground },
-                        mode === 'sign-up' && styles.modeButtonActive,
-                      ]}
-                      onPress={() => {
-                        setMode('sign-up');
-                        setAttemptedSubmit(false);
-                      }}
-                      disabled={mode === 'sign-up'}
-                    >
-                      <Text
+                    {variantConfig.allowSelfSignup ? (
+                      <TouchableOpacity
                         style={[
-                          styles.modeButtonText,
-                          { color: inactiveTabTextColor },
-                          mode === 'sign-up' && { color: activeTabTextColor },
-                          mode === 'sign-up' && styles.modeButtonTextActive,
+                          styles.modeButton,
+                          mode === 'sign-up' && { backgroundColor: activeTabBackground },
+                          mode === 'sign-up' && styles.modeButtonActive,
                         ]}
+                        onPress={() => {
+                          setMode('sign-up');
+                          setAttemptedSubmit(false);
+                        }}
+                        disabled={mode === 'sign-up'}
                       >
-                        Sign Up
-                      </Text>
-                    </TouchableOpacity>
+                        <Text
+                          style={[
+                            styles.modeButtonText,
+                            { color: inactiveTabTextColor },
+                            mode === 'sign-up' && { color: activeTabTextColor },
+                            mode === 'sign-up' && styles.modeButtonTextActive,
+                          ]}
+                        >
+                          Sign Up
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
 
-                  {mode === 'sign-up' && (
+                  {mode === 'sign-up' && variantConfig.showAccountTypeSwitch && (
                     <View style={{ gap: 8 }}>
                       <View style={styles.labelErrorContainer}>
                         <Text
@@ -1028,9 +914,58 @@ export default function AuthScreen() {
 
                       <TouchableOpacity
                         style={styles.signInForgotWrapper}
-                        onPress={() =>
-                          showNotification('Coming soon', 'Password reset is coming shortly.')
-                        }
+                        onPress={async () => {
+                          const resetEmail = email.trim().toLowerCase();
+                          if (!resetEmail) {
+                            Alert.alert(
+                              'Email required',
+                              'Enter your email address first, then tap Forgot Password again.'
+                            );
+                            return;
+                          }
+
+                          try {
+                            const { data, error } = await resetPassword(resetEmail);
+                            if (error) {
+                              throw error;
+                            }
+
+                            if (data?.resetUrl) {
+                              Alert.alert(
+                                'Reset ready',
+                                'Email delivery is not configured yet, so open the reset link now to choose a new password.',
+                                [
+                                  {
+                                    text: 'Open Reset Link',
+                                    onPress: async () => {
+                                      try {
+                                        await Linking.openURL(data.resetUrl);
+                                      } catch {
+                                        showNotification(
+                                          'Reset link',
+                                          'Copy and open this link in your browser: ' +
+                                            data.resetUrl
+                                        );
+                                      }
+                                    },
+                                  },
+                                  { text: 'OK', style: 'cancel' },
+                                ]
+                              );
+                              return;
+                            }
+
+                            Alert.alert(
+                              'Password reset sent',
+                              'Check your email for a password reset link.'
+                            );
+                          } catch (error: any) {
+                            Alert.alert(
+                              'Reset failed',
+                              error?.message ?? 'Unable to start password reset right now.'
+                            );
+                          }
+                        }}
                       >
                         <Text style={[styles.signInForgotPassword, { color: palette.tint }]}>
                           Forgot Password?
@@ -1040,25 +975,180 @@ export default function AuthScreen() {
                   ) : (
                     <>
                       {userType === 'business' ? (
-                        <LabeledInput
-                          label="Business name"
-                          value={businessName}
-                          onChangeText={setBusinessName}
-                          placeholder="Enter your business name"
-                          autoCapitalize="words"
-                          autoComplete="organization"
-                          colorScheme={colorScheme}
-                          placeholderColor={placeholderColor}
-                          returnKeyType="next"
-                          errorMessage={
-                            attemptedSubmit && !businessName.trim()
-                              ? 'This field is required'
-                              : undefined
-                          }
-                          hasError={attemptedSubmit && !businessName.trim()}
-                        />
+                        <>
+                          <LabeledInput
+                            label="Business name"
+                            value={businessName}
+                            onChangeText={setBusinessName}
+                            placeholder="Enter your business name"
+                            autoCapitalize="words"
+                            autoComplete="organization"
+                            colorScheme={colorScheme}
+                            placeholderColor={placeholderColor}
+                            returnKeyType="next"
+                            errorMessage={
+                              attemptedSubmit && !businessName.trim()
+                                ? 'This field is required'
+                                : undefined
+                            }
+                            hasError={attemptedSubmit && !businessName.trim()}
+                          />
+
+                          <LabeledInput
+                            label="Trading name"
+                            value={tradingName}
+                            onChangeText={setTradingName}
+                            placeholder="Enter your trading name"
+                            autoCapitalize="words"
+                            colorScheme={colorScheme}
+                            placeholderColor={placeholderColor}
+                            returnKeyType="next"
+                            errorMessage={
+                              attemptedSubmit && !tradingName.trim()
+                                ? 'This field is required'
+                                : undefined
+                            }
+                            hasError={attemptedSubmit && !tradingName.trim()}
+                          />
+
+                          <LabeledInput
+                            label="Business registration number"
+                            value={businessRegistrationNumber}
+                            onChangeText={setBusinessRegistrationNumber}
+                            placeholder="Enter registration number"
+                            autoCapitalize="characters"
+                            colorScheme={colorScheme}
+                            placeholderColor={placeholderColor}
+                            returnKeyType="next"
+                            errorMessage={
+                              attemptedSubmit && !businessRegistrationNumber.trim()
+                                ? 'This field is required'
+                                : undefined
+                            }
+                            hasError={attemptedSubmit && !businessRegistrationNumber.trim()}
+                          />
+
+                          <LabeledInput
+                            label="Main contact person"
+                            value={mainContactPerson}
+                            onChangeText={setMainContactPerson}
+                            placeholder="Enter contact person name"
+                            autoCapitalize="words"
+                            autoComplete="name"
+                            colorScheme={colorScheme}
+                            placeholderColor={placeholderColor}
+                            returnKeyType="next"
+                            errorMessage={
+                              attemptedSubmit && !mainContactPerson.trim()
+                                ? 'This field is required'
+                                : undefined
+                            }
+                            hasError={attemptedSubmit && !mainContactPerson.trim()}
+                          />
+
+                          <LabeledInput
+                            label="Business phone number"
+                            value={businessPhone}
+                            onChangeText={setBusinessPhone}
+                            placeholder="Enter business phone number"
+                            keyboardType="phone-pad"
+                            autoComplete="tel"
+                            colorScheme={colorScheme}
+                            placeholderColor={placeholderColor}
+                            returnKeyType="next"
+                            errorMessage={
+                              attemptedSubmit && !businessPhone.trim()
+                                ? 'This field is required'
+                                : undefined
+                            }
+                            hasError={attemptedSubmit && !businessPhone.trim()}
+                          />
+
+                          <LabeledInput
+                            label="Physical address"
+                            value={physicalAddress}
+                            onChangeText={setPhysicalAddress}
+                            placeholder="Enter physical address"
+                            autoCapitalize="sentences"
+                            colorScheme={colorScheme}
+                            placeholderColor={placeholderColor}
+                            returnKeyType="next"
+                            errorMessage={
+                              attemptedSubmit && !physicalAddress.trim()
+                                ? 'This field is required'
+                                : undefined
+                            }
+                            hasError={attemptedSubmit && !physicalAddress.trim()}
+                          />
+                        </>
                       ) : (
                         <>
+                          <View style={{ gap: 8 }}>
+                            <View style={styles.labelErrorContainer}>
+                              <Text style={[styles.inputLabel, { color: palette.text }]}>
+                                Explorer type
+                              </Text>
+                            </View>
+                            <View
+                              style={[
+                                styles.userTypeSwitch,
+                                {
+                                  borderColor: segmentBorderColor,
+                                  backgroundColor: segmentBackground,
+                                },
+                              ]}
+                            >
+                              <TouchableOpacity
+                                style={[
+                                  styles.userTypeButton,
+                                  explorerType === 'local' && {
+                                    backgroundColor: activeTabBackground,
+                                  },
+                                  explorerType === 'local' && styles.userTypeButtonActive,
+                                ]}
+                                onPress={() => setExplorerType('local')}
+                                disabled={explorerType === 'local'}
+                              >
+                                <Text
+                                  style={[
+                                    styles.userTypeButtonText,
+                                    { color: inactiveTabTextColor },
+                                    explorerType === 'local' && {
+                                      color: activeTabTextColor,
+                                    },
+                                    explorerType === 'local' && styles.userTypeButtonTextActive,
+                                  ]}
+                                >
+                                  Local
+                                </Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[
+                                  styles.userTypeButton,
+                                  explorerType === 'foreign' && {
+                                    backgroundColor: activeTabBackground,
+                                  },
+                                  explorerType === 'foreign' && styles.userTypeButtonActive,
+                                ]}
+                                onPress={() => setExplorerType('foreign')}
+                                disabled={explorerType === 'foreign'}
+                              >
+                                <Text
+                                  style={[
+                                    styles.userTypeButtonText,
+                                    { color: inactiveTabTextColor },
+                                    explorerType === 'foreign' && {
+                                      color: activeTabTextColor,
+                                    },
+                                    explorerType === 'foreign' && styles.userTypeButtonTextActive,
+                                  ]}
+                                >
+                                  Foreign
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                          </View>
+
                           <View style={{ gap: 8 }}>
                             <View style={styles.labelErrorContainer}>
                               <Text style={[styles.inputLabel, { color: palette.text }]}>
@@ -1457,7 +1547,7 @@ export default function AuthScreen() {
                     </TouchableOpacity>
                   </View>
 
-                  {mode === 'sign-in' && (
+                  {mode === 'sign-in' && variantConfig.allowGuest && (
                     <>
                       <View style={styles.socialDivider}>
                         <View
@@ -1493,7 +1583,7 @@ export default function AuthScreen() {
                     </>
                   )}
 
-                  {mode === 'sign-up' && (
+                  {mode === 'sign-up' && variantConfig.allowSelfSignup && (
                     <View style={styles.switchAuthRow}>
                       <Text style={[styles.switchAuthLabel, { color: palette.text }]}>
                         Already have an account?
@@ -1505,8 +1595,7 @@ export default function AuthScreen() {
                       </TouchableOpacity>
                     </View>
                   )}
-                </>
-              )}
+              </>
             </View>
 
             <Text style={styles.footer}>
@@ -2669,6 +2758,20 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 60,
     paddingHorizontal: 24,
+  },
+  authIntro: {
+    gap: 6,
+    marginBottom: 20,
+  },
+  authIntroTitle: {
+    fontFamily: Fonts.bold,
+    fontSize: 28,
+    lineHeight: 32,
+  },
+  authIntroSubtitle: {
+    fontFamily: Fonts.regular,
+    fontSize: 15,
+    lineHeight: 22,
   },
   formSurface: {
     ...cardSurfaceBaseStyle,

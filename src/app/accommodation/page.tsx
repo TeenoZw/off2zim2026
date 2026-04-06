@@ -1,4 +1,6 @@
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import FavoriteButton from "@/components/ui/FavoriteButton";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { MapPin, Search, SlidersHorizontal, Star, Users, Wifi } from "lucide-react";
 
 interface Accommodation {
@@ -186,6 +188,10 @@ export default function AccommodationPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Stays" />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="theme-panel rounded-[32px] p-4 md:p-5">
           <div className="grid gap-3 lg:grid-cols-[1.25fr_1fr_1fr_0.85fr_auto]">
@@ -251,16 +257,10 @@ export default function AccommodationPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-          <p className="theme-label text-sm uppercase tracking-[0.28em]">
-            Featured stays
-          </p>
-          <h2 className="theme-heading mt-2 text-3xl font-semibold">
-            Strong first options for high-intent travelers
-          </h2>
-          </div>
-        </div>
+        <SectionHeader
+          eyebrow="Featured stays"
+          title="Strong first options for high-intent travelers"
+        />
 
         <div className="grid gap-5 lg:grid-cols-3">
           {featured.map((accommodation) => (
@@ -305,14 +305,10 @@ export default function AccommodationPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <p className="theme-label text-sm uppercase tracking-[0.28em]">
-            All properties
-          </p>
-          <h2 className="theme-heading mt-2 text-3xl font-semibold">
-            Browse Zimbabwe stays by vibe, location, and confidence
-          </h2>
-        </div>
+        <SectionHeader
+          eyebrow="All properties"
+          title="Browse Zimbabwe stays by vibe, location, and confidence"
+        />
 
         <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-3">
           {accommodations.map((accommodation) => (

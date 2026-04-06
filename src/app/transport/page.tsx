@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import SectionHeader from "@/components/ui/SectionHeader";
 import {
   ArrowRight,
   Bus,
@@ -96,7 +98,15 @@ export default function TransportPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Transport" />
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <SectionHeader
+          eyebrow="Modes"
+          title="Choose the transport layer that fits the route"
+        />
         <div className="grid gap-5 md:grid-cols-2">
           {transportTypes.map((transport) => {
             const Icon = transport.icon;
