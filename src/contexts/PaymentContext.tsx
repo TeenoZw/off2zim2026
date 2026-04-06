@@ -7,7 +7,6 @@ import {
   BookingConfirmation,
   PaymentError,
 } from "@/types/payment";
-import getStripe from "@/lib/stripe";
 
 interface PaymentContextType {
   currentBooking: BookingItem[] | null;
@@ -171,11 +170,6 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
       setError(null);
 
       try {
-        const stripe = await getStripe();
-        if (!stripe) {
-          throw new Error("Stripe failed to load");
-        }
-
         const response = await fetch("/api/payments/confirm", {
           method: "POST",
           headers: {

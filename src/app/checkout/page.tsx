@@ -109,8 +109,8 @@ const CheckoutContent = () => {
               </button>
               <h1 className="theme-heading mt-3 text-4xl font-semibold">Checkout</h1>
               <p className="theme-muted mt-2 text-sm">
-                Complete your Off2Zim booking with card, mobile money, or Stripe
-                Checkout.
+                Review your booking and submit a request while online payments are
+                being finalized for launch.
               </p>
             </div>
             <div className="theme-panel-soft rounded-[24px] px-5 py-4 text-sm">

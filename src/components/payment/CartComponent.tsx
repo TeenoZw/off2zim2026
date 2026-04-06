@@ -202,7 +202,7 @@ const CartComponent: React.FC = () => {
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center mt-2">
-                  Secure payment powered by Stripe
+                  Booking request protected by Off2Zim
                 </p>
               </div>
             </>

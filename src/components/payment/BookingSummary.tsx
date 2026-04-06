@@ -101,15 +101,15 @@ export default function BookingSummary({ items }: BookingSummaryProps) {
       <div className="rounded-[28px] border border-[#7ddf8c]/20 bg-[#ecf8ef] p-4 dark:bg-[#122116]">
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-0.5 h-5 w-5 text-[#7ddf8c]" />
-          <div>
-            <h5 className="text-sm font-semibold text-slate-900 dark:text-white">Booking protection included</h5>
-            <p className="mt-1 text-xs leading-6 text-slate-600 dark:text-white/60">
-              Secure payment, clear confirmation, and a cleaner handoff into your
+              <div>
+                <h5 className="text-sm font-semibold text-slate-900 dark:text-white">Booking protection included</h5>
+                <p className="mt-1 text-xs leading-6 text-slate-600 dark:text-white/60">
+              Clear confirmation, trip continuity, and a cleaner handoff into your
               Off2Zim itinerary.
-            </p>
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
     </div>
   );
 }

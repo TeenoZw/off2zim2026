@@ -21,7 +21,6 @@ export interface CreatePaymentRequest {
   currency: string;
   method: string; // Changed from enum to string for flexibility
   status?: string;
-  stripePaymentId?: string;
   mobileProvider?: "ecocash" | "onemoney" | "telecash";
   phoneNumber?: string;
   reference?: string;
@@ -160,7 +159,6 @@ export class BookingService {
           currency: data.currency,
           method: data.method,
           status: data.status || "PENDING",
-          stripePaymentId: data.stripePaymentId,
           mobileProvider: data.mobileProvider,
           phoneNumber: data.phoneNumber,
           reference: data.reference,

@@ -1,18 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { BookingItem, PaymentIntent } from "@/types/payment";
-import PaymentForm from "./PaymentForm";
-import MobileMoneyForm from "./MobileMoneyForm";
+import React from "react";
+import Link from "next/link";
+import { BookingItem } from "@/types/payment";
 import BookingSummary from "./BookingSummary";
-import { Building, CreditCard, Smartphone } from "lucide-react";
-import { getAuthHeaders } from "@/lib/client-api";
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
+import { ArrowRight, CalendarClock, Mail, ShieldAlert } from "lucide-react";
 
 interface CheckoutComponentProps {
   items: BookingItem[];
@@ -25,70 +17,21 @@ export default function CheckoutComponent({
   onSuccess,
   onCancel,
 }: CheckoutComponentProps) {
-  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"card" | "mobile" | "checkout">("card");
-
-  const createPaymentIntent = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/payments/create-intent", {
-        method: "POST",
-        headers: getAuthHeaders(undefined, true),
-        body: JSON.stringify({ items }),
-      });
-
-      if (!response.ok) throw new Error("Failed to create payment intent");
-
-      const intent = await response.json();
-      setPaymentIntent(intent);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCheckoutSession = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/payments/create-checkout", {
-        method: "POST",
-        headers: getAuthHeaders(undefined, true),
-        body: JSON.stringify({ items }),
-      });
-
-      if (!response.ok) throw new Error("Failed to create checkout session");
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const stripeOptions = {
-    clientSecret: paymentIntent?.clientSecret,
-    appearance: {
-      theme: "night" as const,
-      variables: {
-        colorPrimary: "#ff5630",
-        colorBackground: "#121212",
-        colorText: "#ffffff",
-        colorDanger: "#ef4444",
-        fontFamily: "Century Gothic, Arial, sans-serif",
-        borderRadius: "14px",
-      },
-    },
+  const handleRequestBooking = () => {
+    const confirmationNumber = `REQ-${Date.now().toString(36).toUpperCase()}`;
+    localStorage.setItem(
+      "off2zim_booking_request",
+      JSON.stringify({
+        confirmationNumber,
+        createdAt: new Date().toISOString(),
+        items,
+        total,
+        mode: "booking_request",
+      })
+    );
+    onSuccess(confirmationNumber);
   };
 
   return (
@@ -98,7 +41,7 @@ export default function CheckoutComponent({
           <div className="theme-panel sticky top-24 rounded-[36px] p-6">
             <h2 className="theme-heading text-2xl font-semibold">Booking summary</h2>
             <p className="theme-muted mt-2 text-sm">
-              Review your items before confirming payment.
+              Review your trip items while payments are being finalized for launch.
             </p>
             <div className="mt-6">
               <BookingSummary items={items} />
@@ -108,136 +51,97 @@ export default function CheckoutComponent({
 
         <div className="lg:order-1">
           <div className="theme-panel rounded-[36px] p-6 md:p-8">
-            <h2 className="theme-heading text-3xl font-semibold">Complete your booking</h2>
-            <p className="theme-muted mt-2 text-sm">
-              Choose the payment method that feels right for your traveler.
-            </p>
-
-            <div className="theme-card-soft mt-6 grid grid-cols-3 gap-2 rounded-[24px] p-2">
-              <TabButton
-                active={activeTab === "card"}
-                icon={<CreditCard className="h-4 w-4" />}
-                label="Card"
-                onClick={() => setActiveTab("card")}
-              />
-              <TabButton
-                active={activeTab === "mobile"}
-                icon={<Smartphone className="h-4 w-4" />}
-                label="Mobile Money"
-                onClick={() => setActiveTab("mobile")}
-              />
-              <TabButton
-                active={activeTab === "checkout"}
-                icon={<Building className="h-4 w-4" />}
-                label="Stripe Checkout"
-                onClick={() => setActiveTab("checkout")}
-              />
-            </div>
-
-            <div className="theme-card-soft mt-6 rounded-[28px] p-5">
-              {activeTab === "card" && (
-                <>
-                  {!paymentIntent ? (
-                    <div className="py-8 text-center">
-                      <button
-                        onClick={createPaymentIntent}
-                        disabled={isLoading}
-                        className="rounded-full bg-[#ff5630] px-8 py-3 text-sm font-semibold text-white disabled:opacity-50"
-                      >
-                        {isLoading ? "Setting up payment..." : "Pay with card"}
-                      </button>
-                    </div>
-                  ) : (
-                    <Elements stripe={stripePromise} options={stripeOptions}>
-                      <PaymentForm
-                        paymentIntent={paymentIntent}
-                        onSuccess={onSuccess}
-                        onCancel={onCancel}
-                      />
-                    </Elements>
-                  )}
-                </>
-              )}
-
-              {activeTab === "mobile" && (
-                <>
-                  {!paymentIntent ? (
-                    <div className="py-8 text-center">
-                      <button
-                        onClick={createPaymentIntent}
-                        disabled={isLoading}
-                        className="rounded-full bg-[#ff5630] px-8 py-3 text-sm font-semibold text-white disabled:opacity-50"
-                      >
-                        {isLoading ? "Setting up payment..." : "Pay with mobile money"}
-                      </button>
-                    </div>
-                  ) : (
-                    <MobileMoneyForm
-                      paymentIntent={paymentIntent}
-                      onSuccess={onSuccess}
-                      onCancel={onCancel}
-                    />
-                  )}
-                </>
-              )}
-
-              {activeTab === "checkout" && (
-                <div className="py-8 text-center">
-                  <button
-                    onClick={handleCheckoutSession}
-                    disabled={isLoading}
-                    className="mx-auto inline-flex items-center gap-2 rounded-full bg-[#ff5630] px-8 py-3 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    <Building className="h-4 w-4" />
-                    {isLoading ? "Redirecting..." : "Continue to Stripe Checkout"}
-                  </button>
-                  <p className="theme-subtle mt-3 text-sm">
-                    Secure hosted checkout for fast confirmation.
+            <div className="rounded-[28px] border border-amber-500/25 bg-amber-500/10 p-5">
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="mt-0.5 h-5 w-5 text-amber-400" />
+                <div>
+                  <h2 className="theme-heading text-xl font-semibold">
+                    Online payments are temporarily unavailable
+                  </h2>
+                  <p className="theme-muted mt-2 text-sm leading-6">
+                    Off2Zim is completing payment provider setup. For now, you can
+                    review the booking, submit a booking request, and finalize
+                    payment manually with the provider.
                   </p>
                 </div>
-              )}
-
-              {error && (
-                <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
-                  {error}
-                </div>
-              )}
+              </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t border-black/10 pt-6 dark:border-white/10">
-              <span className="theme-muted text-sm">Current total</span>
-              <span className="theme-heading text-2xl font-semibold">${total.toFixed(2)}</span>
+            <div className="theme-card-soft mt-6 rounded-[28px] p-6">
+              <h3 className="theme-heading text-lg font-semibold">
+                What happens next
+              </h3>
+              <div className="mt-5 space-y-4">
+                <div className="flex items-start gap-3">
+                  <CalendarClock className="mt-1 h-5 w-5 text-[#ff7352]" />
+                  <div>
+                    <div className="theme-heading text-sm font-semibold">
+                      We hold your trip details together
+                    </div>
+                    <div className="theme-muted mt-1 text-sm leading-6">
+                      Your selected stays, activities, and trip items remain grouped
+                      as one Off2Zim booking request.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Mail className="mt-1 h-5 w-5 text-[#5aa7ff]" />
+                  <div>
+                    <div className="theme-heading text-sm font-semibold">
+                      You receive a request reference
+                    </div>
+                    <div className="theme-muted mt-1 text-sm leading-6">
+                      Use the request reference when following up with the provider
+                      or the Off2Zim team.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <ArrowRight className="mt-1 h-5 w-5 text-[#7ddf8c]" />
+                  <div>
+                    <div className="theme-heading text-sm font-semibold">
+                      Manual payment can be completed next
+                    </div>
+                    <div className="theme-muted mt-1 text-sm leading-6">
+                  Once payment rails are live again, this flow will return to
+                      direct online checkout.
+                  </div>
+                </div>
+              </div>
+              </div>
+            </div>
+
+            <div className="theme-card-soft mt-6 rounded-[28px] p-6">
+              <div className="flex items-center justify-between">
+                <span className="theme-muted text-sm">Current total</span>
+                <span className="theme-heading text-2xl font-semibold">
+                  ${total.toFixed(2)}
+                </span>
+              </div>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button
+                  onClick={onCancel}
+                  className="theme-button-secondary flex-1 rounded-full px-6 py-3 text-sm font-semibold"
+                >
+                  Go back
+                </button>
+                <button
+                  onClick={handleRequestBooking}
+                  className="flex-1 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white"
+                >
+                  Submit booking request
+                </button>
+              </div>
+              <div className="mt-4 text-center text-xs text-slate-500 dark:text-white/45">
+                Need help now?{" "}
+                <Link href="/contact" className="text-[#ff7352] hover:underline">
+                  Contact Off2Zim support
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function TabButton({
-  active,
-  icon,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-3 text-sm font-medium transition ${
-        active
-          ? "bg-white text-black shadow-sm dark:bg-white dark:text-black"
-          : "bg-transparent text-slate-600 hover:bg-black/[0.05] hover:text-slate-950 dark:text-white/65 dark:hover:bg-white/[0.05] dark:hover:text-white"
-      }`}
-    >
-      {icon}
-      <span className="hidden sm:inline">{label}</span>
-    </button>
   );
 }
