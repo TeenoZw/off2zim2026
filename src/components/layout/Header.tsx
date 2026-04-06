@@ -102,7 +102,7 @@ function DesktopDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-black/68 transition hover:bg-black/[0.045] hover:text-black dark:text-white/72 dark:hover:bg-white/8 dark:hover:text-white"
+        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white/84 dark:hover:bg-white/10 dark:hover:text-white"
         aria-expanded={isOpen}
       >
         <Icon className="h-4 w-4 text-[#ff7352]" />
@@ -113,9 +113,9 @@ function DesktopDropdown({
       </button>
 
       {isOpen ? (
-        <div className="absolute left-0 top-[calc(100%+0.9rem)] z-50 w-[22rem] rounded-[28px] border border-black/10 bg-white/96 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-xl dark:border-white/10 dark:bg-[#111111]/96 dark:shadow-[0_28px_80px_rgba(0,0,0,0.45)]">
+        <div className="absolute left-0 top-[calc(100%+0.9rem)] z-50 w-[22rem] rounded-[28px] border border-black/12 bg-white p-3 shadow-[0_28px_80px_rgba(15,23,42,0.16)] dark:border-white/10 dark:bg-[#0e0e0e] dark:shadow-[0_28px_80px_rgba(0,0,0,0.6)]">
           <div className="mb-2 px-3 pt-2">
-            <div className="text-xs uppercase tracking-[0.24em] text-black/35 dark:text-white/35">
+            <div className="text-xs uppercase tracking-[0.24em] text-black/45 dark:text-white/40">
               {group.label}
             </div>
           </div>
@@ -125,12 +125,12 @@ function DesktopDropdown({
                 key={item.label}
                 href={item.href}
                 onClick={onClose}
-                className="rounded-[22px] px-3 py-3 transition hover:bg-black/[0.045] dark:hover:bg-white/6"
+                className="rounded-[22px] px-3 py-3 transition hover:bg-black/[0.055] dark:hover:bg-white/7"
               >
                 <div className="text-sm font-semibold text-black dark:text-white">
                   {item.label}
                 </div>
-                <div className="mt-1 text-sm leading-5 text-black/56 dark:text-white/54">
+                <div className="mt-1 text-sm leading-5 text-black/68 dark:text-white/66">
                   {item.description}
                 </div>
               </Link>
@@ -155,7 +155,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-[120] border-b border-black/10 bg-white/88 backdrop-blur-xl dark:border-white/10 dark:bg-[#070707]/88">
+      <header className="sticky top-0 z-[120] border-b border-black/10 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-[#050505] dark:shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <button
@@ -199,7 +199,7 @@ export default function Header() {
 
             <Link
               href="/marketplace"
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-black/68 transition hover:bg-black/[0.045] hover:text-black dark:text-white/72 dark:hover:bg-white/8 dark:hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white/84 dark:hover:bg-white/10 dark:hover:text-white"
             >
               Marketplace
             </Link>
@@ -210,7 +210,7 @@ export default function Header() {
               <>
                 <Link
                   href={getSurfaceHref("explorer", "/login")}
-                  className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-black/72 transition hover:bg-black/[0.045] hover:text-black dark:text-white/78 dark:hover:bg-white/8 dark:hover:text-white md:inline-flex"
+                  className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white/84 dark:hover:bg-white/10 dark:hover:text-white md:inline-flex"
                 >
                   Sign in
                 </Link>
@@ -231,7 +231,7 @@ export default function Header() {
 
             <Link
               href={user ? accountRoute : getSurfaceHref("explorer", "/login")}
-              className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black/10 bg-white/80 px-3 text-black/80 transition hover:bg-white dark:border-white/10 dark:bg-[#161616] dark:text-white/85 dark:hover:bg-[#1d1d1d] md:px-4"
+              className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#161616] dark:text-white/90 dark:hover:bg-[#1d1d1d] md:px-4"
               aria-label={user ? "Open workspace" : "Sign in"}
             >
               {user ? (
