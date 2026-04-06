@@ -78,12 +78,10 @@ export default function CommunityGuidesPage() {
                 Ask a Local
               </div>
               <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
-                Local guidance should feel like a core part of Off2Zim
+                Ask locals. Book with confidence.
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                The PRD positions Community Guides as a trust-building layer, not
-                just an extra feature. This page now brings the forum and Guide+
-                services into the same polished experience as discovery and booking.
+                Get trusted local insight, practical answers, and Guide+ support in one place.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">

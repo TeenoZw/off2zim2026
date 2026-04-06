@@ -101,7 +101,7 @@ export default function EnhancedOrderManagement() {
           </article>
         ) : filteredOrders.length === 0 ? (
           <article className="rounded-[32px] border border-white/10 bg-[#111111] p-6 text-white/60">
-            No provider orders yet.
+            No orders found.
           </article>
         ) : (
           filteredOrders.map((order) => (
@@ -215,10 +215,6 @@ export default function EnhancedOrderManagement() {
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-white">Dispute handling</h3>
-            <p className="mt-2 text-sm leading-6 text-white/55">
-              Provider disputes are now grounded in real booking records and can be
-              extended into richer resolution workflows next.
-            </p>
             <div className="mt-4 flex flex-wrap gap-3 text-sm text-white/55">
               <span className="inline-flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-[#8dc9ff]" />
@@ -246,7 +242,7 @@ export default function EnhancedOrderManagement() {
         <div className="mt-4 space-y-3">
           {disputes.length === 0 ? (
             <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/55">
-              No disputes raised against your bookings yet.
+              No active disputes.
             </div>
           ) : (
             disputes.map((dispute) => (

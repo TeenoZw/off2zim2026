@@ -1,4 +1,5 @@
-import { Heart, MapPin, Search, SlidersHorizontal, Star, Users, Wifi } from "lucide-react";
+import FavoriteButton from "@/components/ui/FavoriteButton";
+import { MapPin, Search, SlidersHorizontal, Star, Users, Wifi } from "lucide-react";
 
 interface Accommodation {
   id: number;
@@ -276,9 +277,12 @@ export default function AccommodationPage() {
                 <div className={`absolute left-4 top-4 inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusClasses(accommodation.availability)}`}>
                   {accommodation.availability}
                 </div>
-                <button className="absolute right-4 top-4 rounded-full bg-[#111111]/85 p-3 text-white/75 backdrop-blur">
-                  <Heart className="h-4 w-4" />
-                </button>
+                <FavoriteButton
+                  itemId={`stay-${accommodation.id}`}
+                  itemType="stay"
+                  className="absolute right-4 top-4 rounded-full bg-[#111111]/85 p-3 text-white/75 backdrop-blur"
+                  iconClassName="h-4 w-4"
+                />
 
                 <div className="absolute inset-x-4 bottom-4 rounded-[24px] bg-black/35 p-4 backdrop-blur-md">
                   <div className="flex items-center justify-between gap-3">
@@ -333,9 +337,12 @@ export default function AccommodationPage() {
                       {accommodation.name}
                     </h3>
                   </div>
-                  <button className="theme-button-secondary rounded-full p-3">
-                    <Heart className="h-4 w-4" />
-                  </button>
+                  <FavoriteButton
+                    itemId={`stay-${accommodation.id}`}
+                    itemType="stay"
+                    className="theme-button-secondary rounded-full p-3"
+                    iconClassName="h-4 w-4"
+                  />
                 </div>
 
                 <div className="theme-muted mt-4 flex flex-wrap gap-3 text-sm">

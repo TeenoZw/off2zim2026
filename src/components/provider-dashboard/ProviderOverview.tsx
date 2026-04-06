@@ -89,10 +89,6 @@ export default function ProviderOverview({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="theme-heading text-2xl font-semibold">Performance overview</h2>
-            <p className="theme-muted mt-2 text-sm">
-              The provider dashboard now mirrors the same premium product feel as the
-              public browsing experience.
-            </p>
           </div>
           <select className="theme-chip rounded-full px-4 py-2 text-sm">
             <option>Last 30 days</option>
@@ -144,9 +140,7 @@ export default function ProviderOverview({
           <div className="theme-card-soft mt-6 flex h-72 items-center justify-center rounded-[28px] border border-dashed">
             <div className="text-center">
               <BarChart3 className="theme-subtle mx-auto h-10 w-10" />
-              <p className="theme-muted mt-3 text-sm">
-                Chart zone reserved for future analytics integration
-              </p>
+              <p className="theme-muted mt-3 text-sm">Analytics coming soon</p>
             </div>
           </div>
         </div>

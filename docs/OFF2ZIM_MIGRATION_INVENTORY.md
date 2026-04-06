@@ -196,16 +196,23 @@ Still needed:
 
 ### 2. First-class Prisma models still deferred
 
-Current temporary/canonical-enough approach:
-
-- favorites are stored in backend-owned user preference payloads
-- destinations are derived through backend responses rather than a dedicated Prisma model
-
-Likely future first-class models:
+Completed in the current schema:
 
 - `Favorite`
 - `Destination`
+- `StayGallery`
+- `EventTicket`
+- `EventGallery`
+
+Current temporary/canonical-enough approach:
+
+- destination responses still keep a derived-data fallback for resilience
+- some legacy favorite data may still exist in user preference payloads until touched and migrated through the API
+
+Likely future first-class models:
+
 - possibly richer gallery/media models for listings, events, and stays
+- `StayRoom` if we decide to fully absorb the old `stay_rooms` concept into the canonical backend model
 
 ### 3. Remaining mobile compatibility dependencies
 
@@ -218,6 +225,9 @@ Confirmed current examples:
 
 - compatibility auth/table usage remains available for older mobile flows
 - direct shim dependency was removed from `Mobile/app/screens/Featured.tsx`
+- direct shim dependency was removed from `Mobile/utils/favoritesUtils.ts`
+- direct shim dependency was removed from `Mobile/context/AuthContext.tsx`
+- direct shim dependency was removed from `Mobile/app/screens/DestinationDetail.tsx`
 
 ### 4. Profile media and generalized storage unification
 

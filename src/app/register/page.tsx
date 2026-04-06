@@ -47,9 +47,7 @@ function RegisterContent() {
                 Join Off2Zim with the role that matches your journey
               </h1>
               <p className="theme-muted mt-4 max-w-xl text-sm leading-7 md:text-base">
-                The PRD asks for role-aware onboarding, so this registration flow
-                separates explorers from service providers and keeps the next step
-                clear from the start.
+                Create an explorer or provider account and continue where you belong.
               </p>
 
               <div className="mt-8 space-y-3">
@@ -87,7 +85,7 @@ function RegisterContent() {
                   <div className="mt-2 text-2xl font-semibold">Explore | Experience | Enjoy</div>
                   <div className="mt-3 inline-flex items-center gap-2 text-sm text-white/80">
                     <Sparkles className="h-4 w-4 text-[#ffca74]" />
-                    A cleaner start for travelers and tourism partners
+                    Built for travelers and tourism partners
                   </div>
                 </div>
               </div>

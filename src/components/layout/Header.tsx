@@ -61,6 +61,23 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {!user ? (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-black/70 transition hover:text-black dark:text-white/75 dark:hover:text-white md:inline-flex"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  className="hidden items-center gap-2 rounded-full bg-[#ff5630] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#ff6f4d] md:inline-flex"
+                >
+                  Create account
+                </Link>
+              </>
+            ) : null}
+
             <Link
               href="/featured-section"
               className="hidden items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-4 py-2 text-sm font-medium text-black/70 transition hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10 md:inline-flex"
@@ -77,7 +94,7 @@ export default function Header() {
 
             <Link
               href={user ? "/dashboard" : "/login"}
-              className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black/10 bg-white/80 px-3 text-black/80 transition hover:bg-white dark:border-white/10 dark:bg-[#161616] dark:text-white/85 dark:hover:bg-[#1d1d1d]"
+              className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black/10 bg-white/80 px-3 text-black/80 transition hover:bg-white dark:border-white/10 dark:bg-[#161616] dark:text-white/85 dark:hover:bg-[#1d1d1d] md:px-4"
               aria-label={user ? "Open dashboard" : "Sign in"}
             >
               {user ? (
@@ -91,7 +108,10 @@ export default function Header() {
                   </span>
                 </span>
               ) : (
-                <User className="h-5 w-5" />
+                <span className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  <span className="hidden text-sm font-medium md:inline">Account</span>
+                </span>
               )}
             </Link>
 

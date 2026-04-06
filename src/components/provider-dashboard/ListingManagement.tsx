@@ -375,7 +375,7 @@ export default function ListingManagement() {
 
           {!loading && filteredListings.length === 0 ? (
             <article className="theme-panel rounded-[32px] p-6 text-sm">
-              No listings match the current search yet.
+              No listings found.
             </article>
           ) : null}
         </section>
@@ -388,10 +388,6 @@ export default function ListingManagement() {
           </div>
           <div>
             <h3 className="theme-heading text-lg font-semibold">One business, many services</h3>
-            <p className="theme-muted mt-2 text-sm leading-6">
-              The provider workspace now stores listings in the backend against the
-              core company profile, which matches the PRD’s operating model.
-            </p>
           </div>
         </div>
       </section>

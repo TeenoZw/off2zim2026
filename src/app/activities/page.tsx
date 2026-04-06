@@ -50,8 +50,7 @@ export default function ActivitiesPage() {
                 Book provider-led Zimbabwe experiences from the live catalog
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                This page now reflects the provider platform directly, so activity
-                listings published in the dashboard appear here for customers to discover.
+                Browse live experiences, compare options, and add the right moments to your trip.
               </p>
             </div>
             <div
@@ -95,11 +94,11 @@ export default function ActivitiesPage() {
           </div>
         ) : loading ? (
           <div className="theme-panel rounded-[36px] p-12 text-center">
-            <p className="theme-muted text-sm">Loading live experiences...</p>
+            <p className="theme-muted text-sm">Loading experiences...</p>
           </div>
         ) : activities.length === 0 ? (
           <div className="theme-panel rounded-[36px] p-12 text-center">
-            <p className="theme-muted text-sm">No public experiences match this search yet.</p>
+            <p className="theme-muted text-sm">No experiences found.</p>
           </div>
         ) : (
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

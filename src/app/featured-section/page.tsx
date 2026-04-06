@@ -103,9 +103,7 @@ export default function FeaturedSectionPage() {
                 A better way to feature Zimbabwe without making visibility feel arbitrary
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
-                This page explains how Off2Zim can highlight strong providers while
-                keeping the system fair, geographically balanced, and aligned with
-                traveler trust.
+                Editorial visibility built around trust, quality, and balance.
               </p>
             </div>
             <div

@@ -1,5 +1,5 @@
 import { favoritesService } from '@/services/database';
-import { supabase } from '@/lib/supabase';
+import { buildSession } from '@/lib/api';
 
 // In-memory favorites store (IDs)
 let favorites = new Set<string>();
@@ -73,7 +73,7 @@ export const toggleFavorite = (itemId: string, itemType?: string): boolean => {
   // Persist asynchronously
   (async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = (await buildSession())?.user;
       if (!user) return;
 
       if (nowFavorited) {
@@ -98,7 +98,7 @@ export const addToFavorites = (itemId: string, itemType?: string) => {
   notifySubscribers();
   (async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = (await buildSession())?.user;
       if (!user) return;
       await favoritesService.add(user.id, itemType ?? 'unknown', itemId);
     } catch (err) {
@@ -112,7 +112,7 @@ export const removeFromFavorites = (itemId: string, itemType?: string) => {
   notifySubscribers();
   (async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = (await buildSession())?.user;
       if (!user) return;
       if (itemType) {
         await favoritesService.remove(user.id, itemType, itemId);

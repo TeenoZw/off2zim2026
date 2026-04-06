@@ -74,7 +74,7 @@ function MarketplacePageContent() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Off2Zim Marketplace</h1>
               <p className="text-gray-600 mt-1">
-                Discover live provider listings published from the new supplier backend
+                Browse verified stays, experiences, and services
               </p>
             </div>
           </div>
@@ -154,11 +154,11 @@ function MarketplacePageContent() {
 
             {loading ? (
               <div className="bg-white rounded-xl shadow-sm p-8 text-gray-500">
-                Loading live provider listings...
+                Loading listings...
               </div>
             ) : listings.length === 0 ? (
               <div className="bg-white rounded-xl shadow-sm p-8 text-gray-500">
-                No public listings match this search yet.
+                No listings found.
               </div>
             ) : (
               <div
@@ -224,7 +224,7 @@ export default function MarketplacePage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gray-50 p-8 text-gray-500">
-          Loading marketplace...
+          Loading...
         </div>
       }
     >

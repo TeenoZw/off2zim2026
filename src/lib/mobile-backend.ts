@@ -93,6 +93,29 @@ function publicImage(path: string | null | undefined) {
   return path || null;
 }
 
+function mergeImages(...groups: Array<Array<string | null | undefined>>) {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+
+  for (const group of groups) {
+    for (const value of group) {
+      if (typeof value !== 'string') {
+        continue;
+      }
+
+      const trimmed = value.trim();
+      if (!trimmed || seen.has(trimmed)) {
+        continue;
+      }
+
+      seen.add(trimmed);
+      merged.push(trimmed);
+    }
+  }
+
+  return merged;
+}
+
 function isPrismaBuildConfigError(error: unknown) {
   if (!(error instanceof Error)) {
     return false;
@@ -118,6 +141,43 @@ function handleMobileDataFallback<T>(dataset: string, error: unknown, fallback: 
 
 export async function getMobileDestinations() {
   try {
+    const storedDestinations = await prisma.destination.findMany({
+      orderBy: [{ featured: 'desc' }, { displayOrder: 'asc' }, { createdAt: 'desc' }],
+      include: {
+        hotels: { select: { id: true } },
+        activities: { select: { id: true } },
+        restaurants: { select: { id: true } },
+        events: { select: { id: true } },
+      },
+    });
+
+    if (storedDestinations.length > 0) {
+      return storedDestinations.map(destination => {
+        const images = safeJsonParse<string[]>(destination.images, []);
+        return {
+          id: destination.slug || destination.id,
+          name: destination.name,
+          description: destination.description,
+          location: destination.location,
+          image_url: publicImage(destination.imageUrl || images[0] || null),
+          images,
+          latitude: null,
+          longitude: null,
+          created_at: destination.createdAt.toISOString(),
+          stays_count: destination.hotels.length,
+          activities_count:
+            destination.activities.length +
+            destination.restaurants.length +
+            destination.events.length,
+          featured: destination.featured,
+          category: destination.category,
+          price_range: destination.priceRange,
+          rating: destination.rating,
+          weather: destination.weather,
+        };
+      });
+    }
+
     const [hotels, activities, restaurants, events] = await Promise.all([
       prisma.hotel.findMany({ select: { city: true, description: true, images: true } }),
       prisma.activity.findMany({ select: { location: true, description: true, images: true } }),
@@ -204,6 +264,10 @@ export async function getMobileStays() {
     const hotels = await prisma.hotel.findMany({
       include: {
         rooms: true,
+        destination: true,
+        gallery: {
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -211,15 +275,30 @@ export async function getMobileStays() {
     });
 
     return hotels.map(hotel => {
-      const images = safeJsonParse<string[]>(hotel.images, []);
+      const storedImages = safeJsonParse<string[]>(hotel.images, []);
+      const gallery = hotel.gallery.map(image => ({
+        id: image.id,
+        image_url: image.imageUrl,
+        thumbnail_url: image.thumbnailUrl,
+        caption: image.caption,
+        alt_text: image.altText,
+        category: image.category,
+        is_featured: image.isFeatured,
+        sort_order: image.sortOrder,
+        uploaded_by: image.uploadedById ?? null,
+      }));
+      const galleryImages = gallery.map(image => image.image_url);
+      const images = mergeImages(galleryImages, storedImages);
       const amenities = safeJsonParse<string[]>(hotel.amenities, []);
+      const destinationName = hotel.destination?.name || hotel.city;
+      const destinationLocation = hotel.destination?.location || hotel.city;
 
       return {
         id: hotel.id,
         name: hotel.name,
         description: hotel.description,
         location: hotel.city,
-        image_url: publicImage(images[0]),
+        image_url: publicImage(images[0] || hotel.destination?.imageUrl),
         images,
         featured: hotel.rating ? hotel.rating >= 4.8 : false,
         rating: hotel.rating,
@@ -232,8 +311,9 @@ export async function getMobileStays() {
         amenities,
         created_at: hotel.createdAt.toISOString(),
         destinations: {
-          name: hotel.city,
-          location: hotel.city,
+          id: hotel.destination?.id ?? null,
+          name: destinationName,
+          location: destinationLocation,
         },
         service_providers: null,
         stay_rooms: hotel.rooms.map(room => ({
@@ -249,12 +329,20 @@ export async function getMobileStays() {
           available_rooms: null,
           stay_name: hotel.name,
         })),
-        stay_gallery: images.map((image, index) => ({
-          id: `${hotel.id}-${index}`,
-          image_url: image,
-          caption: hotel.name,
-          sort_order: index,
-        })),
+        stay_gallery:
+          gallery.length > 0
+            ? gallery
+            : images.map((image, index) => ({
+                id: `${hotel.id}-${index}`,
+                image_url: image,
+                thumbnail_url: image,
+                caption: hotel.name,
+                alt_text: hotel.name,
+                category: 'general',
+                is_featured: index === 0,
+                sort_order: index,
+                uploaded_by: null,
+              })),
       };
     });
   } catch (error) {
@@ -265,15 +353,79 @@ export async function getMobileStays() {
 export async function getMobileEvents() {
   try {
     const events = await prisma.event.findMany({
+      include: {
+        destination: true,
+        tickets: {
+          orderBy: [{ basePrice: 'asc' }, { createdAt: 'asc' }],
+        },
+        gallery: {
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        },
+      },
       orderBy: {
         startDate: 'asc',
       },
     });
 
     return events.map(event => {
-      const images = safeJsonParse<string[]>(event.images, []);
+      const storedImages = safeJsonParse<string[]>(event.images, []);
+      const gallery = event.gallery.map(image => ({
+        id: image.id,
+        image_url: image.imageUrl,
+        thumbnail_url: image.thumbnailUrl || image.imageUrl,
+        caption: image.caption,
+        alt_text: image.altText,
+        category: image.category || 'general',
+        is_featured: image.isFeatured,
+        sort_order: image.sortOrder,
+        uploaded_by: image.uploadedById ?? null,
+      }));
+      const galleryImages = gallery.map(image => image.image_url);
+      const images = mergeImages(galleryImages, storedImages);
       const now = new Date();
       const isUpcoming = event.startDate >= now;
+      const tickets =
+        event.tickets.length > 0
+          ? event.tickets.map(ticket => ({
+              id: ticket.id,
+              ticket_type: ticket.ticketType,
+              name: ticket.name,
+              description: ticket.description,
+              base_price: ticket.basePrice,
+              original_price: ticket.originalPrice,
+              currency: ticket.currency,
+              total_tickets: ticket.totalTickets,
+              tickets_sold: ticket.ticketsSold,
+              tickets_available: ticket.ticketsAvailable,
+              perks: safeJsonParse<string[]>(ticket.perks, []),
+              min_purchase: ticket.minPurchase,
+              max_purchase: ticket.maxPurchase,
+              sale_start_date: ticket.saleStartDate?.toISOString() ?? null,
+              sale_end_date: ticket.saleEndDate?.toISOString() ?? null,
+              is_active: ticket.isActive,
+            }))
+          : [
+              {
+                id: `${event.id}-standard`,
+                ticket_type: 'standard',
+                name: 'Standard Ticket',
+                description: 'General admission',
+                base_price: event.price,
+                original_price: null,
+                currency: event.currency,
+                total_tickets: event.capacity,
+                tickets_sold: 0,
+                tickets_available: event.capacity,
+                perks: [],
+                min_purchase: 1,
+                max_purchase: 10,
+                sale_start_date: null,
+                sale_end_date: null,
+                is_active: true,
+              },
+            ];
+      const destinationName = event.destination?.name || event.location;
+      const destinationLocation = event.destination?.location || event.location;
 
       return {
         id: event.id,
@@ -288,46 +440,33 @@ export async function getMobileEvents() {
         currency: event.currency,
         capacity: event.capacity,
         tickets_available: event.capacity,
-        image_url: publicImage(images[0]),
+        image_url: publicImage(images[0] || event.destination?.imageUrl),
         images,
         start_date: event.startDate.toISOString(),
         start_time: event.startDate.toISOString().slice(11, 16),
         end_time: event.endDate?.toISOString().slice(11, 16) ?? null,
         created_at: event.createdAt.toISOString(),
         destinations: {
-          name: event.location,
-          location: event.location,
+          id: event.destination?.id ?? null,
+          name: destinationName,
+          location: destinationLocation,
         },
         service_providers: null,
-        event_tickets: [
-          {
-            id: `${event.id}-standard`,
-            ticket_type: 'standard',
-            name: 'Standard Ticket',
-            description: 'General admission',
-            base_price: event.price,
-            original_price: null,
-            currency: event.currency,
-            total_tickets: event.capacity,
-            tickets_sold: 0,
-            tickets_available: event.capacity,
-            perks: [],
-            min_purchase: 1,
-            max_purchase: 10,
-            sale_start_date: null,
-            sale_end_date: null,
-            is_active: true,
-          },
-        ],
-        event_gallery: images.map((image, index) => ({
-          id: `${event.id}-${index}`,
-          image_url: image,
-          thumbnail_url: image,
-          caption: event.name,
-          category: 'general',
-          is_featured: index === 0,
-          sort_order: index,
-        })),
+        event_tickets: tickets,
+        event_gallery:
+          gallery.length > 0
+            ? gallery
+            : images.map((image, index) => ({
+                id: `${event.id}-${index}`,
+                image_url: image,
+                thumbnail_url: image,
+                caption: event.name,
+                alt_text: event.name,
+                category: 'general',
+                is_featured: index === 0,
+                sort_order: index,
+                uploaded_by: null,
+              })),
       };
     });
   } catch (error) {

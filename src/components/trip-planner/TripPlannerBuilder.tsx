@@ -220,12 +220,8 @@ export default function TripPlannerBuilder() {
               Planner studio
             </p>
             <h2 className="theme-heading mt-2 text-3xl font-semibold md:text-4xl">
-              Your itinerary workspace
+              Itinerary builder
             </h2>
-            <p className="theme-muted mt-3 max-w-2xl text-sm leading-6 md:text-base">
-              Build the route, shape each day, manage costs, and export the trip
-              from one focused planning studio.
-            </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -445,7 +441,7 @@ export default function TripPlannerBuilder() {
                           ))
                         ) : (
                           <div className="rounded-[20px] bg-white px-4 py-4 text-sm text-slate-500">
-                            No items planned for this day.
+                            No items for this day.
                           </div>
                         )}
                       </div>
@@ -494,7 +490,7 @@ export default function TripPlannerBuilder() {
                     Planner notes
                   </div>
                   <div className="mt-3 text-sm leading-7 text-slate-700">
-                    {meta.notes || "No planning notes added yet."}
+                    {meta.notes || "No notes added."}
                   </div>
                 </div>
               </div>

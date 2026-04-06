@@ -63,9 +63,7 @@ export default function TransportPage() {
                 Move through Zimbabwe with a route that still feels calm
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
-                The PRD needs transport to work as part of planning, not as a separate
-                afterthought. Off2Zim transport should help travelers connect stays,
-                activities, and event timings without friction.
+                Compare routes, protect your timing, and keep every leg aligned with your trip.
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">

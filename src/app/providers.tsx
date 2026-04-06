@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { PaymentProvider } from "@/contexts/PaymentContext";
 import { TripPlannerProvider } from "@/contexts/TripPlannerContext";
 import { useState } from "react";
@@ -30,35 +31,37 @@ export function Providers({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <AuthProvider>
-          <PaymentProvider>
-            <TripPlannerProvider>
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: "#363636",
-                    color: "#fff",
-                  },
-                  success: {
-                    duration: 3000,
-                    iconTheme: {
-                      primary: "#4ade80",
-                      secondary: "#fff",
+          <FavoritesProvider>
+            <PaymentProvider>
+              <TripPlannerProvider>
+                {children}
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: "#363636",
+                      color: "#fff",
                     },
-                  },
-                  error: {
-                    duration: 5000,
-                    iconTheme: {
-                      primary: "#ef4444",
-                      secondary: "#fff",
+                    success: {
+                      duration: 3000,
+                      iconTheme: {
+                        primary: "#4ade80",
+                        secondary: "#fff",
+                      },
                     },
-                  },
-                }}
-              />
-            </TripPlannerProvider>
-          </PaymentProvider>
+                    error: {
+                      duration: 5000,
+                      iconTheme: {
+                        primary: "#ef4444",
+                        secondary: "#fff",
+                      },
+                    },
+                  }}
+                />
+              </TripPlannerProvider>
+            </PaymentProvider>
+          </FavoritesProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

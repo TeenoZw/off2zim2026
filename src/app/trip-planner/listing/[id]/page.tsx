@@ -4,11 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import FavoriteButton from "@/components/ui/FavoriteButton";
 import {
   CalendarDays,
   ChevronLeft,
   Globe,
-  Heart,
   Mail,
   MapPin,
   Phone,
@@ -146,9 +146,12 @@ export default function TripPlannerListingDetailPage() {
                 {plannerItem.availability}
               </div>
               <div className="absolute right-5 top-5 flex gap-2">
-                <button className="rounded-full bg-[#111111]/85 p-3 text-white/80 backdrop-blur">
-                  <Heart className="h-4 w-4" />
-                </button>
+                <FavoriteButton
+                  itemId={plannerItem.id}
+                  itemType={plannerItem.type}
+                  className="rounded-full bg-[#111111]/85 p-3 text-white/80 backdrop-blur"
+                  iconClassName="h-4 w-4"
+                />
                 <button className="rounded-full bg-[#111111]/85 p-3 text-white/80 backdrop-blur">
                   <Share2 className="h-4 w-4" />
                 </button>

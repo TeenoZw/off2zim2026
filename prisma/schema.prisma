@@ -64,6 +64,9 @@ model User {
   bookings               Booking[]
   reviews                Review[]
   payments               Payment[]
+  favorites              Favorite[]
+  uploadedStayGalleries  StayGallery[] @relation("StayGalleryUploads")
+  uploadedEventGalleries EventGallery[] @relation("EventGalleryUploads")
   ownedCompanies         ProviderCompany[]   @relation("CompanyOwner")
   verificationReviews    ProviderVerificationReview[] @relation("AdminVerificationReviews")
   openedDisputes         Dispute[]           @relation("OpenedDisputes")
@@ -82,12 +85,39 @@ model VerificationToken {
 }
 
 // Tourism Content Models
+model Destination {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  location     String
+  imageUrl     String?
+  images       String?  @default("[]")
+  priceRange   String?
+  rating       Float?   @default(0)
+  weather      String?
+  featured     Boolean  @default(false)
+  category     String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  hotels      Hotel[]
+  activities  Activity[]
+  restaurants Restaurant[]
+  events      Event[]
+
+  @@index([featured, displayOrder])
+  @@map("destinations")
+}
+
 model Hotel {
   id          String   @id @default(cuid())
   name        String
   description String?
   address     String
   city        String
+  destinationId String?
   category    String
   priceRange  String
   rating      Float?   @default(0)
@@ -96,9 +126,12 @@ model Hotel {
   rooms       Room[]
   bookings    Booking[]
   reviews     Review[]
+  gallery     StayGallery[]
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  destination Destination? @relation(fields: [destinationId], references: [id])
 
   @@map("hotels")
 }
@@ -125,6 +158,7 @@ model Activity {
   id          String   @id @default(cuid())
   name        String
   description String?
+  destinationId String?
   category    String
   duration    String?
   difficulty  String?
@@ -142,6 +176,8 @@ model Activity {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  destination Destination? @relation(fields: [destinationId], references: [id])
+
   @@map("activities")
 }
 
@@ -151,6 +187,7 @@ model Restaurant {
   description String?
   cuisine     String
   location    String
+  destinationId String?
   priceRange  String
   rating      Float?   @default(0)
   images      String?  @default("[]")
@@ -162,6 +199,8 @@ model Restaurant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  destination Destination? @relation(fields: [destinationId], references: [id])
+
   @@map("restaurants")
 }
 
@@ -171,6 +210,7 @@ model Event {
   description String?
   category    String
   location    String
+  destinationId String?
   startDate   DateTime
   endDate     DateTime?
   price       Float
@@ -179,11 +219,29 @@ model Event {
   capacity    Int?
   bookings    Booking[]
   reviews     Review[]
+  tickets     EventTicket[]
+  gallery     EventGallery[]
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  destination Destination? @relation(fields: [destinationId], references: [id])
+
   @@map("events")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  itemType  String
+  itemId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemType, itemId])
+  @@index([userId, itemType])
+  @@map("favorites")
 }
 
 // Booking System
@@ -400,6 +458,73 @@ model ListingAvailability {
   listing ProviderListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@index([listingId, startDate, endDate])
+}
+
+model StayGallery {
+  id          String   @id @default(cuid())
+  hotelId      String   @map("stay_id")
+  imageUrl     String   @map("image_url")
+  thumbnailUrl String?  @map("thumbnail_url")
+  caption      String?
+  altText      String?  @map("alt_text")
+  category     String?
+  isFeatured   Boolean  @default(false) @map("is_featured")
+  sortOrder    Int      @default(0) @map("sort_order")
+  uploadedById String?  @map("uploaded_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  hotel       Hotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  uploadedBy  User? @relation("StayGalleryUploads", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([hotelId, sortOrder])
+  @@map("stay_gallery")
+}
+
+model EventTicket {
+  id               String   @id @default(cuid())
+  eventId          String
+  ticketType       String
+  name             String
+  description      String?
+  basePrice        Float
+  currency         String   @default("USD")
+  originalPrice    Float?
+  totalTickets     Int?
+  ticketsSold      Int      @default(0)
+  ticketsAvailable Int?
+  minPurchase      Int      @default(1)
+  maxPurchase      Int      @default(10)
+  perks            String?  @default("[]")
+  saleStartDate    DateTime?
+  saleEndDate      DateTime?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, isActive])
+  @@map("event_tickets")
+}
+
+model EventGallery {
+  id           String   @id @default(cuid())
+  eventId       String
+  imageUrl      String   @map("image_url")
+  thumbnailUrl  String?  @map("thumbnail_url")
+  caption       String?
+  altText       String?  @map("alt_text")
+  category      String?
+  isFeatured    Boolean  @default(false) @map("is_featured")
+  sortOrder     Int      @default(0) @map("sort_order")
+  uploadedById  String?  @map("uploaded_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  event      Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  uploadedBy User? @relation("EventGalleryUploads", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([eventId, sortOrder])
+  @@map("event_gallery")
 }
 
 model Dispute {

@@ -40,9 +40,6 @@ export default function CheckoutComponent({
         <div className="lg:order-2">
           <div className="theme-panel sticky top-24 rounded-[36px] p-6">
             <h2 className="theme-heading text-2xl font-semibold">Booking summary</h2>
-            <p className="theme-muted mt-2 text-sm">
-              Review your trip items while payments are being finalized for launch.
-            </p>
             <div className="mt-6">
               <BookingSummary items={items} />
             </div>
@@ -56,12 +53,10 @@ export default function CheckoutComponent({
                 <ShieldAlert className="mt-0.5 h-5 w-5 text-amber-400" />
                 <div>
                   <h2 className="theme-heading text-xl font-semibold">
-                    Online payments are temporarily unavailable
+                    Booking request
                   </h2>
                   <p className="theme-muted mt-2 text-sm leading-6">
-                    Off2Zim is completing payment provider setup. For now, you can
-                    review the booking, submit a booking request, and finalize
-                    payment manually with the provider.
+                    Submit your request and Off2Zim will confirm the next steps with the provider.
                   </p>
                 </div>
               </div>
@@ -76,11 +71,10 @@ export default function CheckoutComponent({
                   <CalendarClock className="mt-1 h-5 w-5 text-[#ff7352]" />
                   <div>
                     <div className="theme-heading text-sm font-semibold">
-                      We hold your trip details together
+                      Trip details saved
                     </div>
                     <div className="theme-muted mt-1 text-sm leading-6">
-                      Your selected stays, activities, and trip items remain grouped
-                      as one Off2Zim booking request.
+                      Your selected items stay grouped under one request.
                     </div>
                   </div>
                 </div>
@@ -88,11 +82,10 @@ export default function CheckoutComponent({
                   <Mail className="mt-1 h-5 w-5 text-[#5aa7ff]" />
                   <div>
                     <div className="theme-heading text-sm font-semibold">
-                      You receive a request reference
+                      Reference issued
                     </div>
                     <div className="theme-muted mt-1 text-sm leading-6">
-                      Use the request reference when following up with the provider
-                      or the Off2Zim team.
+                      Use it for follow-ups with the provider or Off2Zim.
                     </div>
                   </div>
                 </div>
@@ -100,14 +93,13 @@ export default function CheckoutComponent({
                   <ArrowRight className="mt-1 h-5 w-5 text-[#7ddf8c]" />
                   <div>
                     <div className="theme-heading text-sm font-semibold">
-                      Manual payment can be completed next
+                      Confirmation follows next
                     </div>
                     <div className="theme-muted mt-1 text-sm leading-6">
-                  Once payment rails are live again, this flow will return to
-                      direct online checkout.
+                      Off2Zim will guide the final confirmation and payment step.
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
             </div>
 

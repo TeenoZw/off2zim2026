@@ -78,7 +78,7 @@ function BookingSuccessContent() {
             </div>
             <h1 className="mt-6 text-4xl font-semibold">Booking confirmed</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-white/60">
-              Your booking has been recorded in the new provider-backed platform flow.
+              Your reservation has been recorded successfully.
             </p>
           </div>
 

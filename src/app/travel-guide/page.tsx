@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import FavoriteButton from "@/components/ui/FavoriteButton";
+import WeatherBadge from "@/components/ui/WeatherBadge";
+import { useMemo, useState } from "react";
 import {
   ArrowRight,
   Banknote,
@@ -7,7 +12,6 @@ import {
   CloudRain,
   FileText,
   Globe2,
-  Heart,
   Info,
   Languages,
   MapPin,
@@ -128,6 +132,30 @@ const facts = [
 ];
 
 export default function TravelGuidePage() {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredDestinations = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+
+    if (!query) {
+      return destinations;
+    }
+
+    return destinations.filter((destination) =>
+      [
+        destination.name,
+        destination.description,
+        destination.bestTime,
+        destination.climate,
+        destination.meta,
+        ...destination.highlights,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [searchTerm]);
+
   return (
     <div className="theme-page pb-20">
       <section className="mx-auto max-w-7xl px-4 pb-8 pt-8 sm:px-6 lg:px-8">
@@ -138,12 +166,10 @@ export default function TravelGuidePage() {
                 Destinations
               </div>
               <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
-                Zimbabwe travel guidance with stronger destination context
+                Zimbabwe travel guide
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                This page now matches the rest of Off2Zim: cinematic imagery, cleaner
-                trust signals, and destination cards that bridge inspiration into booking
-                and planning.
+                Explore destinations, plan routes, and move straight into your itinerary.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -181,6 +207,8 @@ export default function TravelGuidePage() {
             <Search className="theme-subtle absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Search destinations, activities, weather, or planning tips..."
               className="theme-input w-full rounded-2xl py-3 pl-12 pr-4 text-sm"
             />
@@ -199,7 +227,7 @@ export default function TravelGuidePage() {
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {destinations.map((destination) => (
+          {filteredDestinations.map((destination) => (
             <article key={destination.id} className="theme-card overflow-hidden">
               <div
                 className="relative h-56 bg-cover bg-center"
@@ -210,9 +238,12 @@ export default function TravelGuidePage() {
                 <div className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-2 text-sm text-white backdrop-blur">
                   {destination.meta}
                 </div>
-                <button className="absolute right-4 top-4 rounded-full bg-black/45 p-3 text-white backdrop-blur">
-                  <Heart className="h-4 w-4 text-[#ff5b65]" />
-                </button>
+                <FavoriteButton
+                  itemId={destination.name}
+                  itemType="destination"
+                  className="absolute right-4 top-4 rounded-full bg-black/45 p-3 text-white backdrop-blur"
+                  iconClassName="h-4 w-4"
+                />
                 <div className="absolute inset-x-4 bottom-4">
                   <h3 className="text-2xl font-semibold text-white">{destination.name}</h3>
                   <p className="mt-2 text-sm text-white/75">{destination.description}</p>
@@ -229,6 +260,10 @@ export default function TravelGuidePage() {
                     <SunMedium className="h-4 w-4 text-[#ffc247]" />
                     {destination.climate}
                   </span>
+                </div>
+
+                <div className="mt-4 inline-flex rounded-full bg-black/[0.04] px-3 py-2 text-sm dark:bg-white/[0.06]">
+                  <WeatherBadge location={destination.name} compact />
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -250,6 +285,12 @@ export default function TravelGuidePage() {
             </article>
           ))}
         </div>
+
+        {filteredDestinations.length === 0 ? (
+          <div className="theme-panel mt-5 rounded-[30px] p-6 text-sm text-center">
+            No destinations match that search.
+          </div>
+        ) : null}
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

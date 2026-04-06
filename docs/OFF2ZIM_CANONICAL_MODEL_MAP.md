@@ -1,6 +1,6 @@
 # Off2Zim Canonical Model Map
 
-Last updated: 2026-04-05
+Last updated: 2026-04-06
 
 ## Purpose
 
@@ -75,9 +75,10 @@ Canonical target:
 - Short term: backend-owned favorites stored in user preferences and exposed via `/api/favorites`
 - Medium term: Prisma `Favorite` model if we need richer querying, analytics, uniqueness guarantees, or joins
 
-Recommendation:
+Current status:
 
-- Add a real Prisma `Favorite` model in a later migration once Postgres is active
+- `Favorite` is now a real Prisma/Postgres model.
+- `/api/favorites` now reads and writes through the `favorites` table, with a compatibility migration path from the old user-preferences storage.
 
 ### Destinations
 
@@ -91,13 +92,10 @@ Canonical target:
 
 - Dedicated Prisma `Destination` model
 
-Interim state:
+Current status:
 
-- Backend derives destination responses from current tourism entities
-
-Recommendation:
-
-- Introduce first-class `Destination` records once Postgres migration is complete
+- `Destination` is now a real Prisma/Postgres model.
+- The destination backend currently prefers first-class destination rows when present and falls back to derived responses only if needed.
 
 ### Stays
 
@@ -151,6 +149,10 @@ Canonical target:
 Recommendation:
 
 - Add normalized event ticket and gallery models if those concepts need to become first-class in the backend
+  
+Current status:
+
+- `EventTicket` and `EventGallery` are now first-class Prisma/Postgres models.
 
 ### Bookings
 
@@ -241,9 +243,7 @@ Target:
 ## Next Schema Candidates After Postgres Cutover
 
 - `UserProfile`
-- `Favorite`
-- `Destination`
-- `StayImage` or generalized media model
-- `EventTicket`
-- `EventMedia`
-
+- `StayRoom` or a future canonical replacement for the old stay-room model
+- `UserMessage`
+- `Itinerary`
+- generalized media abstraction if we want to unify stay/event/provider uploads later

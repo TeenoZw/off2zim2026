@@ -150,7 +150,7 @@ export default function CompanyProfile() {
               </p>
             ))
           ) : (
-            <p className="text-sm text-white/45">No services added yet.</p>
+            <p className="text-sm text-white/45">No services added.</p>
           )}
         </CardBlock>
         <CardBlock title="Coverage">
@@ -161,7 +161,7 @@ export default function CompanyProfile() {
               </p>
             ))
           ) : (
-            <p className="text-sm text-white/45">Service areas have not been defined yet.</p>
+            <p className="text-sm text-white/45">No service areas added.</p>
           )}
         </CardBlock>
         <CardBlock title="Documents on file">
@@ -172,7 +172,7 @@ export default function CompanyProfile() {
               </p>
             ))
           ) : (
-            <p className="text-sm text-white/45">No verification documents uploaded yet.</p>
+            <p className="text-sm text-white/45">No documents uploaded.</p>
           )}
         </CardBlock>
       </section>

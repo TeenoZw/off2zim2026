@@ -311,6 +311,82 @@ Open concerns:
 - Docker-based local Postgres is still unverified because Docker Desktop was not running during this pass.
 - `Mobile/lib/supabase.ts` remains the largest leftover compatibility layer after the successful Postgres cutover.
 
+### Pass 10 - 2026-04-06
+
+Completed:
+
+- Added the first safe merge wave from the legacy Supabase-style schema into the canonical Prisma schema:
+- `Destination`
+- `Favorite`
+- `StayGallery`
+- `EventTicket`
+- `EventGallery`
+- Added optional destination relations to the current `Hotel`, `Activity`, `Restaurant`, and `Event` models.
+- Updated the Postgres seed so the new canonical tables are populated with:
+- 2 destinations
+- 4 stay gallery records
+- 2 event tickets
+- 4 event gallery records
+- Moved `/api/favorites` onto the real Prisma `Favorite` model with automatic migration from the old preference-based favorite storage.
+- Updated destination aggregation to prefer first-class `Destination` rows when present and fall back to derived location aggregation only when needed.
+- Rebuilt and reseeded the live local Postgres database successfully with the expanded schema.
+- Verified the new merged Postgres tables directly:
+- destinations: 2
+- event_tickets: 2
+- event_gallery: 4
+- stay_gallery: 4
+- Updated the canonical model map and migration inventory to reflect that these models are now active, not just candidates.
+
+In progress:
+
+- The schema now contains the first merged legacy concepts, but the remaining “stays” and “profiles” legacy tables still need careful consolidation instead of direct copying.
+- Favorites now use a real table, but older preference-stored favorites will only migrate as users interact with the API.
+
+Open concerns:
+
+- We still need to decide whether `Hotel`/`Room` remains the canonical stay model or whether a future `Stay`/`StayRoom` layer should replace it.
+- Destination reads now prefer real `Destination` rows, but more route-level adoption is still possible as other areas start consuming first-class destination relations.
+- `Mobile/lib/supabase.ts` remains the biggest remaining compatibility surface after this schema merge.
+
+### Pass 11 - 2026-04-06
+
+Completed:
+
+- Updated the shared mobile/backend stay serializer to prefer first-class `StayGallery` rows over legacy `images` arrays while preserving the exact mobile response shape.
+- Updated the shared mobile/backend event serializer to prefer first-class `EventGallery` and `EventTicket` rows over synthesized fallback values.
+- Added destination relation projection to stay/event payloads so shared APIs now return canonical destination metadata when available.
+- Removed the mobile favorites utility's dependency on `supabase.auth.getUser()` and pointed it directly at the backend-backed session store in `Mobile/lib/api.ts`.
+
+In progress:
+
+- The mobile compatibility shim still exists, but more of the runtime behavior now flows through canonical backend tables rather than shimmed assumptions.
+- Destination detail routes still resolve through the shared aggregate adapter rather than dedicated direct-read serializers.
+
+Open concerns:
+
+- `Mobile/lib/supabase.ts` is still present for older compatibility edges even though favorites no longer depend on its auth helper.
+- Stay/event payloads still preserve some legacy fields for UI stability, so the transport contract remains broader than the canonical database models.
+- We still need a clean Postgres-native Prisma migration baseline to replace the generated-SQL bootstrap workaround.
+
+### Pass 12 - 2026-04-06
+
+Completed:
+
+- Removed `Mobile/context/AuthContext.tsx`'s dependency on the Supabase compatibility shim and moved it fully onto backend-native session/auth primitives from `Mobile/lib/api.ts`.
+- Added a shared backend response type at `Mobile/types/backend.ts` so destination screens no longer need shim-owned table typings.
+- Removed `Mobile/app/screens/DestinationDetail.tsx`'s type-only import from `Mobile/lib/supabase.ts`.
+
+In progress:
+
+- `Mobile/lib/supabase.ts` is now isolated to the dedicated auth screen's legacy verification/resend UX and no longer participates in normal session hydration or destination browsing flows.
+- The auth screen still exposes legacy verification affordances even though the shared backend currently returns stubbed verification/reset behavior.
+
+Open concerns:
+
+- `Mobile/app/auth.tsx` remains the last direct runtime import of `Mobile/lib/supabase.ts`.
+- The email verification UI path is still compatibility-shaped and should either be backed by a real backend flow or removed in a future product pass.
+- Password reset remains intentionally unsupported in the shared mobile backend.
+
 ## Verification Checklist
 
 - Auth works on web and mobile against the same backend flow
@@ -328,3 +404,4 @@ Open concerns:
 - Progress `OMN-7` by establishing a clean Postgres-native Prisma migration baseline now that the live local Postgres runtime is validated.
 - Continue `OMN-12` by reusing the new backend upload routes from the web onboarding/profile flows and deciding whether production storage lands on Supabase Storage or another object-store backend.
 - Continue `OMN-10` by shrinking `Mobile/lib/supabase.ts` to only the remaining unsupported compatibility edges, then remove those edges route by route using `docs/OFF2ZIM_MIGRATION_INVENTORY.md` as the implementation map.
+- Start the next schema consolidation decision: either keep `Hotel`/`Room` as canonical stays or plan a controlled migration toward a real `Stay`/`StayRoom` model.

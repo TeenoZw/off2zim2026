@@ -5,6 +5,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Seeding database...");
 
+  await prisma.favorite.deleteMany();
+  await prisma.stayGallery.deleteMany();
+  await prisma.eventGallery.deleteMany();
+  await prisma.eventTicket.deleteMany();
+  await prisma.destination.deleteMany();
   await prisma.review.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.booking.deleteMany();
@@ -13,6 +18,47 @@ async function main() {
   await prisma.activity.deleteMany();
   await prisma.restaurant.deleteMany();
   await prisma.event.deleteMany();
+
+  const [victoriaFalls, harare] = await Promise.all([
+    prisma.destination.create({
+      data: {
+        name: "Victoria Falls",
+        slug: "victoria-falls",
+        description:
+          "Zimbabwe's flagship destination for waterfall views, adventure activities, and premium safari hospitality.",
+        location: "Victoria Falls",
+        imageUrl:
+          "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+        images: JSON.stringify([
+          "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+          "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800",
+        ]),
+        priceRange: "USD 25-850",
+        rating: 4.8,
+        featured: true,
+        category: "waterfall-adventure",
+        displayOrder: 1,
+      },
+    }),
+    prisma.destination.create({
+      data: {
+        name: "Harare",
+        slug: "harare",
+        description:
+          "Urban culture, dining, events, and a practical gateway into Zimbabwe travel.",
+        location: "Harare",
+        imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
+        images: JSON.stringify([
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800",
+        ]),
+        priceRange: "USD 15-250",
+        rating: 4.2,
+        featured: false,
+        category: "city-cultural",
+        displayOrder: 2,
+      },
+    }),
+  ]);
 
   // Create Hotels with matching schema
   const hotels = await Promise.all([
@@ -23,6 +69,7 @@ async function main() {
           "Luxury safari lodge overlooking the African bushveld with stunning views of Victoria Falls spray.",
         address: "471 Squire Cummings Road",
         city: "Victoria Falls",
+        destinationId: victoriaFalls.id,
         category: "Luxury Safari Lodge",
         priceRange: "USD 350-550",
         rating: 4.8,
@@ -88,6 +135,7 @@ async function main() {
           "Iconic luxury hotel offering unparalleled views of Victoria Falls and the Zambezi River.",
         address: "Victoria Falls",
         city: "Victoria Falls",
+        destinationId: victoriaFalls.id,
         category: "Luxury Hotel",
         priceRange: "USD 450-850",
         rating: 4.9,
@@ -130,6 +178,32 @@ async function main() {
 
   console.log("✅ Created hotels:", hotels.length);
 
+  await prisma.stayGallery.createMany({
+    data: hotels.flatMap((hotel, index) => {
+      const images =
+        index === 0
+          ? [
+              "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
+              "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800",
+            ]
+          : [
+              "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800",
+              "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800",
+            ];
+
+      return images.map((imageUrl, galleryIndex) => ({
+        hotelId: hotel.id,
+        imageUrl,
+        thumbnailUrl: imageUrl,
+        caption: `${hotel.name} gallery image ${galleryIndex + 1}`,
+        altText: `${hotel.name} photo ${galleryIndex + 1}`,
+        category: galleryIndex === 0 ? "hero" : "property",
+        isFeatured: galleryIndex === 0,
+        sortOrder: galleryIndex,
+      }));
+    }),
+  });
+
   // Create Activities with matching schema
   const activities = await Promise.all([
     prisma.activity.create({
@@ -137,6 +211,7 @@ async function main() {
         name: "Victoria Falls Helicopter Flight",
         description:
           "Experience the majesty of Victoria Falls from above with our scenic helicopter flights.",
+        destinationId: victoriaFalls.id,
         category: "Adventure",
         duration: "12-15 minutes",
         difficulty: "Easy",
@@ -163,6 +238,7 @@ async function main() {
         name: "Zambezi Sunset Cruise",
         description:
           "Relaxing sunset cruise on the Zambezi River with drinks and snacks.",
+        destinationId: victoriaFalls.id,
         category: "Leisure",
         duration: "3 hours",
         difficulty: "Easy",
@@ -189,6 +265,7 @@ async function main() {
         name: "White Water Rafting",
         description:
           "Thrilling white water rafting adventure on the mighty Zambezi River.",
+        destinationId: victoriaFalls.id,
         category: "Adventure",
         duration: "8 hours",
         difficulty: "Moderate to Hard",
@@ -221,6 +298,7 @@ async function main() {
         name: "The Boma - Dinner & Drum Show",
         description:
           "Authentic African dining experience with traditional music and dance performances.",
+        destinationId: victoriaFalls.id,
         cuisine: "African Traditional",
         location: "Victoria Falls",
         priceRange: "USD 65-85",
@@ -248,6 +326,7 @@ async function main() {
         name: "The Lookout Cafe",
         description:
           "Casual dining with spectacular views of the Batoka Gorge and Zambezi River.",
+        destinationId: victoriaFalls.id,
         cuisine: "International",
         location: "Victoria Falls",
         priceRange: "USD 25-45",
@@ -280,6 +359,7 @@ async function main() {
         name: "Victoria Falls Carnival",
         description:
           "Annual celebration featuring live music, local arts and crafts, and cultural performances.",
+        destinationId: victoriaFalls.id,
         category: "Cultural",
         location: "Victoria Falls",
         startDate: new Date("2024-12-15T10:00:00Z"),
@@ -298,6 +378,7 @@ async function main() {
         name: "Zambezi Music Festival",
         description:
           "Three-day music festival featuring local and international artists.",
+        destinationId: harare.id,
         category: "Music",
         location: "Victoria Falls",
         startDate: new Date("2024-11-22T16:00:00Z"),
@@ -314,8 +395,63 @@ async function main() {
 
   console.log("✅ Created events:", events.length);
 
+  await prisma.eventTicket.createMany({
+    data: [
+      {
+        eventId: events[0].id,
+        ticketType: "general",
+        name: "General Admission",
+        description: "Standard event access.",
+        basePrice: 25,
+        currency: "USD",
+        totalTickets: 5000,
+        ticketsAvailable: 4200,
+        perks: JSON.stringify(["Festival access", "Main stage entry"]),
+      },
+      {
+        eventId: events[1].id,
+        ticketType: "vip",
+        name: "VIP Pass",
+        description: "Premium festival access with priority viewing.",
+        basePrice: 120,
+        originalPrice: 150,
+        currency: "USD",
+        totalTickets: 500,
+        ticketsAvailable: 180,
+        perks: JSON.stringify(["VIP lounge", "Priority entry", "Merch bundle"]),
+      },
+    ],
+  });
+
+  await prisma.eventGallery.createMany({
+    data: events.flatMap((event, index) => {
+      const images =
+        index === 0
+          ? [
+              "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800",
+              "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800",
+            ]
+          : [
+              "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800",
+              "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800",
+            ];
+
+      return images.map((imageUrl, galleryIndex) => ({
+        eventId: event.id,
+        imageUrl,
+        thumbnailUrl: imageUrl,
+        caption: `${event.name} gallery image ${galleryIndex + 1}`,
+        altText: `${event.name} photo ${galleryIndex + 1}`,
+        category: galleryIndex === 0 ? "hero" : "event",
+        isFeatured: galleryIndex === 0,
+        sortOrder: galleryIndex,
+      }));
+    }),
+  });
+
   console.log("🎉 Database seeded successfully!");
   console.log("📊 Summary:");
+  console.log("  - Destinations: 2");
   console.log(`  - Hotels: ${hotels.length}`);
   console.log(`  - Restaurants: ${restaurants.length}`);
   console.log(`  - Activities: ${activities.length}`);

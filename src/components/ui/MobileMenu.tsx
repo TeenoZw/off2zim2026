@@ -94,6 +94,23 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             ))}
           </nav>
 
+          <div className="mt-6 grid gap-3">
+            <Link
+              href="/login"
+              onClick={onClose}
+              className="inline-flex items-center justify-center rounded-full border border-white/10 px-4 py-3 text-sm font-medium text-white/90"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/register"
+              onClick={onClose}
+              className="inline-flex items-center justify-center rounded-full bg-[#ff5630] px-4 py-3 text-sm font-semibold text-white"
+            >
+              Create account
+            </Link>
+          </div>
+
           <div className="mt-6 space-y-3 border-t border-white/10 pt-5">
             <div className="flex items-center gap-3 text-sm text-white/72">
               <Compass className="h-4 w-4 text-[#ff7352]" />
