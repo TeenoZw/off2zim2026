@@ -1,5 +1,6 @@
 import React from "react";
 import ProviderDashboard from "./ProviderDashboard";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export const metadata = {
   title: "Service Provider Dashboard | Off2Zim",
@@ -8,5 +9,9 @@ export const metadata = {
 };
 
 export default function ProviderDashboardPage() {
-  return <ProviderDashboard />;
+  return (
+    <ProtectedRoute requiredRole="provider">
+      <ProviderDashboard />
+    </ProtectedRoute>
+  );
 }

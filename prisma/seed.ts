@@ -5,6 +5,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Seeding database...");
 
+  await prisma.review.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.booking.deleteMany();
+  await prisma.room.deleteMany();
+  await prisma.hotel.deleteMany();
+  await prisma.activity.deleteMany();
+  await prisma.restaurant.deleteMany();
+  await prisma.event.deleteMany();
+
   // Create Hotels with matching schema
   const hotels = await Promise.all([
     prisma.hotel.create({

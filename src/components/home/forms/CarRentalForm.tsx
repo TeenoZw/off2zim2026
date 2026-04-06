@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { Calendar, MapPin, Clock, Car } from "lucide-react";
 import DestinationDropdown from "./DestinationDropdown";
 import DatePicker from "./DatePicker";
@@ -18,6 +19,7 @@ interface CarRentalFormData {
 }
 
 export default function CarRentalForm() {
+  const router = useRouter();
   const [showPickupDropdown, setShowPickupDropdown] = useState(false);
   const [showDropoffDropdown, setShowDropoffDropdown] = useState(false);
   const [showPickupDate, setShowPickupDate] = useState(false);
@@ -40,8 +42,16 @@ export default function CarRentalForm() {
   const formData = watch();
 
   const onSubmit = (data: CarRentalFormData) => {
-    console.log("Car rental search:", data);
-    // Handle car rental search
+    const params = new URLSearchParams();
+    params.set("listingType", "transport");
+    params.set(
+      "search",
+      [data.pickupLocation, data.sameLocation ? "" : data.dropoffLocation]
+        .filter(Boolean)
+        .join(" ")
+    );
+    params.set("driverAge", data.driverAge);
+    router.push(`/trip-planner/search?${params.toString()}`);
   };
 
   const locations = [

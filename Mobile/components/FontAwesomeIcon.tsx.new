@@ -1,0 +1,23 @@
+import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faHouse as solidHouse } from '@fortawesome/free-solid-svg-icons';
+import { faHouse } from '@fortawesome/free-solid-svg-icons';
+
+interface FAIconProps {
+  name: string;
+  solid?: boolean;
+  color: string;
+  size?: number;
+}
+
+// This component only implements the home icon replacement
+export function FAIcon({ name, solid = true, color, size = 24 }: FAIconProps) {
+  // Only handle the home icon case for now
+  if (name === 'home') {
+    // Always use solid house icon since there's no regular version
+    return <FontAwesomeIcon icon={faHouse} size={size} color={color} />;
+  }
+  
+  // For other icons, return null (we're only replacing the home icon)
+  return null;
+}

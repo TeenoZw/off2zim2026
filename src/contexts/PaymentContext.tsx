@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import {
   BookingItem,
   PaymentIntent,
@@ -59,6 +59,25 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   );
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<PaymentError | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedItems = localStorage.getItem("checkout_items");
+      if (savedItems) {
+        setCurrentBooking(JSON.parse(savedItems));
+      }
+    } catch {
+      // Ignore malformed persisted checkout state.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentBooking && currentBooking.length > 0) {
+      localStorage.setItem("checkout_items", JSON.stringify(currentBooking));
+    } else {
+      localStorage.removeItem("checkout_items");
+    }
+  }, [currentBooking]);
 
   const addToBooking = useCallback((item: BookingItem) => {
     setCurrentBooking((prev) => {

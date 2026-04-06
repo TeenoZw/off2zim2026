@@ -69,7 +69,7 @@ export default function PlannerAddDrawer({
 }: PlannerAddDrawerProps) {
   const [query, setQuery] = useState("");
   const [selectedType, setSelectedType] = useState<PlannerItemType | "all">("all");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState(getDefaultSchedule(defaultDate));
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   Badge,
@@ -10,46 +10,115 @@ import {
   FileText,
   Shield,
 } from "lucide-react";
+import { apiFetch } from "@/lib/client-api";
+import type { ProviderCompanyRecord } from "@/types/platform";
 
 export default function VerificationStatus() {
-  const steps = [
-    {
-      title: "Business registration",
-      description: "Valid business registration documents",
-      status: "completed",
-      tier: "Basic",
-    },
-    {
-      title: "Identity verification",
-      description: "Government-issued ID verification",
-      status: "completed",
-      tier: "Basic",
-    },
-    {
-      title: "Insurance coverage",
-      description: "Public liability insurance documentation",
-      status: "completed",
-      tier: "Verified",
-    },
-    {
-      title: "Location verification",
-      description: "Physical location and premises verification",
-      status: "in-review",
-      tier: "Verified",
-    },
-    {
-      title: "Safety certification",
-      description: "Tourism safety and quality standards",
-      status: "pending",
-      tier: "Verified",
-    },
-    {
-      title: "Quality assessment",
-      description: "Professional quality evaluation and premium review",
-      status: "not-started",
-      tier: "Premium",
-    },
-  ];
+  const [company, setCompany] = useState<ProviderCompanyRecord | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const loadCompany = async () => {
+    try {
+      const payload = await apiFetch<{ company: ProviderCompanyRecord }>(
+        "/api/provider/company"
+      );
+      setCompany(payload.company);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load verification status.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCompany();
+  }, []);
+
+  const steps = useMemo(() => {
+    if (!company) {
+      return [];
+    }
+
+    const hasDocuments = company.documents.length > 0;
+    const reviewStatus = company.verificationReviews[0]?.status;
+
+    return [
+      {
+        title: "Core company profile",
+        description: "Required company identity and contact information is stored.",
+        status: company.companyName && company.businessEmail ? "completed" : "not-started",
+        tier: "Basic",
+      },
+      {
+        title: "Business documents",
+        description: "Registration, tax, insurance, or other legitimacy documents uploaded.",
+        status: hasDocuments ? "completed" : "pending",
+        tier: "Basic",
+      },
+      {
+        title: "Internal legitimacy review",
+        description: "Off2Zim admin review before any listing is fully trusted.",
+        status:
+          company.onboardingStatus === "basic_approved"
+            ? "completed"
+            : company.onboardingStatus === "submitted"
+              ? "in-review"
+              : reviewStatus === "changes_requested"
+                ? "pending"
+                : "not-started",
+        tier: "Basic",
+      },
+      {
+        title: "Verified / Premium Partner badge",
+        description: "Enhanced vetting for featured placement and premium trust signals.",
+        status: company.verificationTier === "verified_premium" ? "completed" : "not-started",
+        tier: "Premium",
+      },
+    ];
+  }, [company]);
+
+  const progress = useMemo(() => {
+    if (steps.length === 0) return 0;
+    const completed = steps.filter((step) => step.status === "completed").length;
+    return Math.round((completed / steps.length) * 100);
+  }, [steps]);
+
+  const submitForReview = async () => {
+    setSubmitting(true);
+    try {
+      const payload = await apiFetch<{ company: ProviderCompanyRecord }>(
+        "/api/provider/company/review",
+        {
+          method: "POST",
+        }
+      );
+      setCompany(payload.company);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to submit for review.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6 text-white">
+        Loading verification status...
+      </section>
+    );
+  }
+
+  if (error && !company) {
+    return (
+      <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6 text-white">
+        {error}
+      </section>
+    );
+  }
 
   const statusUI = (status: string) => {
     if (status === "completed") {
@@ -90,41 +159,52 @@ export default function VerificationStatus() {
                 <Badge className="h-5 w-5 text-[#8dc9ff]" />
               </div>
               <div>
-                <h2 className="text-2xl font-semibold text-white">Verified status</h2>
-                <p className="text-sm text-white/50">Your current verification level</p>
+                <h2 className="text-2xl font-semibold text-white">Verification status</h2>
+                <p className="text-sm text-white/50">Provider onboarding aligned to the PRD</p>
               </div>
             </div>
 
             <div className="mt-6">
               <div className="mb-2 flex justify-between text-sm text-white/55">
                 <span>Overall progress</span>
-                <span>75%</span>
+                <span>{progress}%</span>
               </div>
               <div className="h-2 rounded-full bg-white/10">
-                <div className="h-2 w-[75%] rounded-full bg-[#ff5630]" />
+                <div className="h-2 rounded-full bg-[#ff5630]" style={{ width: `${progress}%` }} />
               </div>
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <Metric label="Uploaded" value="5" />
-              <Metric label="Pending" value="2" />
-              <Metric label="Required" value="7" />
+              <Metric label="Uploaded docs" value={`${company?.documents.length || 0}`} />
+              <Metric
+                label="Reviews"
+                value={`${company?.verificationReviews.length || 0}`}
+              />
+              <Metric label="Tier" value={company?.verificationTier === "verified_premium" ? "Premium" : "Basic"} />
             </div>
 
-            <button className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white">
-              Upgrade to Premium
+            <button
+              onClick={submitForReview}
+              disabled={submitting || company?.onboardingStatus === "submitted"}
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {company?.onboardingStatus === "submitted"
+                ? "Review submitted"
+                : submitting
+                  ? "Submitting..."
+                  : "Submit for admin review"}
               <ChevronRight className="h-4 w-4" />
             </button>
+            {error ? <p className="mt-3 text-sm text-[#ff8a63]">{error}</p> : null}
           </div>
 
           <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
-            <h3 className="text-lg font-semibold text-white">What you unlock next</h3>
+            <h3 className="text-lg font-semibold text-white">What the next tier unlocks</h3>
             <div className="mt-4 space-y-2 text-sm text-white/60">
-              <p>Priority search placement</p>
-              <p>Featured listing eligibility</p>
-              <p>Advanced analytics and insights</p>
-              <p>Priority customer support</p>
-              <p>Revenue optimization tools</p>
+              <p>Eligibility for featured listings and promotional campaigns</p>
+              <p>Stronger trust signal on public listing pages</p>
+              <p>Better visibility across curated Off2Zim placements</p>
+              <p>A clearer internal review trail for compliance and auditability</p>
             </div>
           </div>
         </div>
@@ -134,9 +214,24 @@ export default function VerificationStatus() {
         <div className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
           <h2 className="text-2xl font-semibold text-white">Tier progress</h2>
           <div className="mt-6 space-y-5">
-            <TierRow label="Basic" value={100} tone="bg-[#8cf0a1]" icon={<FileText className="h-4 w-4 text-[#8cf0a1]" />} />
-            <TierRow label="Verified" value={75} tone="bg-[#8dc9ff]" icon={<Badge className="h-4 w-4 text-[#8dc9ff]" />} />
-            <TierRow label="Premium" value={0} tone="bg-[#ff8a63]" icon={<Shield className="h-4 w-4 text-[#ff8a63]" />} />
+            <TierRow
+              label="Basic"
+              value={Math.min(progress, 75)}
+              tone="bg-[#8cf0a1]"
+              icon={<FileText className="h-4 w-4 text-[#8cf0a1]" />}
+            />
+            <TierRow
+              label="Verified"
+              value={company?.onboardingStatus === "basic_approved" ? 100 : progress}
+              tone="bg-[#8dc9ff]"
+              icon={<Badge className="h-4 w-4 text-[#8dc9ff]" />}
+            />
+            <TierRow
+              label="Premium"
+              value={company?.verificationTier === "verified_premium" ? 100 : 0}
+              tone="bg-[#ff8a63]"
+              icon={<Shield className="h-4 w-4 text-[#ff8a63]" />}
+            />
           </div>
         </div>
 

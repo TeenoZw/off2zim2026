@@ -1,145 +1,122 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import { Star } from "lucide-react";
-import { usePayment } from "../../contexts/PaymentContext";
-import { BookingItem } from "../../types/payment";
-
-// Import hotel booking components from the existing structure
-import {
-  Header9,
-  Layout249,
-  Layout3,
-  Layout4,
-  Testimonial14,
-  Pricing5,
-  Cta1,
-  Faq3,
-} from "../../components/hotel-booking";
-
-// Sample hotel data
-const sampleHotels = [
-  {
-    id: "hotel_1",
-    name: "Victoria Falls Safari Lodge",
-    description: "Luxury safari lodge with stunning waterfall views",
-    price: 250,
-    currency: "USD",
-    category: "accommodation",
-    location: "Victoria Falls",
-    amenities: ["Free WiFi", "Pool", "Safari Tours", "Restaurant"],
-    rating: 4.8,
-    image: "/images/victoria-falls-lodge.jpg",
-  },
-  {
-    id: "hotel_2",
-    name: "Elephant Hills Resort",
-    description: "Premium resort in the heart of Victoria Falls",
-    price: 180,
-    currency: "USD",
-    category: "accommodation",
-    location: "Victoria Falls",
-    amenities: ["Free WiFi", "Pool", "Spa", "Golf Course"],
-    rating: 4.6,
-    image: "/images/elephant-hills.jpg",
-  },
-  {
-    id: "hotel_3",
-    name: "Camp Amalinda",
-    description: "Exclusive safari camp in Matobo National Park",
-    price: 420,
-    currency: "USD",
-    category: "accommodation",
-    location: "Matobo Hills",
-    amenities: ["All Inclusive", "Game Drives", "Rock Art Tours", "Spa"],
-    rating: 4.9,
-    image: "/images/camp-amalinda.jpg",
-  },
-];
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, MapPin, ShieldCheck, Sparkles } from "lucide-react";
+import { apiFetch } from "@/lib/client-api";
+import type { PublicListingRecord } from "@/types/platform";
 
 export default function HotelsPage() {
-  const router = useRouter();
-  const { addToCart, items } = usePayment();
+  const [listings, setListings] = useState<PublicListingRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const handleBookHotel = (hotel: (typeof sampleHotels)[0]) => {
-    const bookingItem: BookingItem = {
-      id: hotel.id,
-      type: "accommodation",
-      name: hotel.name,
-      description: hotel.description,
-      price: hotel.price,
-      currency: hotel.currency,
-      category: hotel.category,
-      quantity: 1,
-      metadata: {
-        location: hotel.location,
-        amenities: hotel.amenities,
-        rating: hotel.rating,
-        image: hotel.image,
-      },
+  useEffect(() => {
+    const loadListings = async () => {
+      try {
+        const payload = await apiFetch<{ listings: PublicListingRecord[] }>(
+          "/api/listings?category=Accommodation"
+        );
+        setListings(payload.listings);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to load accommodation listings.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    addToCart(bookingItem);
-    router.push("/checkout");
-  };
+    loadListings();
+  }, []);
 
   return (
-    <>
-      {/* Hotel Booking Hero Section */}
-      <div className="relative">
-        <Header9 />
+    <div className="theme-page pb-20">
+      <section className="mx-auto max-w-7xl px-4 pb-6 pt-6 sm:px-6 lg:px-8">
+        <Link
+          href="/accommodation"
+          className="theme-muted inline-flex items-center gap-2 text-sm transition hover:text-slate-950 dark:hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to accommodation
+        </Link>
 
-        {/* Enhanced booking buttons */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 pointer-events-auto">
-            {sampleHotels.map((hotel) => (
-              <div
-                key={hotel.id}
-                className="bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg"
-              >
-                <h3 className="text-xl font-bold mb-2">{hotel.name}</h3>
-                <p className="text-gray-600 mb-3 text-sm">
-                  {hotel.description}
-                </p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-primary">
-                    ${hotel.price}
-                  </span>
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 fill-current text-yellow-500" />
-                    <span className="ml-1 text-sm">{hotel.rating}</span>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {hotel.amenities.slice(0, 2).map((amenity, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-gray-100 text-xs rounded"
-                    >
-                      {amenity}
-                    </span>
-                  ))}
-                </div>
-                <button
-                  onClick={() => handleBookHotel(hotel)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                >
-                  Book Now - ${hotel.price}
-                </button>
+        <div className="theme-panel-strong mt-5 overflow-hidden rounded-[34px]">
+          <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="p-6 md:p-8 lg:p-10">
+              <div className="theme-chip inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]">
+                Hotels
               </div>
-            ))}
+              <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">
+                Stays that give the route a reliable base
+              </h1>
+              <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
+                This route keeps hotel discovery in the same Off2Zim language as the
+                planner and marketplace, so travelers can compare trusted options and
+                move into booking or planning without a visual reset.
+              </p>
+            </div>
+            <div
+              className="min-h-[260px] bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.5)), url('/images/palm-river-hotel-604329-original.jpg')",
+              }}
+            />
           </div>
         </div>
-      </div>
+      </section>
 
-      <Layout249 />
-      <Layout3 />
-      <Layout4 />
-      <Testimonial14 />
-      <Pricing5 />
-      <Cta1 />
-      <Faq3 />
-    </>
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        {error ? (
+          <div className="theme-panel rounded-[28px] p-6 text-sm text-rose-500">{error}</div>
+        ) : loading ? (
+          <div className="theme-panel rounded-[28px] p-8 text-center">
+            <p className="theme-muted text-sm">Loading accommodation listings...</p>
+          </div>
+        ) : listings.length === 0 ? (
+          <div className="theme-panel rounded-[28px] p-8 text-center">
+            <p className="theme-muted text-sm">No hotel listings are published yet.</p>
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {listings.map((listing) => (
+              <Link key={listing.id} href={`/marketplace/${listing.slug}`} className="theme-card overflow-hidden">
+                <div
+                  className="min-h-[220px] bg-cover bg-center"
+                  style={{
+                    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.42)), url('${listing.images[0] || "/images/palm-river-hotel-604329-original.jpg"}')`,
+                  }}
+                />
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="theme-label text-xs uppercase tracking-[0.24em]">
+                        {listing.category}
+                      </div>
+                      <h2 className="theme-heading mt-2 text-xl font-semibold">{listing.title}</h2>
+                    </div>
+                    {listing.provider.hasVerifiedBadge ? (
+                      <ShieldCheck className="h-5 w-5 shrink-0 text-[#8cf0a1]" />
+                    ) : null}
+                  </div>
+                  <p className="theme-muted mt-3 text-sm leading-6">
+                    {listing.shortDescription || listing.description}
+                  </p>
+                  <div className="theme-muted mt-4 flex flex-wrap gap-4 text-sm">
+                    <span className="inline-flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-[#ff7352]" />
+                      {listing.location}
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#ffca74]" />
+                      {listing.basePrice ? `$${listing.basePrice}` : "Quote"}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 }

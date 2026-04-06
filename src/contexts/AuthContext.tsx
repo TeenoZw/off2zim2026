@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 import {
   AuthContextType,
   AuthState,
@@ -9,12 +9,9 @@ import {
   User,
   UserProfile,
   UserRole,
-  ExplorerType,
-  VerificationStatus,
-  ExplorerScore,
 } from "@/types/auth";
+import { apiFetch } from "@/lib/client-api";
 
-// Create AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 type AuthAction =
@@ -32,7 +29,7 @@ const initialState: AuthState = {
   error: null,
 };
 
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case "LOGIN_START":
       return { ...state, isLoading: true, error: null };
@@ -70,106 +67,115 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
     default:
       return state;
   }
+}
+
+type AuthPayload = {
+  token: string;
+  user: User;
 };
+
+const EMPTY_PROVIDER_DOCUMENTS: Array<{
+  type: string;
+  file: File | null;
+  fileUrl?: string | null;
+  status: "pending" | "uploaded" | "verified" | "rejected";
+}> = [];
+
+function persistAuth(payload: AuthPayload) {
+  localStorage.setItem("off2zim_user", JSON.stringify(payload.user));
+  localStorage.setItem("off2zim_token", payload.token);
+}
+
+function persistUser(user: User) {
+  localStorage.setItem("off2zim_user", JSON.stringify(user));
+}
+
+function clearAuth() {
+  localStorage.removeItem("off2zim_user");
+  localStorage.removeItem("off2zim_token");
+}
+
+function mapProfileToProviderPayload(profile: UserProfile) {
+  const businessDocuments = profile.businessDocuments || EMPTY_PROVIDER_DOCUMENTS;
+
+  return {
+    companyName: profile.companyName || "",
+    tradingName: profile.tradingName || "",
+    businessRegistrationNumber: profile.businessRegistrationNumber || "",
+    mainContactPerson: profile.mainContactPerson || "",
+    businessPhone: profile.businessPhone || "",
+    businessEmail: profile.businessEmail || "",
+    physicalAddress: profile.physicalAddress || "",
+    headquartersCity: profile.location || "",
+    businessCategory: profile.businessCategory || "",
+    businessDescription: profile.businessDescription || "",
+    establishedYear: profile.establishedYear ? Number(profile.establishedYear) : null,
+    numberOfEmployees: profile.numberOfEmployees || "",
+    operatingHours: profile.operatingHours || "",
+    websiteUrl: profile.websiteUrl || "",
+    socialMediaLinks: profile.socialMediaLinks || {},
+    servicesOffered: profile.servicesOffered || [],
+    serviceAreas: profile.serviceAreas || [],
+    documents: businessDocuments
+      .filter((document) => document.file || document.type || document.fileUrl)
+      .map((document) => ({
+        type: document.type,
+        fileName: document.file?.name || `${document.type}.pdf`,
+        fileUrl: document.fileUrl || null,
+        status: document.status,
+      })),
+  };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check for stored authentication on mount
   useEffect(() => {
-    const checkStoredAuth = () => {
-      try {
-        const storedUser = localStorage.getItem("off2zim_user");
-        const storedToken = localStorage.getItem("off2zim_token");
+    const hydrateSession = async () => {
+      const token = localStorage.getItem("off2zim_token");
+      const storedUser = localStorage.getItem("off2zim_user");
 
-        if (storedUser && storedToken) {
-          const user = JSON.parse(storedUser);
-          dispatch({ type: "LOGIN_SUCCESS", payload: user });
-        } else {
-          dispatch({ type: "SET_LOADING", payload: false });
+      if (!token) {
+        dispatch({ type: "SET_LOADING", payload: false });
+        return;
+      }
+
+      if (storedUser) {
+        try {
+          dispatch({ type: "LOGIN_SUCCESS", payload: JSON.parse(storedUser) });
+        } catch {
+          clearAuth();
         }
+      }
+
+      try {
+        const payload = await apiFetch<{ user: User }>("/api/auth/session");
+        persistUser(payload.user);
+        dispatch({ type: "LOGIN_SUCCESS", payload: payload.user });
       } catch (error) {
-        console.error("Error checking stored auth:", error);
+        clearAuth();
         dispatch({ type: "SET_LOADING", payload: false });
       }
     };
 
-    checkStoredAuth();
+    hydrateSession();
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      // Simulate API call - In real implementation, this would be an actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock user data based on email - In real app, this comes from the API
-      const mockUser: User = {
-        id: `user_${Date.now()}`,
-        email: credentials.email,
-        firstName: credentials.email.includes("provider")
-          ? "Business"
-          : credentials.email.includes("guide")
-            ? "Local"
-            : "Explorer",
-        lastName: credentials.email.includes("provider")
-          ? "Owner"
-          : credentials.email.includes("guide")
-            ? "Guide"
-            : "User",
-        role: credentials.email.includes("provider@")
-          ? "provider"
-          : credentials.email.includes("guide@")
-            ? "guide"
-            : credentials.email.includes("admin@")
-              ? "admin"
-              : "explorer",
-        isVerified: true,
-        verificationStatus: credentials.email.includes("provider")
-          ? "verified_premium"
-          : "basic_approved",
-        hasVerifiedBadge: credentials.email.includes("provider"),
-        verifiedBadgeExpiresAt: credentials.email.includes("provider")
-          ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-          : undefined,
-        createdAt: new Date().toISOString(),
-        lastActive: new Date().toISOString(),
-        profile: {
-          bio: "Welcome to Off2Zim!",
-          location: "Zimbabwe",
-          interests: ["Travel", "Adventure"],
-          languages: ["English"],
-        },
-        verification: {
-          email: true,
-          phone: credentials.email.includes("provider"),
-          identity: credentials.email.includes("provider"),
-          business: credentials.email.includes("provider"),
-        },
-        explorerScore:
-          !credentials.email.includes("provider") &&
-          !credentials.email.includes("admin")
-            ? {
-                rating: 5.0,
-                completedBookings: 0,
-                cancelledBookings: 0,
-                reviewsReceived: 0,
-                lastUpdated: new Date().toISOString(),
-              }
-            : undefined,
-      };
-
-      // Store user data
-      localStorage.setItem("off2zim_user", JSON.stringify(mockUser));
-      localStorage.setItem("off2zim_token", "mock_token_" + Date.now());
-
-      dispatch({ type: "LOGIN_SUCCESS", payload: mockUser });
-    } catch (error) {
-      dispatch({
-        type: "LOGIN_ERROR",
-        payload: "Login failed. Please try again.",
+      const payload = await apiFetch<AuthPayload>("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(credentials),
       });
+
+      persistAuth(payload);
+      dispatch({ type: "LOGIN_SUCCESS", payload: payload.user });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Login failed. Please try again.";
+      dispatch({ type: "LOGIN_ERROR", payload: message });
       throw error;
     }
   };
@@ -178,105 +184,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "LOGIN_START" });
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Aligns with PRD requirements for new user creation
-      const newUser: User = {
-        id: `user_${Date.now()}`,
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        role: data.role,
-        isVerified: false,
-        // Aligns with PRD 3.3: New users start with pending verification
-        verificationStatus: "pending",
-        hasVerifiedBadge: false,
-        createdAt: new Date().toISOString(),
-        lastActive: new Date().toISOString(),
-        profile: {
-          bio: "",
-          location: "",
-          interests: [],
-          languages: ["English"],
-          // Aligns with PRD 3.1: Store Core Company Profile for providers
-          ...(data.role === "provider" && {
-            companyName: data.companyName,
-            tradingName: data.tradingName,
-            businessRegistrationNumber: data.businessRegistrationNumber,
-            mainContactPerson: data.mainContactPerson,
-            businessPhone: data.businessPhone,
-            businessEmail: data.businessEmail,
-            physicalAddress: data.physicalAddress,
-          }),
-        },
-        verification: {
-          email: false,
-          phone: false,
-          identity: false,
-          business: data.role === "provider" ? false : undefined,
-        },
-        // Aligns with PRD 2.1: Initialize Explorer Score for explorers
-        explorerScore:
-          data.role === "explorer"
-            ? {
-                rating: 0,
-                completedBookings: 0,
-                cancelledBookings: 0,
-                reviewsReceived: 0,
-                lastUpdated: new Date().toISOString(),
-              }
-            : undefined,
-      };
-
-      localStorage.setItem("off2zim_user", JSON.stringify(newUser));
-      localStorage.setItem("off2zim_token", "mock_token_" + Date.now());
-
-      dispatch({ type: "LOGIN_SUCCESS", payload: newUser });
-    } catch (error) {
-      dispatch({
-        type: "LOGIN_ERROR",
-        payload: "Registration failed. Please try again.",
+      const payload = await apiFetch<AuthPayload>("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(data),
       });
+
+      persistAuth(payload);
+      dispatch({ type: "LOGIN_SUCCESS", payload: payload.user });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Registration failed. Please try again.";
+      dispatch({ type: "LOGIN_ERROR", payload: message });
       throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("off2zim_user");
-    localStorage.removeItem("off2zim_token");
-    dispatch({ type: "LOGOUT" });
+  const logout = async () => {
+    try {
+      await apiFetch<{ ok: boolean }>("/api/auth/logout", {
+        method: "POST",
+      });
+    } catch {
+      // If the session is already gone we can still clear client state safely.
+    } finally {
+      clearAuth();
+      dispatch({ type: "LOGOUT" });
+    }
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!state.user) return;
+    if (!state.user) {
+      return;
+    }
+
+    const nextProfile = { ...state.user.profile, ...updates };
+    const nextUser = { ...state.user, profile: nextProfile };
 
     try {
-      const updatedUser = {
-        ...state.user,
-        profile: { ...state.user.profile, ...updates },
-      };
-      localStorage.setItem("off2zim_user", JSON.stringify(updatedUser));
+      if (state.user.role === "provider") {
+        await apiFetch<{ company: unknown }>("/api/provider/company", {
+          method: "PATCH",
+          body: JSON.stringify(mapProfileToProviderPayload(nextProfile)),
+        });
+      }
+
+      persistUser(nextUser);
       dispatch({
         type: "UPDATE_PROFILE",
-        payload: { profile: { ...state.user.profile, ...updates } },
+        payload: { profile: nextProfile },
       });
     } catch (error) {
       console.error("Profile update failed:", error);
+      throw error;
     }
   };
 
-  const hasRole = (role: UserRole | UserRole[]): boolean => {
+  const hasRole = (role: UserRole | UserRole[]) => {
     if (!state.user) return false;
-    if (Array.isArray(role)) {
-      return role.includes(state.user.role);
-    }
-    return state.user.role === role;
+    return Array.isArray(role)
+      ? role.includes(state.user.role)
+      : state.user.role === role;
   };
 
-  const isVerified = (): boolean => {
-    return state.user?.isVerified || false;
-  };
+  const isVerified = () => state.user?.isVerified || false;
 
   const value: AuthContextType = {
     ...state,
@@ -296,5 +268,6 @@ export function useAuth() {
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return context;
 }

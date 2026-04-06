@@ -9,6 +9,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { PaymentIntent } from "@/types/payment";
 import { CreditCard, Loader2, Lock } from "lucide-react";
+import { getAuthHeaders } from "@/lib/client-api";
 
 interface PaymentFormProps {
   paymentIntent: PaymentIntent;
@@ -50,7 +51,7 @@ export default function PaymentForm({
       if (confirmedIntent?.status === "succeeded") {
         const response = await fetch("/api/payments/confirm", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(undefined, true),
           body: JSON.stringify({ paymentIntentId: confirmedIntent.id }),
         });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import Link from "next/link";
 import {
   CalendarIcon,
@@ -12,6 +13,15 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function TripPlannerHero() {
+  const handleStartItinerary = useCallback(() => {
+    const target = document.getElementById("planner-explore");
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => {
+      target.focus({ preventScroll: true });
+    }, 250);
+  }, []);
+
   return (
     <section className="mx-auto max-w-7xl px-4 pb-6 pt-6 sm:px-6 lg:px-8 lg:pb-8 lg:pt-8">
       <div className="theme-panel-strong overflow-hidden rounded-[34px] md:rounded-[38px]">
@@ -74,7 +84,10 @@ export default function TripPlannerHero() {
             </div>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row md:mt-8">
-              <button className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white">
+              <button
+                onClick={handleStartItinerary}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white"
+              >
                 <PlusIcon className="h-5 w-5" />
                 Start your itinerary
               </button>

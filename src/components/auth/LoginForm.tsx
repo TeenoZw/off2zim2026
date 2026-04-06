@@ -65,19 +65,19 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
   ];
 
   const fillDemoAccount = (email: string) => {
-    setFormData({ email, password: "demo123" });
+    setFormData({ email, password: "demo12345" });
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6">
+    <div className="theme-card w-full max-w-md rounded-[30px] p-6 shadow-xl md:p-7">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
-        <p className="text-gray-600 mt-2">Sign in to your Off2Zim account</p>
+        <h2 className="theme-heading text-2xl font-bold">Welcome back</h2>
+        <p className="theme-muted mt-2 text-sm">Sign in to continue your Off2Zim journey</p>
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-sm">{error}</p>
+        <div className="mb-4 rounded-[18px] border border-rose-200 bg-rose-50 p-4 dark:border-rose-500/20 dark:bg-rose-500/10">
+          <p className="text-sm text-rose-600 dark:text-rose-200">{error}</p>
         </div>
       )}
 
@@ -86,7 +86,7 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -111,7 +111,7 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
 
           <button
             type="button"
-            className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -129,7 +129,7 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="theme-muted theme-panel-strong rounded-full px-3 py-1 text-xs">
               Or continue with email
             </span>
           </div>
@@ -140,7 +140,7 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="theme-muted mb-1 block text-sm font-medium"
           >
             Email Address
           </label>
@@ -151,7 +151,7 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="theme-input w-full rounded-[18px] px-3 py-2"
             placeholder="Enter your email"
           />
         </div>
@@ -159,7 +159,7 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="theme-muted mb-1 block text-sm font-medium"
           >
             Password
           </label>
@@ -171,13 +171,13 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+              className="theme-input w-full rounded-[18px] px-3 py-2 pr-10"
               placeholder="Enter your password"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              className="theme-subtle absolute inset-y-0 right-0 flex items-center pr-3 hover:text-slate-700 dark:hover:text-white/70"
             >
               {showPassword ? (
                 <svg
@@ -220,13 +220,10 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
 
         <div className="flex items-center justify-between">
           <label className="flex items-center">
-            <input
-              type="checkbox"
-              className="rounded border-gray-300 text-blue-600"
-            />
-            <span className="ml-2 text-sm text-gray-600">Remember me</span>
+            <input type="checkbox" className="rounded border-black/20 text-[#ff5630]" />
+            <span className="theme-muted ml-2 text-sm">Remember me</span>
           </label>
-          <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
+          <a href="#" className="text-sm text-[#ff5630] hover:text-[#e44c28]">
             Forgot password?
           </a>
         </div>
@@ -234,15 +231,15 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full rounded-full bg-[#ff5630] px-4 py-3 text-white transition-colors hover:bg-[#e44c28] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoading ? "Signing In..." : "Sign In"}
         </button>
       </form>
 
       {/* Demo Accounts Section */}
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <p className="text-sm text-gray-600 text-center mb-3">
+      <div className="mt-6 border-t border-black/10 pt-6 dark:border-white/10">
+        <p className="theme-muted mb-3 text-center text-sm">
           Demo Accounts (Development)
         </p>
         <div className="space-y-2">
@@ -250,13 +247,13 @@ const LoginForm = ({ onClose, redirectTo }: LoginFormProps) => {
             <button
               key={account.email}
               onClick={() => fillDemoAccount(account.email)}
-              className="w-full text-left p-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+              className="theme-card-soft w-full rounded-[18px] p-3 text-left transition-colors"
             >
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="theme-heading text-sm font-medium">
                   {account.role}
                 </span>
-                <span className="text-xs text-gray-500">{account.email}</span>
+                <span className="theme-muted text-xs">{account.email}</span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
                 {account.description}

@@ -39,7 +39,14 @@ export class BookingService {
 
       // Determine booking type and related entity IDs from items
       const bookingType = data.items[0]?.type || "HOTEL";
+      const initialStatus =
+        data.items[0]?.metadata?.bookingMode === "instant" ||
+        data.items[0]?.metadata?.instantBooking
+          ? "CONFIRMED"
+          : "PENDING";
       let relatedIds: {
+        providerId?: string;
+        listingId?: string;
         hotelId?: string;
         roomId?: string;
         activityId?: string;
@@ -50,6 +57,12 @@ export class BookingService {
       // Extract IDs from the first item (assuming single-item bookings for now)
       if (data.items.length > 0) {
         const item = data.items[0];
+        if (item.metadata?.providerId) {
+          relatedIds.providerId = item.metadata.providerId;
+        }
+        if (item.metadata?.listingId) {
+          relatedIds.listingId = item.metadata.listingId;
+        }
         switch (item.type) {
           case "accommodation":
             // For hotel bookings, we might have hotel and room info in metadata
@@ -79,7 +92,7 @@ export class BookingService {
         data: {
           userId: data.userId,
           bookingType: bookingType.toUpperCase(),
-          status: "PENDING",
+          status: initialStatus,
           totalAmount: data.totalAmount,
           currency: data.currency,
           confirmationNumber,
@@ -146,12 +159,13 @@ export class BookingService {
           amount: data.amount,
           currency: data.currency,
           method: data.method,
-          status: "PENDING",
+          status: data.status || "PENDING",
           stripePaymentId: data.stripePaymentId,
           mobileProvider: data.mobileProvider,
           phoneNumber: data.phoneNumber,
           reference: data.reference,
           metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+          processedAt: data.status === "COMPLETED" ? new Date() : null,
         },
       });
 

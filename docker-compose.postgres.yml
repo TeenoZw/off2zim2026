@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: off2zim-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: off2zim
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - off2zim_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d off2zim"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  off2zim_postgres_data:

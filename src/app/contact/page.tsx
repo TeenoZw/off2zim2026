@@ -1,443 +1,234 @@
-import React from "react";
 import {
-  PhoneIcon,
+  ChatBubbleLeftRightIcon,
+  ClockIcon,
   EnvelopeIcon,
   MapPinIcon,
-  ClockIcon,
-  ChatBubbleLeftRightIcon,
+  PhoneIcon,
 } from "@heroicons/react/24/solid";
-import {
-  GlobeAltIcon,
-  DevicePhoneMobileIcon,
-  BuildingOfficeIcon,
-} from "@heroicons/react/24/outline";
+import { GlobeAltIcon } from "@heroicons/react/24/outline";
+
+const contactMethods = [
+  {
+    title: "Call Off2Zim",
+    detail: "+263 78 111 4400",
+    note: "Trip planning help, urgent travel support, and booking coordination.",
+    icon: PhoneIcon,
+    accent: "text-[#8cf0a1]",
+  },
+  {
+    title: "Email the team",
+    detail: "hello@off2zim.com",
+    note: "Best for custom itineraries, partnership requests, and follow-up questions.",
+    icon: EnvelopeIcon,
+    accent: "text-[#ffca74]",
+  },
+  {
+    title: "WhatsApp support",
+    detail: "+263 77 440 2211",
+    note: "Quick support for active travelers who need answers while moving.",
+    icon: ChatBubbleLeftRightIcon,
+    accent: "text-[#5aa7ff]",
+  },
+];
+
+const officeMoments = [
+  {
+    city: "Harare",
+    label: "Coordination hub",
+    address: "Borrowdale, Harare",
+    hours: "Mon to Fri, 08:00 to 18:00",
+  },
+  {
+    city: "Victoria Falls",
+    label: "Guest support",
+    address: "Livingstone Way, Victoria Falls",
+    hours: "Daily, 07:00 to 20:00",
+  },
+  {
+    city: "Bulawayo",
+    label: "Regional support",
+    address: "City Centre, Bulawayo",
+    hours: "Mon to Sat, 08:00 to 17:00",
+  },
+];
+
+const faqs = [
+  {
+    question: "How does Off2Zim help with trip planning?",
+    answer:
+      "We bring together stays, experiences, transport, events, and local guidance so you can shape one connected Zimbabwe itinerary instead of juggling separate providers.",
+  },
+  {
+    question: "Can you help with custom group or family travel?",
+    answer:
+      "Yes. Use the message form to share dates, traveler count, pacing preferences, and must-do experiences, and the team can help shape a more tailored route.",
+  },
+  {
+    question: "Do you only support international travelers?",
+    answer:
+      "No. Off2Zim is designed for both visitors and local explorers who want easier discovery, booking coordination, and trusted travel information.",
+  },
+];
 
 export default function ContactPage() {
-  const contactMethods = [
-    {
-      icon: <PhoneIcon className="w-6 h-6" />,
-      title: "Phone",
-      description: "Speak with our travel experts",
-      contact: "+263 4 123 456",
-      availability: "Mon - Fri: 8AM - 6PM",
-      action: "Call Now",
-    },
-    {
-      icon: <EnvelopeIcon className="w-6 h-6" />,
-      title: "Email",
-      description: "Send us your travel inquiries",
-      contact: "info@off2zim.com",
-      availability: "24/7 - Response within 24hrs",
-      action: "Send Email",
-    },
-    {
-      icon: <ChatBubbleLeftRightIcon className="w-6 h-6" />,
-      title: "Live Chat",
-      description: "Chat with our support team",
-      contact: "Available on website",
-      availability: "Mon - Fri: 8AM - 8PM",
-      action: "Start Chat",
-    },
-    {
-      icon: <DevicePhoneMobileIcon className="w-6 h-6" />,
-      title: "WhatsApp",
-      description: "Quick messages and support",
-      contact: "+263 77 123 4567",
-      availability: "Mon - Sat: 8AM - 10PM",
-      action: "Message Us",
-    },
-  ];
-
-  const offices = [
-    {
-      city: "Harare",
-      address: "123 Nelson Mandela Avenue, Harare CBD",
-      phone: "+263 4 123 456",
-      email: "harare@off2zim.com",
-      hours: "Mon - Fri: 8AM - 6PM, Sat: 9AM - 2PM",
-      isHeadquarters: true,
-    },
-    {
-      city: "Victoria Falls",
-      address: "456 Livingstone Way, Victoria Falls",
-      phone: "+263 13 789 012",
-      email: "vicfalls@off2zim.com",
-      hours: "Mon - Sun: 7AM - 8PM",
-      isHeadquarters: false,
-    },
-    {
-      city: "Bulawayo",
-      address: "789 Joshua Nkomo Street, Bulawayo",
-      phone: "+263 9 345 678",
-      email: "bulawayo@off2zim.com",
-      hours: "Mon - Fri: 8AM - 5PM, Sat: 9AM - 1PM",
-      isHeadquarters: false,
-    },
-  ];
-
-  const faqs = [
-    {
-      question: "What is the best time to visit Zimbabwe?",
-      answer:
-        "The dry season (May to October) is generally the best time to visit Zimbabwe, with cooler temperatures and excellent wildlife viewing opportunities.",
-    },
-    {
-      question: "Do I need a visa to visit Zimbabwe?",
-      answer:
-        "Most visitors need a visa to enter Zimbabwe. Visas are available on arrival at airports and border posts, or can be obtained in advance from Zimbabwean embassies.",
-    },
-    {
-      question: "What currency is used in Zimbabwe?",
-      answer:
-        "The US Dollar is the most widely accepted currency in Zimbabwe. Other accepted currencies include the South African Rand and British Pound.",
-    },
-    {
-      question: "Is it safe to travel to Zimbabwe?",
-      answer:
-        "Zimbabwe is generally safe for tourists who take normal precautions. We recommend staying aware of your surroundings and following local advice.",
-    },
-    {
-      question: "How far in advance should I book my trip?",
-      answer:
-        "We recommend booking at least 2-3 months in advance, especially for peak season (May-October) and popular destinations like Victoria Falls.",
-    },
-  ];
-
   return (
-    <>
-      {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary to-primary/80 text-white py-16 md:py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                Contact Us
+    <div className="theme-page pb-20">
+      <section className="mx-auto max-w-7xl px-4 pb-6 pt-6 sm:px-6 lg:px-8">
+        <div className="theme-panel-strong overflow-hidden rounded-[34px]">
+          <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="p-6 md:p-8 lg:p-10">
+              <div className="theme-chip inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]">
+                Contact Off2Zim
+              </div>
+              <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">
+                Reach the team behind your Zimbabwe journey
               </h1>
-              <p className="text-xl md:text-2xl mb-8 text-white/90">
-                Let our Zimbabwe travel experts help you plan your perfect
-                adventure
+              <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
+                Use Off2Zim for discovery, planning, and booking support, then reach
+                out when you need a clearer route, a faster answer, or help turning
+                an idea into a working itinerary.
               </p>
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-3">
-                <ClockIcon className="w-5 h-5" />
-                <span className="font-medium">Available 7 days a week</span>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {contactMethods.map((method) => {
+                  const Icon = method.icon;
+                  return (
+                    <div key={method.title} className="theme-card-soft rounded-[24px] p-4">
+                      <Icon className={`h-6 w-6 ${method.accent}`} />
+                      <div className="theme-heading mt-3 text-base font-semibold">
+                        {method.title}
+                      </div>
+                      <div className="theme-muted mt-1 text-sm">{method.detail}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div
+              className="min-h-[280px] bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.5)), url('/images/victoria-falls.jpg')",
+              }}
+            >
+              <div className="flex h-full items-end p-5 md:p-7">
+                <div className="w-full rounded-[28px] border border-white/15 bg-black/40 p-4 text-white backdrop-blur">
+                  <div className="text-xs uppercase tracking-[0.24em] text-white/55">
+                    Support window
+                  </div>
+                  <div className="mt-2 text-xl font-semibold">
+                    Real people, real route support
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-3 text-sm text-white/80">
+                    <span className="inline-flex items-center gap-2">
+                      <ClockIcon className="h-4 w-4 text-[#8cf0a1]" />
+                      Seven-day support rhythm
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <MapPinIcon className="h-4 w-4 text-[#ff7352]" />
+                      Zimbabwe-first knowledge
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Contact Methods */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              Get in Touch
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="theme-panel rounded-[30px] p-6 md:p-8">
+            <p className="theme-label text-xs uppercase tracking-[0.24em]">Write to us</p>
+            <h2 className="theme-heading mt-2 text-2xl font-semibold">
+              Tell us what you are trying to plan
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {contactMethods.map((method, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl p-6 shadow-lg text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full text-primary mb-4">
-                    {method.icon}
-                  </div>
-                  <h3 className="text-xl font-bold mb-2">{method.title}</h3>
-                  <p className="text-gray-600 mb-3 text-sm">
-                    {method.description}
-                  </p>
-                  <p className="font-semibold text-primary mb-2">
-                    {method.contact}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-4">
-                    {method.availability}
-                  </p>
-                  <button className="btn-primary rounded-2xl w-full">
-                    {method.action}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+            <p className="theme-muted mt-3 text-sm leading-6">
+              This message format mirrors the PRD travel workflow: dates, traveler
+              type, trip intent, and what still needs solving.
+            </p>
 
-        {/* Contact Form */}
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Send Us a Message
-                </h2>
-                <p className="text-gray-600 text-lg">
-                  Fill out the form below and we&apos;ll get back to you within
-                  24 hours
-                </p>
+            <form className="mt-6 space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <input className="theme-input h-12 rounded-[18px] px-4" placeholder="First name" />
+                <input className="theme-input h-12 rounded-[18px] px-4" placeholder="Last name" />
+              </div>
+              <input className="theme-input h-12 rounded-[18px] px-4" placeholder="Email address" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <input className="theme-input h-12 rounded-[18px] px-4" placeholder="Preferred dates" />
+                <select className="theme-input h-12 rounded-[18px] px-4">
+                  <option>Traveler type</option>
+                  <option>Foreign explorer</option>
+                  <option>Local explorer</option>
+                  <option>Family or group</option>
+                  <option>Business traveler</option>
+                </select>
+              </div>
+              <textarea
+                className="theme-input min-h-[180px] rounded-[24px] px-4 py-3"
+                placeholder="Share the route, experiences, budget expectations, or support you need."
+              />
+              <button className="inline-flex w-full items-center justify-center rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white">
+                Send to Off2Zim support
+              </button>
+            </form>
+          </div>
+
+          <div className="space-y-6">
+            <div className="theme-panel rounded-[30px] p-6 md:p-8">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="theme-label text-xs uppercase tracking-[0.24em]">
+                    Support points
+                  </p>
+                  <h2 className="theme-heading mt-2 text-2xl font-semibold">
+                    Where the journey is coordinated
+                  </h2>
+                </div>
+                <GlobeAltIcon className="h-6 w-6 text-[#ff7352]" />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Contact Form */}
-                <div className="bg-white rounded-2xl p-8 shadow-lg">
-                  <form className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="mt-5 space-y-4">
+                {officeMoments.map((office) => (
+                  <div key={office.city} className="theme-card-soft rounded-[24px] p-4">
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          First Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          className="input w-full"
-                          placeholder="John"
-                        />
+                        <div className="theme-heading text-lg font-semibold">{office.city}</div>
+                        <div className="theme-muted mt-1 text-sm">{office.label}</div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Last Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          className="input w-full"
-                          placeholder="Doe"
-                        />
+                      <div className="theme-chip rounded-full px-3 py-1 text-xs">
+                        {office.hours}
                       </div>
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        className="input w-full"
-                        placeholder="john.doe@example.com"
-                      />
+                    <div className="theme-muted mt-4 flex items-center gap-2 text-sm">
+                      <MapPinIcon className="h-4 w-4 text-[#ff7352]" />
+                      {office.address}
                     </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        className="input w-full"
-                        placeholder="+1 (555) 123-4567"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Travel Interest
-                      </label>
-                      <select className="input w-full">
-                        <option>Select your interest</option>
-                        <option>Safari & Wildlife</option>
-                        <option>Adventure Activities</option>
-                        <option>Cultural Tours</option>
-                        <option>Accommodation</option>
-                        <option>Transportation</option>
-                        <option>Custom Package</option>
-                        <option>General Inquiry</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Preferred Travel Dates
-                      </label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <input
-                          type="date"
-                          className="input"
-                          placeholder="Departure"
-                        />
-                        <input
-                          type="date"
-                          className="input"
-                          placeholder="Return"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Number of Travelers
-                      </label>
-                      <select className="input w-full">
-                        <option>Select number</option>
-                        <option>1 person</option>
-                        <option>2 people</option>
-                        <option>3-5 people</option>
-                        <option>6-10 people</option>
-                        <option>More than 10</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message *
-                      </label>
-                      <textarea
-                        required
-                        rows={4}
-                        className="input w-full resize-none"
-                        placeholder="Tell us about your travel plans and any specific requirements..."
-                      ></textarea>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn-primary w-full rounded-2xl"
-                    >
-                      Send Message
-                    </button>
-                  </form>
-                </div>
-
-                {/* Contact Information */}
-                <div className="space-y-8">
-                  <div className="bg-white rounded-2xl p-8 shadow-lg">
-                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                      <BuildingOfficeIcon className="w-6 h-6 text-primary" />
-                      Our Offices
-                    </h3>
-                    <div className="space-y-6">
-                      {offices.map((office, index) => (
-                        <div
-                          key={index}
-                          className="border-b border-gray-100 last:border-b-0 pb-4 last:pb-0"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-lg">
-                              {office.city}
-                            </h4>
-                            {office.isHeadquarters && (
-                              <span className="text-xs bg-primary text-white px-2 py-1 rounded-full">
-                                Headquarters
-                              </span>
-                            )}
-                          </div>
-                          <div className="space-y-2 text-sm text-gray-600">
-                            <div className="flex items-start gap-2">
-                              <MapPinIcon className="w-4 h-4 mt-0.5 text-gray-400" />
-                              <span>{office.address}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <PhoneIcon className="w-4 h-4 text-gray-400" />
-                              <span>{office.phone}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <EnvelopeIcon className="w-4 h-4 text-gray-400" />
-                              <span>{office.email}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <ClockIcon className="w-4 h-4 text-gray-400" />
-                              <span>{office.hours}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-2xl p-8 shadow-lg">
-                    <h3 className="text-xl font-bold mb-6">
-                      Emergency Contact
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <PhoneIcon className="w-5 h-5 text-red-500" />
-                        <div>
-                          <p className="font-medium">24/7 Emergency Line</p>
-                          <p className="text-sm text-gray-600">
-                            +263 77 999 0000
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <EnvelopeIcon className="w-5 h-5 text-red-500" />
-                        <div>
-                          <p className="font-medium">Emergency Email</p>
-                          <p className="text-sm text-gray-600">
-                            emergency@off2zim.com
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-                Frequently Asked Questions
-              </h2>
-              <div className="space-y-4">
-                {faqs.map((faq, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-2xl shadow-lg overflow-hidden"
-                  >
-                    <details className="group">
-                      <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors">
-                        <h3 className="font-semibold text-lg pr-4">
-                          {faq.question}
-                        </h3>
-                        <div className="transform transition-transform group-open:rotate-180">
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </div>
-                      </summary>
-                      <div className="px-6 pb-6">
-                        <p className="text-gray-600 leading-relaxed">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    </details>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Map Section Placeholder */}
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              Find Us
-            </h2>
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-gray-300 rounded-2xl h-96 flex items-center justify-center">
-                <div className="text-center">
-                  <GlobeAltIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-600 font-medium">
-                    Interactive Map Coming Soon
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Our offices across Zimbabwe
-                  </p>
-                </div>
+            <div className="theme-panel rounded-[30px] p-6 md:p-8">
+              <p className="theme-label text-xs uppercase tracking-[0.24em]">FAQs</p>
+              <h2 className="theme-heading mt-2 text-2xl font-semibold">
+                Questions travelers ask first
+              </h2>
+              <div className="mt-5 space-y-3">
+                {faqs.map((faq) => (
+                  <details key={faq.question} className="theme-card-soft rounded-[24px] p-4">
+                    <summary className="theme-heading cursor-pointer list-none text-base font-semibold">
+                      {faq.question}
+                    </summary>
+                    <p className="theme-muted mt-3 text-sm leading-6">{faq.answer}</p>
+                  </details>
+                ))}
               </div>
             </div>
           </div>
-        </section>
-    </>
+        </div>
+      </section>
+    </div>
   );
 }

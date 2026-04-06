@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { Calendar, MapPin, Users, Clock } from "lucide-react";
 import DestinationDropdown from "./DestinationDropdown";
 import DatePicker from "./DatePicker";
@@ -16,6 +17,7 @@ interface BusFormData {
 }
 
 export default function BusForm() {
+  const router = useRouter();
   const [tripType, setTripType] = useState<"one-way" | "round-trip">("one-way");
   const [showFromDropdown, setShowFromDropdown] = useState(false);
   const [showToDropdown, setShowToDropdown] = useState(false);
@@ -36,8 +38,11 @@ export default function BusForm() {
   const formData = watch();
 
   const onSubmit = (data: BusFormData) => {
-    console.log("Bus search:", data);
-    // Handle bus search
+    const params = new URLSearchParams();
+    params.set("listingType", "transport");
+    params.set("search", [data.from, data.to].filter(Boolean).join(" "));
+    params.set("passengers", String(data.passengers));
+    router.push(`/trip-planner/search?${params.toString()}`);
   };
 
   const busDestinations = [

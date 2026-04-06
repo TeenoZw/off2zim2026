@@ -114,17 +114,17 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6">
+    <div className="theme-card w-full max-w-md rounded-[30px] p-6 shadow-xl md:p-7">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Join Off2Zim</h2>
-        <p className="text-gray-600 mt-2">
+        <h2 className="theme-heading text-2xl font-bold">Join Off2Zim</h2>
+        <p className="theme-muted mt-2 text-sm">
           Create your account and start exploring
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-sm">{error}</p>
+        <div className="mb-4 rounded-[18px] border border-rose-200 bg-rose-50 p-4 dark:border-rose-500/20 dark:bg-rose-500/10">
+          <p className="text-sm text-rose-600 dark:text-rose-200">{error}</p>
         </div>
       )}
 
@@ -133,7 +133,7 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -158,7 +158,7 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
 
           <button
             type="button"
-            className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="theme-button-secondary w-full inline-flex items-center justify-center rounded-[18px] px-4 py-2 text-sm font-medium"
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -176,7 +176,7 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">
+            <span className="theme-muted theme-panel-strong rounded-full px-3 py-1 text-xs">
               Or continue with email
             </span>
           </div>
@@ -188,7 +188,7 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
         <div>
           <label
             htmlFor="role"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="theme-muted mb-1 block text-sm font-medium"
           >
             Account Type
           </label>
@@ -197,7 +197,7 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="theme-input w-full rounded-[18px] px-3 py-2"
           >
             <option value="explorer">Explorer</option>
             <option value="provider">Service Provider</option>
@@ -209,7 +209,7 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
               Administrator
             </option>
           </select>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="theme-muted mt-1 text-xs">
             {roleDescriptions[formData.role]}
           </p>
         </div>
@@ -219,7 +219,7 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
           <div>
             <label
               htmlFor="explorerType"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="theme-muted mb-1 block text-sm font-medium"
             >
               Are you a local or visiting Zimbabwe?
             </label>
@@ -228,12 +228,12 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
               name="explorerType"
               value={formData.explorerType}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="theme-input w-full rounded-[18px] px-3 py-2"
             >
               <option value="foreign">Visiting Zimbabwe (Foreign)</option>
               <option value="local">Local Zimbabwean</option>
             </select>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="theme-muted mt-1 text-xs">
               This helps us tailor your experience
             </p>
           </div>

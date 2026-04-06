@@ -5,7 +5,7 @@ export type PlannerItemType =
   | "dining";
 
 export interface PlannerCatalogItem {
-  id: number;
+  id: string;
   name: string;
   type: PlannerItemType;
   category: string;
@@ -28,7 +28,7 @@ export interface PlannerCatalogItem {
 
 export interface TripPlannerItem {
   id: string;
-  sourceId?: number;
+  sourceId?: string;
   title: string;
   type: PlannerItemType;
   location: string;

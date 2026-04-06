@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { PaymentIntent } from "@/types/payment";
 import { AlertCircle, CheckCircle, Loader2, Smartphone } from "lucide-react";
+import { getAuthHeaders } from "@/lib/client-api";
 
 interface MobileMoneyFormProps {
   paymentIntent: PaymentIntent;
@@ -83,7 +84,7 @@ export default function MobileMoneyForm({
     try {
       const response = await fetch("/api/payments/mobile-money", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(undefined, true),
         body: JSON.stringify({
           paymentIntentId: paymentIntent.id,
           provider: selectedProvider,

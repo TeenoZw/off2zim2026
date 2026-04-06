@@ -8,6 +8,7 @@ import PaymentForm from "./PaymentForm";
 import MobileMoneyForm from "./MobileMoneyForm";
 import BookingSummary from "./BookingSummary";
 import { Building, CreditCard, Smartphone } from "lucide-react";
+import { getAuthHeaders } from "@/lib/client-api";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -36,7 +37,7 @@ export default function CheckoutComponent({
     try {
       const response = await fetch("/api/payments/create-intent", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(undefined, true),
         body: JSON.stringify({ items }),
       });
 
@@ -58,7 +59,7 @@ export default function CheckoutComponent({
     try {
       const response = await fetch("/api/payments/create-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(undefined, true),
         body: JSON.stringify({ items }),
       });
 

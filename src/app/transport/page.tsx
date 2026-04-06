@@ -1,262 +1,139 @@
-import React from "react";
-import { Button } from "@relume_io/relume-ui";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  ArrowRight,
+  Bus,
+  CarFront,
+  Plane,
+  Route,
+  ShieldCheck,
+  TimerReset,
+} from "lucide-react";
 
 const transportTypes = [
   {
     id: "bus",
-    name: "Bus Transport",
-    description: "Comfortable intercity and local bus services across Zimbabwe",
-    icon: "/icons/bus.png",
+    name: "Bus transport",
+    description: "Intercity movement, route planning, and practical budget-friendly travel.",
+    icon: Bus,
     href: "/transport/bus",
-    features: [
-      "Intercity Routes",
-      "Local Transport",
-      "Tour Buses",
-      "Group Transport",
-    ],
+    image: "/images/slide1.jpg",
+    features: ["Intercity routes", "Regional movement", "Budget planning"],
   },
   {
     id: "car-rental",
-    name: "Car Rental",
-    description: "Rent vehicles for self-drive adventures and city exploration",
-    icon: "/icons/rental.png",
+    name: "Car rental",
+    description: "Self-drive flexibility for travelers building multi-stop Zimbabwe routes.",
+    icon: CarFront,
     href: "/transport/car-rental",
-    features: [
-      "Economy Cars",
-      "SUVs & 4WDs",
-      "Luxury Vehicles",
-      "Commercial Vehicles",
-    ],
+    image: "/images/eastern-highlands.jpg",
+    features: ["SUV and 4x4", "Self-drive", "Flexible pickup"],
   },
   {
     id: "flights",
     name: "Flights",
-    description:
-      "Domestic and international flight bookings and charter services",
-    icon: "/icons/plane.png",
+    description: "Domestic hops and time-saving connections between major destinations.",
+    icon: Plane,
     href: "/transport/flights",
-    features: [
-      "Domestic Flights",
-      "International Routes",
-      "Charter Flights",
-      "Scenic Flights",
-    ],
+    image: "/images/victoria-falls.jpg",
+    features: ["Domestic links", "Scenic air movement", "Faster route shaping"],
   },
   {
     id: "taxi",
-    name: "Taxi Services",
-    description: "Reliable taxi and ride-hailing services for local transport",
-    icon: "/icons/taxi.png",
+    name: "Taxi services",
+    description: "Airport transfers, city movement, and last-mile itinerary support.",
+    icon: Route,
     href: "/transport/taxi",
-    features: [
-      "City Taxis",
-      "Airport Transfers",
-      "Long Distance",
-      "Tour Taxis",
-    ],
+    image: "/images/jacaranda.JPG",
+    features: ["Airport pickup", "City rides", "Last-mile support"],
   },
 ];
 
 export default function TransportPage() {
   return (
-    <>
-      {/* Hero Section */}
-        <section className="relative py-20 text-white bg-gradient-to-br from-gray-900 to-black">
-          <div className="absolute inset-0 bg-black/20"></div>
-          <div className="container relative z-10 px-4 mx-auto">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-5xl font-bold mb-6 font-['Century_Gothic']">
-                Transport Services in Zimbabwe
+    <div className="theme-page pb-20">
+      <section className="mx-auto max-w-7xl px-4 pb-6 pt-6 sm:px-6 lg:px-8">
+        <div className="theme-panel-strong overflow-hidden rounded-[34px]">
+          <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="p-6 md:p-8 lg:p-10">
+              <div className="theme-chip inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]">
+                Transport
+              </div>
+              <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">
+                Move through Zimbabwe with a route that still feels calm
               </h1>
-              <p className="text-xl mb-8 text-gray-200 font-['Century_Gothic']">
-                Discover convenient and reliable transport options for your
-                journey across Zimbabwe. From buses and car rentals to flights
-                and taxis, we&apos;ve got you covered.
+              <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
+                The PRD needs transport to work as part of planning, not as a separate
+                afterthought. Off2Zim transport should help travelers connect stays,
+                activities, and event timings without friction.
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Button
-                  title="Book Transport"
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-3 text-lg rounded-[16px] font-['Century_Gothic']"
-                >
-                  Book Transport
-                </Button>
-                <Button
-                  title="View Routes"
-                  variant="secondary"
-                  className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg rounded-[16px] font-['Century_Gothic']"
-                >
-                  View Routes
-                </Button>
+
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <div className="theme-card-soft rounded-[24px] p-4">
+                  <ShieldCheck className="h-6 w-6 text-[#8cf0a1]" />
+                  <div className="theme-heading mt-3 text-base font-semibold">Trusted providers</div>
+                  <div className="theme-muted mt-1 text-sm">Verified operators and route-aware choices.</div>
+                </div>
+                <div className="theme-card-soft rounded-[24px] p-4">
+                  <TimerReset className="h-6 w-6 text-[#5aa7ff]" />
+                  <div className="theme-heading mt-3 text-base font-semibold">Time visibility</div>
+                  <div className="theme-muted mt-1 text-sm">See what saves time and what stretches a day.</div>
+                </div>
+                <div className="theme-card-soft rounded-[24px] p-4">
+                  <Route className="h-6 w-6 text-[#ffca74]" />
+                  <div className="theme-heading mt-3 text-base font-semibold">Trip-linked planning</div>
+                  <div className="theme-muted mt-1 text-sm">Transport that fits the actual itinerary window.</div>
+                </div>
               </div>
             </div>
+
+            <div
+              className="min-h-[280px] bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.48)), url('/images/eastern-highlands.jpg')",
+              }}
+            />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Transport Types Grid */}
-        <section className="py-16 bg-white/80 backdrop-blur-sm">
-          <div className="container px-4 mx-auto">
-            <div className="mb-12 text-center">
-              <h2 className="text-4xl font-bold text-black mb-4 font-['Century_Gothic']">
-                Choose Your Transport
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto font-['Century_Gothic']">
-                Select from our range of transport services designed to meet all
-                your travel needs in Zimbabwe
-              </p>
-            </div>
-
-            <div className="grid max-w-6xl grid-cols-1 gap-8 mx-auto md:grid-cols-2 lg:grid-cols-2">
-              {transportTypes.map((transport) => (
-                <div
-                  key={transport.id}
-                  className="group bg-white rounded-[16px] overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"
-                >
-                  <div className="p-8">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-16 h-16 bg-gray-50 rounded-[16px] flex items-center justify-center group-hover:bg-gray-100 transition-colors">
-                        <Image
-                          src={transport.icon}
-                          alt={transport.name}
-                          width={32}
-                          height={32}
-                          className="object-contain"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-black group-hover:text-gray-700 transition-colors font-['Century_Gothic']">
-                          {transport.name}
-                        </h3>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-600 mb-6 leading-relaxed font-['Century_Gothic']">
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="grid gap-5 md:grid-cols-2">
+          {transportTypes.map((transport) => {
+            const Icon = transport.icon;
+            return (
+              <Link key={transport.id} href={transport.href} className="theme-card overflow-hidden transition hover:-translate-y-0.5">
+                <div className="grid md:grid-cols-[0.85fr_1.15fr]">
+                  <div className="relative min-h-[220px]">
+                    <Image src={transport.image} alt={transport.name} fill className="object-cover" />
+                  </div>
+                  <div className="p-6 md:p-7">
+                    <Icon className="h-7 w-7 text-[#ff7352]" />
+                    <h2 className="theme-heading mt-4 text-2xl font-semibold">
+                      {transport.name}
+                    </h2>
+                    <p className="theme-muted mt-3 text-sm leading-6">
                       {transport.description}
                     </p>
-
-                    <div className="mb-8 space-y-3">
-                      {transport.features.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-black rounded-full"></div>
-                          <span className="text-gray-700 font-['Century_Gothic']">
-                            {feature}
-                          </span>
-                        </div>
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {transport.features.map((feature) => (
+                        <span key={feature} className="theme-chip rounded-full px-3 py-1.5 text-sm">
+                          {feature}
+                        </span>
                       ))}
                     </div>
-
-                    <Link href={transport.href}>
-                      <Button
-                        title={`Explore ${transport.name}`}
-                        className="w-full bg-black hover:bg-gray-800 text-white rounded-[16px] font-['Century_Gothic']"
-                      >
-                        Explore {transport.name}
-                        <svg
-                          className="w-4 h-4 ml-2"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </Button>
-                    </Link>
+                    <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#ff5630]">
+                      Explore this transport mode
+                      <ArrowRight className="h-4 w-4" />
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Why Choose Our Transport Section */}
-        <section className="py-16 bg-gray-50/80 backdrop-blur-sm">
-          <div className="container px-4 mx-auto">
-            <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-4xl font-bold text-black mb-6 font-['Century_Gothic']">
-                Why Choose Our Transport Services?
-              </h2>
-              <div className="grid grid-cols-1 gap-8 mt-12 md:grid-cols-3">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-[16px] flex items-center justify-center mx-auto mb-4">
-                    <svg
-                      className="w-8 h-8 text-black"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 font-['Century_Gothic'] text-black">
-                    Reliable & Safe
-                  </h3>
-                  <p className="text-gray-600 font-['Century_Gothic']">
-                    All our transport partners are vetted for safety and
-                    reliability
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-[16px] flex items-center justify-center mx-auto mb-4">
-                    <svg
-                      className="w-8 h-8 text-black"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 font-['Century_Gothic'] text-black">
-                    24/7 Support
-                  </h3>
-                  <p className="text-gray-600 font-['Century_Gothic']">
-                    Round-the-clock customer support for all your transport
-                    needs
-                  </p>
-                </div>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-[16px] flex items-center justify-center mx-auto mb-4">
-                    <svg
-                      className="w-8 h-8 text-black"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 font-['Century_Gothic'] text-black">
-                    Best Prices
-                  </h3>
-                  <p className="text-gray-600 font-['Century_Gothic']">
-                    Competitive pricing across all transport options
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-    </>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+    </div>
   );
 }

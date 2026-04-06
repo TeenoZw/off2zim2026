@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   AdjustmentsHorizontalIcon,
   Bars3Icon,
@@ -13,42 +14,59 @@ import {
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon, StarIcon } from "@heroicons/react/24/solid";
 import { useTripPlanner } from "@/contexts/TripPlannerContext";
-import {
-  getPlannerCatalogItem,
-  tripPlannerCatalog,
-} from "@/lib/trip-planner/catalog";
-import { PlannerCatalogItem } from "@/types/trip-planner";
+import type { PlannerCatalogItem } from "@/types/trip-planner";
+import type { PublicListingRecord } from "@/types/platform";
+import { publicListingToPlannerCatalogItem } from "@/lib/public-listing-adapter";
+import { apiFetch } from "@/lib/client-api";
 
-export default function TripPlannerSearchPage() {
+function TripPlannerSearchPageContent() {
+  const searchParams = useSearchParams();
   const { addCatalogItem, items } = useTripPlanner();
   const [activeTab, setActiveTab] = useState<
     "all" | "accommodation" | "activity" | "transport"
-  >("all");
+  >(
+    searchParams?.get("listingType") === "transport"
+      ? "transport"
+      : "all"
+  );
   const [sortBy, setSortBy] = useState("featured");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(searchParams?.get("search") || "");
   const [selectedLocation, setSelectedLocation] = useState("all");
+  const [results, setResults] = useState<PlannerCatalogItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const locations = [
-    "all",
-    ...Array.from(new Set(tripPlannerCatalog.map((item) => item.location))),
-  ];
+  useEffect(() => {
+    const loadResults = async () => {
+      try {
+        const payload = await apiFetch<{ listings: PublicListingRecord[] }>(
+          `/api/listings?search=${encodeURIComponent(searchTerm)}`
+        );
+        setResults(payload.listings.map(publicListingToPlannerCatalogItem));
+        setError("");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to load planner results.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timeout = window.setTimeout(loadResults, 200);
+    return () => window.clearTimeout(timeout);
+  }, [searchTerm]);
+
+  const locations = useMemo(
+    () => ["all", ...Array.from(new Set(results.map((item) => item.location)))],
+    [results]
+  );
 
   const filteredResults = useMemo(() => {
-    let filtered = tripPlannerCatalog.filter((result) => {
-      const query = searchTerm.trim().toLowerCase();
-      const matchesQuery =
-        !query ||
-        result.name.toLowerCase().includes(query) ||
-        result.location.toLowerCase().includes(query) ||
-        result.category.toLowerCase().includes(query) ||
-        result.description.toLowerCase().includes(query);
-
+    let filtered = results.filter((result) => {
       const matchesTab = activeTab === "all" || result.type === activeTab;
       const matchesLocation =
         selectedLocation === "all" || result.location === selectedLocation;
-
-      return matchesQuery && matchesTab && matchesLocation;
+      return matchesTab && matchesLocation;
     });
 
     switch (sortBy) {
@@ -70,21 +88,21 @@ export default function TripPlannerSearchPage() {
         filtered = filtered.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        filtered = filtered.sort(
-          (a, b) => Number(b.featured) - Number(a.featured)
-        );
+        filtered = filtered.sort((a, b) => Number(b.featured) - Number(a.featured));
     }
 
     return filtered;
-  }, [activeTab, searchTerm, selectedLocation, sortBy]);
+  }, [activeTab, results, selectedLocation, sortBy]);
 
-  const resultCounts = {
-    all: tripPlannerCatalog.length,
-    accommodation: tripPlannerCatalog.filter((item) => item.type === "accommodation")
-      .length,
-    activity: tripPlannerCatalog.filter((item) => item.type === "activity").length,
-    transport: tripPlannerCatalog.filter((item) => item.type === "transport").length,
-  };
+  const resultCounts = useMemo(
+    () => ({
+      all: results.length,
+      accommodation: results.filter((item) => item.type === "accommodation").length,
+      activity: results.filter((item) => item.type === "activity").length,
+      transport: results.filter((item) => item.type === "transport").length,
+    }),
+    [results]
+  );
 
   return (
     <div className="theme-page pb-20">
@@ -96,12 +114,11 @@ export default function TripPlannerSearchPage() {
                 Trip search
               </p>
               <h1 className="theme-heading mt-2 text-4xl font-semibold">
-                Build your itinerary from stays, activities, and transport
+                Build your itinerary from live provider listings
               </h1>
               <p className="theme-muted mt-3 max-w-2xl text-sm leading-7">
-                The PRD calls for one trip-building workflow with timeline planning,
-                budget visibility, and booking-ready discovery. This search layer now
-                feeds directly into the planner instead of acting like a detached listing page.
+                The planner now pulls from the same provider-managed catalog used by the
+                marketplace, so itinerary building and booking discovery stay aligned.
               </p>
             </div>
 
@@ -117,7 +134,7 @@ export default function TripPlannerSearchPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 type="text"
-                placeholder="Search destinations, activities, or provider types..."
+                placeholder="Search stays, activities, transport, or providers..."
                 className="theme-input w-full rounded-2xl py-3 pl-12 pr-4 text-sm"
               />
             </div>
@@ -199,7 +216,16 @@ export default function TripPlannerSearchPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {filteredResults.length === 0 ? (
+        {error ? (
+          <div className="theme-panel rounded-[36px] p-12 text-center">
+            <h2 className="theme-heading text-2xl font-semibold">Planner search unavailable</h2>
+            <p className="theme-muted mt-3 text-sm">{error}</p>
+          </div>
+        ) : loading ? (
+          <div className="theme-panel rounded-[36px] p-12 text-center">
+            <p className="theme-muted text-sm">Loading live planner results...</p>
+          </div>
+        ) : filteredResults.length === 0 ? (
           <div className="theme-panel rounded-[36px] p-12 text-center">
             <h2 className="theme-heading text-2xl font-semibold">No planner results found</h2>
             <p className="theme-muted mt-3 text-sm">
@@ -229,6 +255,22 @@ export default function TripPlannerSearchPage() {
   );
 }
 
+export default function TripPlannerSearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="theme-page p-8">
+          <div className="theme-panel rounded-[32px] p-8 text-center">
+            <p className="theme-muted text-sm">Loading planner search...</p>
+          </div>
+        </div>
+      }
+    >
+      <TripPlannerSearchPageContent />
+    </Suspense>
+  );
+}
+
 function SearchResultCard({
   result,
   viewMode,
@@ -238,8 +280,7 @@ function SearchResultCard({
   viewMode: "grid" | "list";
   onAddToTrip: () => void;
 }) {
-  const fullResult = getPlannerCatalogItem(result.id) ?? result;
-  const featureList = fullResult.amenities || fullResult.highlights || [];
+  const featureList = result.amenities || result.highlights || [];
 
   const statusClass =
     result.availability === "Limited"

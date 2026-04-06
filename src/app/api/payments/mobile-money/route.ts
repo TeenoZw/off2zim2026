@@ -5,6 +5,9 @@ import {
   CreateBookingRequest,
 } from "@/services/BookingService";
 import { BookingConfirmation, BookingItem } from "@/types/payment";
+import { requireSessionUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 interface MobileMoneyRequest {
   paymentIntentId: string;
@@ -23,6 +26,7 @@ interface MobileMoneyRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    const { user } = await requireSessionUser();
     const body: MobileMoneyRequest = await request.json();
     const {
       paymentIntentId,
@@ -30,7 +34,7 @@ export async function POST(request: NextRequest) {
       phoneNumber,
       amount,
       currency,
-      userId = "demo-user-id", // Default for demo, in real app get from session
+      userId = user.id,
       bookingItems = [],
       checkIn,
       checkOut,
@@ -160,7 +164,10 @@ export async function POST(request: NextRequest) {
       const paymentResult = await simulatePayment();
 
       // Step 4: Update payment status to completed
-      await BookingService.updatePaymentStatus(booking.id, "COMPLETED");
+      await BookingService.updatePaymentStatus(payment.id, "COMPLETED", {
+        transactionId: paymentResult.transactionId,
+        provider,
+      });
 
       // Update booking confirmation with payment success
       booking.status = "confirmed";
@@ -229,6 +236,12 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error("Mobile money payment error:", error);
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json(
+        { error: "Please sign in before paying." },
+        { status: 401 }
+      );
+    }
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

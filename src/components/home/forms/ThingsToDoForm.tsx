@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { Calendar, MapPin, Users, Star, Clock } from "lucide-react";
 import DestinationDropdown from "./DestinationDropdown";
 import DatePicker from "./DatePicker";
@@ -15,6 +16,7 @@ interface ThingsToDoFormData {
 }
 
 export default function ThingsToDoForm() {
+  const router = useRouter();
   const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
   const [showDate, setShowDate] = useState(false);
 
@@ -32,8 +34,12 @@ export default function ThingsToDoForm() {
   const formData = watch();
 
   const onSubmit = (data: ThingsToDoFormData) => {
-    console.log("Things to do search:", data);
-    // Handle things to do search
+    const params = new URLSearchParams();
+    params.set("listingType", "experience");
+    if (data.destination) params.set("search", data.destination);
+    if (data.category !== "any") params.set("category", data.category);
+    params.set("guests", String(data.guests));
+    router.push(`/marketplace?${params.toString()}`);
   };
 
   const destinations = [

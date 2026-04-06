@@ -3,66 +3,40 @@
 import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { BookingConfirmation } from "@/types/payment";
-import { Calendar, CheckCircle, Download, Mail, MapPin, Phone } from "lucide-react";
+import { Calendar, CheckCircle, Mail, MapPin, Phone } from "lucide-react";
+import { apiFetch } from "@/lib/client-api";
+import type { ExplorerBookingRecord } from "@/types/platform";
 
 function BookingSuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id");
-  const confirmationFromQuery = searchParams.get("confirmation");
+  const confirmationNumber = searchParams.get("confirmation");
 
-  const [booking, setBooking] = useState<BookingConfirmation | null>(null);
+  const [booking, setBooking] = useState<ExplorerBookingRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (sessionId || confirmationFromQuery) {
-      const mockBooking: BookingConfirmation = {
-        id: `booking_${Date.now()}`,
-        paymentIntentId: sessionId || "",
-        userId: "current_user",
-        items: [
-          {
-            id: "hotel_1",
-            type: "accommodation",
-            name: "Palm River Hotel",
-            description: "Luxury accommodation near Victoria Falls",
-            price: 250,
-            currency: "USD",
-            quantity: 2,
-            checkIn: "2026-04-15",
-            checkOut: "2026-04-18",
-            guests: 2,
-            provider: {
-              id: "provider_1",
-              name: "Palm River Hospitality",
-              email: "bookings@off2zim.co.zw",
-            },
-          },
-        ],
-        totalAmount: 575,
-        currency: "USD",
-        status: "confirmed",
-        paymentStatus: "paid",
-        bookingDate: new Date().toISOString(),
-        confirmationNumber:
-          confirmationFromQuery ||
-          "OFF2ZIM-" + Date.now().toString(36).toUpperCase(),
-        customerInfo: {
-          name: "John Doe",
-          email: "john.doe@example.com",
-          phone: "+263 77 123 4567",
-        },
-        createdAt: new Date(),
-      };
+    const loadBooking = async () => {
+      if (!confirmationNumber) {
+        setError("No booking reference provided");
+        setIsLoading(false);
+        return;
+      }
 
-      setBooking(mockBooking);
-      setIsLoading(false);
-    } else {
-      setError("No booking reference provided");
-      setIsLoading(false);
-    }
-  }, [confirmationFromQuery, sessionId]);
+      try {
+        const payload = await apiFetch<{ booking: ExplorerBookingRecord }>(
+          `/api/bookings/${confirmationNumber}`
+        );
+        setBooking(payload.booking);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to load booking.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadBooking();
+  }, [confirmationNumber]);
 
   if (isLoading) {
     return (
@@ -104,9 +78,7 @@ function BookingSuccessContent() {
             </div>
             <h1 className="mt-6 text-4xl font-semibold">Booking confirmed</h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-white/60">
-              Your Zimbabwe trip is now locked in. This screen has been refreshed
-              to feel closer to the mobile app: clearer status, stronger hierarchy,
-              and more useful next steps.
+              Your booking has been recorded in the new provider-backed platform flow.
             </p>
           </div>
 
@@ -118,14 +90,14 @@ function BookingSuccessContent() {
                   <Stat label="Confirmation number" value={booking.confirmationNumber} />
                   <Stat
                     label="Booking date"
-                    value={new Date(booking.bookingDate).toLocaleDateString("en-US", {
+                    value={new Date(booking.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
                     })}
                   />
                   <Stat
-                    label="Total paid"
+                    label="Total"
                     value={`$${booking.totalAmount.toFixed(2)} ${booking.currency}`}
                   />
                   <Stat label="Payment status" value={booking.paymentStatus} />
@@ -134,43 +106,42 @@ function BookingSuccessContent() {
 
               <div className="rounded-[32px] border border-white/10 bg-white/[0.03] p-6">
                 <h2 className="text-xl font-semibold">Your booking</h2>
-                <div className="mt-5 space-y-4">
-                  {booking.items.map((item, index) => (
-                    <div
-                      key={index}
-                      className="rounded-[24px] border border-white/10 bg-[#121212] p-4"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-white">{item.name}</h3>
-                          {item.description && (
-                            <p className="mt-1 text-sm text-white/55">{item.description}</p>
-                          )}
-                          <div className="mt-3 space-y-2 text-sm text-white/50">
-                            {item.checkIn && item.checkOut && (
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                {new Date(item.checkIn).toLocaleDateString()} -{" "}
-                                {new Date(item.checkOut).toLocaleDateString()}
-                              </div>
-                            )}
-                            {item.provider && (
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                Provided by {item.provider.name}
-                              </div>
-                            )}
+                <div className="mt-5 rounded-[24px] border border-white/10 bg-[#121212] p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">
+                        {booking.listing?.title || booking.bookingType}
+                      </h3>
+                      <p className="mt-1 text-sm text-white/55">
+                        {booking.provider?.companyName || "Off2Zim Provider"}
+                      </p>
+                      <div className="mt-3 space-y-2 text-sm text-white/50">
+                        {booking.checkIn && (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(booking.checkIn).toLocaleDateString()}
+                            {booking.checkOut
+                              ? ` - ${new Date(booking.checkOut).toLocaleDateString()}`
+                              : ""}
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-semibold text-white">
-                            ${(item.price * item.quantity).toFixed(2)}
+                        )}
+                        {booking.listing?.location && (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            {booking.listing.location}
                           </div>
-                          <div className="text-xs text-white/40">Qty: {item.quantity}</div>
-                        </div>
+                        )}
                       </div>
                     </div>
-                  ))}
+                    <div className="text-right">
+                      <div className="text-lg font-semibold text-white">
+                        ${booking.totalAmount.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-white/40">
+                        {booking.guests || 1} guest{(booking.guests || 1) > 1 ? "s" : ""}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -179,19 +150,17 @@ function BookingSuccessContent() {
               <div className="rounded-[32px] border border-white/10 bg-white/[0.03] p-6">
                 <h2 className="text-xl font-semibold">Quick actions</h2>
                 <div className="mt-5 space-y-3">
-                  <button className="flex w-full items-center justify-center gap-2 rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white">
-                    <Download className="h-4 w-4" />
-                    Download itinerary
-                  </button>
-                  <button className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white">
-                    <Mail className="h-4 w-4" />
-                    Resend confirmation
-                  </button>
                   <Link
                     href="/dashboard"
-                    className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white"
                   >
                     View all bookings
+                  </Link>
+                  <Link
+                    href="/trip-planner"
+                    className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white"
+                  >
+                    Open trip planner
                   </Link>
                 </div>
               </div>
@@ -201,23 +170,21 @@ function BookingSuccessContent() {
                 <div className="mt-5 space-y-3 text-sm text-white/55">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    {booking.customerInfo.email}
+                    Details available in your dashboard and provider thread
                   </div>
-                  {booking.customerInfo.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      {booking.customerInfo.phone}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Save your confirmation number for support requests
+                  </div>
                 </div>
               </div>
 
               <div className="rounded-[32px] border border-[#7ddf8c]/20 bg-[#122116] p-6">
                 <h2 className="text-xl font-semibold">What happens next</h2>
                 <div className="mt-4 space-y-2 text-sm text-white/70">
-                  <p>Check your email for confirmation and provider details.</p>
-                  <p>Save your confirmation number for support requests.</p>
-                  <p>Use Trip Planner to organize the rest of your itinerary.</p>
+                  <p>Your booking is now visible in your explorer dashboard.</p>
+                  <p>The provider can review and manage it from their order workspace.</p>
+                  <p>Admin oversight can be layered on top of the same record set.</p>
                 </div>
               </div>
             </div>
@@ -231,10 +198,10 @@ function BookingSuccessContent() {
               Book more activities
             </Link>
             <Link
-              href="/trip-planner"
+              href="/marketplace"
               className="rounded-full border border-white/10 bg-white/[0.04] px-6 py-3 text-sm font-semibold text-white"
             >
-              Open trip planner
+              Explore marketplace
             </Link>
             <Link
               href="/"
@@ -263,7 +230,7 @@ export default function BookingSuccessPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[#050505] text-white">
-          Loading booking details...
+          Loading confirmation...
         </div>
       }
     >

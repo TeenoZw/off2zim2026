@@ -207,7 +207,12 @@ export default function TripPlannerBuilder() {
   };
 
   return (
-    <section className="section-sm">
+    <section
+      id="planner-explore"
+      tabIndex={-1}
+      className="section-sm scroll-mt-24 pt-6 focus:outline-none md:pt-8"
+      aria-label="Itinerary builder explore section"
+    >
       <div className="container">
         <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">
           <div>
@@ -215,11 +220,11 @@ export default function TripPlannerBuilder() {
               Planner studio
             </p>
             <h2 className="theme-heading mt-2 text-3xl font-semibold md:text-4xl">
-              Explore. Organize. Confirm.
+              Your itinerary workspace
             </h2>
             <p className="theme-muted mt-3 max-w-2xl text-sm leading-6 md:text-base">
-              Move from trip brief to day-by-day shaping, then confirm the route,
-              budget, and shareable itinerary in one calmer flow.
+              Build the route, shape each day, manage costs, and export the trip
+              from one focused planning studio.
             </p>
           </div>
 

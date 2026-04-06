@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -40,21 +40,34 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
+  firstName     String?
+  lastName      String?
   name          String?
   email         String    @unique
+  passwordHash  String?
+  role          String    @default("explorer")
+  verificationStatus String @default("pending")
+  hasVerifiedBadge Boolean @default(false)
+  explorerType  String?
   emailVerified DateTime?
   image         String?
   phone         String?
   nationality   String?
   preferences   String?     @default("{}")
+  explorerScore String?     @default("{}")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
-  bookings     Booking[]
-  reviews      Review[]
-  payments     Payment[]
+  accounts               Account[]
+  sessions               Session[]
+  bookings               Booking[]
+  reviews                Review[]
+  payments               Payment[]
+  ownedCompanies         ProviderCompany[]   @relation("CompanyOwner")
+  verificationReviews    ProviderVerificationReview[] @relation("AdminVerificationReviews")
+  openedDisputes         Dispute[]           @relation("OpenedDisputes")
+  disputeAssignments     Dispute[]           @relation("AssignedDisputes")
+  auditLogs              AdminAuditLog[]     @relation("AdminAuditActor")
   
   @@map("users")
 }
@@ -176,6 +189,8 @@ model Event {
 model Booking {
   id                String        @id @default(cuid())
   userId            String
+  providerId        String?
+  listingId         String?
   bookingType       String        @default("HOTEL")
   status            String        @default("PENDING")
   totalAmount       Float
@@ -190,8 +205,11 @@ model Booking {
   updatedAt         DateTime      @updatedAt
 
   // Relationships
-  user       User        @relation(fields: [userId], references: [id])
-  payments   Payment[]
+  user              User             @relation(fields: [userId], references: [id])
+  provider          ProviderCompany? @relation("ProviderBookings", fields: [providerId], references: [id])
+  listing           ProviderListing? @relation(fields: [listingId], references: [id])
+  payments          Payment[]
+  disputes          Dispute[]
   
   // Tourism relationships (one-to-one with each type)
   hotel      Hotel?      @relation(fields: [hotelId], references: [id])
@@ -256,4 +274,168 @@ model Review {
   eventId      String?
 
   @@map("reviews")
+}
+
+model ProviderCompany {
+  id                         String   @id @default(cuid())
+  ownerUserId                String
+  companyName                String
+  tradingName                String?
+  businessRegistrationNumber String
+  mainContactPerson          String
+  businessPhone              String
+  businessEmail              String
+  physicalAddress            String
+  headquartersCity           String?
+  businessCategory           String?
+  businessDescription        String?
+  establishedYear            Int?
+  numberOfEmployees          String?
+  operatingHours             String?
+  websiteUrl                 String?
+  socialMediaLinks           String?  @default("{}")
+  servicesOffered            String?  @default("[]")
+  serviceAreas               String?  @default("[]")
+  onboardingStatus           String   @default("draft")
+  verificationTier           String   @default("basic")
+  reviewSubmittedAt          DateTime?
+  basicApprovedAt            DateTime?
+  verifiedBadgeExpiresAt     DateTime?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  owner               User                         @relation("CompanyOwner", fields: [ownerUserId], references: [id])
+  documents           ProviderDocument[]
+  listings            ProviderListing[]
+  bookings            Booking[]                    @relation("ProviderBookings")
+  verificationReviews ProviderVerificationReview[]
+  disputes            Dispute[]
+  auditLogs           AdminAuditLog[]
+
+  @@unique([ownerUserId])
+  @@index([onboardingStatus])
+  @@index([verificationTier])
+}
+
+model ProviderDocument {
+  id          String   @id @default(cuid())
+  companyId   String
+  type        String
+  fileName    String
+  fileUrl     String?
+  status      String   @default("pending")
+  notes       String?
+  uploadedAt  DateTime @default(now())
+  reviewedAt  DateTime?
+
+  company ProviderCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+}
+
+model ProviderVerificationReview {
+  id              String   @id @default(cuid())
+  companyId       String
+  reviewedById    String?
+  reviewType      String   @default("basic_review")
+  status          String   @default("pending")
+  notes           String?
+  internalSummary String?
+  createdAt       DateTime @default(now())
+  reviewedAt      DateTime?
+
+  company     ProviderCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  reviewedBy  User?           @relation("AdminVerificationReviews", fields: [reviewedById], references: [id])
+
+  @@index([companyId, status])
+}
+
+model ProviderListing {
+  id                   String   @id @default(cuid())
+  companyId            String
+  title                String
+  slug                 String   @unique
+  category             String
+  listingType          String
+  shortDescription     String?
+  description          String
+  location             String
+  pricingModel         String   @default("per_service")
+  basePrice            Float?
+  currency             String   @default("USD")
+  instantBooking       Boolean  @default(false)
+  bookingMode          String   @default("request")
+  status               String   @default("draft")
+  visibility           String   @default("private")
+  capacity             Int?
+  pickupLeadTimeHours  Int?
+  images               String?  @default("[]")
+  tags                 String?  @default("[]")
+  amenities            String?  @default("[]")
+  policies             String?  @default("{}")
+  metadata             String?  @default("{}")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  company          ProviderCompany      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  availability     ListingAvailability[]
+  bookings         Booking[]
+
+  @@index([companyId, status])
+  @@index([category, visibility, status])
+}
+
+model ListingAvailability {
+  id             String   @id @default(cuid())
+  listingId      String
+  startDate      DateTime
+  endDate        DateTime
+  unitsAvailable Int?
+  status         String   @default("available")
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  listing ProviderListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, startDate, endDate])
+}
+
+model Dispute {
+  id              String   @id @default(cuid())
+  bookingId       String
+  companyId       String?
+  openedByUserId  String
+  assignedAdminId String?
+  reason          String
+  details         String?
+  status          String   @default("open")
+  resolution      String?
+  createdAt       DateTime @default(now())
+  resolvedAt      DateTime?
+
+  booking       Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  company       ProviderCompany? @relation(fields: [companyId], references: [id])
+  openedBy      User             @relation("OpenedDisputes", fields: [openedByUserId], references: [id])
+  assignedAdmin User?            @relation("AssignedDisputes", fields: [assignedAdminId], references: [id])
+
+  @@index([status, createdAt])
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminUserId String
+  companyId   String?
+  action      String
+  targetType  String
+  targetId    String
+  summary     String
+  metadata    String?  @default("{}")
+  createdAt   DateTime @default(now())
+
+  admin   User             @relation("AdminAuditActor", fields: [adminUserId], references: [id])
+  company ProviderCompany? @relation(fields: [companyId], references: [id])
+
+  @@index([adminUserId, createdAt])
+  @@index([targetType, targetId])
 }

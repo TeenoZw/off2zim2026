@@ -30,6 +30,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  name?: string;
   role: UserRole;
   avatar?: string;
   isVerified: boolean;
@@ -40,6 +41,7 @@ export interface User {
   verifiedBadgeExpiresAt?: string;
   createdAt: string;
   lastActive: string;
+  companyId?: string;
   profile: UserProfile;
   verification?: UserVerification;
   // Aligns with PRD 2.1: Explorer Score system
@@ -124,6 +126,7 @@ export interface UserProfile {
   businessDocuments?: Array<{
     type: string;
     file: File | null;
+    fileUrl?: string | null;
     status: "pending" | "uploaded" | "verified" | "rejected";
   }>;
 
@@ -143,6 +146,7 @@ export interface UserProfile {
     instagram?: string;
     twitter?: string;
     linkedin?: string;
+    [key: string]: string | undefined;
   };
 }
 

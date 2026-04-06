@@ -7,6 +7,8 @@ import {
 } from "@/services/BookingService";
 import { BookingConfirmation, BookingItem } from "@/types/payment";
 
+export const dynamic = "force-dynamic";
+
 interface PaynowRequest {
   paymentIntentId: string;
   amount: number;

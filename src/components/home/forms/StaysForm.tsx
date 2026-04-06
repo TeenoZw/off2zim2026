@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   CalendarDaysIcon,
   MapPinIcon,
@@ -11,6 +12,7 @@ import DatePicker from "./DatePicker";
 import { GuestsDropdown } from "./GuestsDropdown";
 
 export default function StaysForm() {
+  const router = useRouter();
   const [destination, setDestination] = useState("");
   const [dates, setDates] = useState("");
   const [guests, setGuests] = useState({ adults: 1, children: 0 });
@@ -24,8 +26,12 @@ export default function StaysForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle search submission
-    console.log("Search:", { destination, dates, guests });
+    const params = new URLSearchParams();
+    params.set("category", "Accommodation");
+    if (destination) params.set("search", destination);
+    params.set("guests", String(guests.adults + guests.children));
+    if (dates) params.set("dates", dates);
+    router.push(`/marketplace?${params.toString()}`);
   };
 
   const formatGuestsText = () => {

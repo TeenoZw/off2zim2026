@@ -6,10 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import CheckoutComponent from "@/components/payment/CheckoutComponent";
 import { BookingItem } from "@/types/payment";
 import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { usePayment } from "@/contexts/PaymentContext";
 
 const CheckoutContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { currentBooking } = usePayment();
   const [items, setItems] = useState<BookingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,11 +28,15 @@ const CheckoutContent = () => {
       }
     } else {
       const savedItems = localStorage.getItem("checkout_items");
-      if (savedItems) setItems(JSON.parse(savedItems));
+      if (savedItems) {
+        setItems(JSON.parse(savedItems));
+      } else if (currentBooking?.length) {
+        setItems(currentBooking);
+      }
     }
 
     setIsLoading(false);
-  }, [searchParams]);
+  }, [currentBooking, searchParams]);
 
   const handleSuccess = (confirmationNumber: string) => {
     localStorage.removeItem("checkout_items");

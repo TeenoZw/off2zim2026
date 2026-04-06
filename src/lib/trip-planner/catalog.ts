@@ -3,10 +3,11 @@ import {
   PlannerItemType,
   TripPlannerItem,
 } from "@/types/trip-planner";
+import { plannerCatalogToTripPlannerItem } from "@/lib/public-listing-adapter";
 
 export const tripPlannerCatalog: PlannerCatalogItem[] = [
   {
-    id: 1,
+    id: "1",
     name: "Palm River Hotel",
     type: "accommodation",
     category: "Luxury Hotel",
@@ -24,7 +25,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
     featured: true,
   },
   {
-    id: 2,
+    id: "2",
     name: "Victoria Falls from Above",
     type: "activity",
     category: "Adventure",
@@ -44,7 +45,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
     featured: true,
   },
   {
-    id: 3,
+    id: "3",
     name: "Private Transfer to Victoria Falls",
     type: "transport",
     category: "Private Transfer",
@@ -62,7 +63,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
     featured: true,
   },
   {
-    id: 4,
+    id: "4",
     name: "Hwange Safari Lodge",
     type: "accommodation",
     category: "Safari Lodge",
@@ -79,7 +80,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
     featured: true,
   },
   {
-    id: 5,
+    id: "5",
     name: "White Water Rafting on the Zambezi",
     type: "activity",
     category: "Adventure Sports",
@@ -98,7 +99,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
     featured: true,
   },
   {
-    id: 6,
+    id: "6",
     name: "Domestic Flight Harare-Victoria Falls",
     type: "transport",
     category: "Domestic Flight",
@@ -115,7 +116,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
     featured: false,
   },
   {
-    id: 7,
+    id: "7",
     name: "Mana Pools Safari Camp",
     type: "accommodation",
     category: "Safari Camp",
@@ -132,7 +133,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
     featured: true,
   },
   {
-    id: 8,
+    id: "8",
     name: "Hwange Game Drive",
     type: "activity",
     category: "Wildlife Safari",
@@ -152,7 +153,7 @@ export const tripPlannerCatalog: PlannerCatalogItem[] = [
   },
 ];
 
-export function getPlannerCatalogItem(id: number) {
+export function getPlannerCatalogItem(id: string) {
   return tripPlannerCatalog.find((item) => item.id === id);
 }
 
@@ -178,33 +179,5 @@ export function toTripPlannerItem(
   item: PlannerCatalogItem,
   overrides: Partial<TripPlannerItem> = {}
 ): TripPlannerItem {
-  const startTime = overrides.startTime ?? "09:00";
-  const quantity = overrides.quantity ?? getDefaultQuantity(item.type);
-  const unitCost =
-    overrides.unitCost ?? Number(item.price.replace(/[^0-9.]/g, ""));
-  const pricingUnit = overrides.pricingUnit ?? getDefaultPricingUnit(item);
-
-  return {
-    id: overrides.id ?? `${item.type}-${item.id}-${Date.now()}`,
-    sourceId: item.id,
-    title: item.name,
-    type: item.type,
-    location: item.location,
-    date: overrides.date ?? new Date().toISOString().slice(0, 10),
-    endDate: overrides.endDate,
-    startTime,
-    endTime: overrides.endTime ?? getDefaultEndTime(startTime, item.type),
-    duration:
-      overrides.duration ??
-      item.duration ??
-      (item.type === "accommodation" ? "1 night" : "Flexible"),
-    cost: overrides.cost ?? unitCost * quantity,
-    unitCost,
-    quantity,
-    pricingUnit,
-    description: overrides.description ?? item.description,
-    rating: overrides.rating ?? item.rating,
-    image: overrides.image ?? item.image,
-    category: overrides.category ?? item.category,
-  };
+  return plannerCatalogToTripPlannerItem(item, overrides);
 }

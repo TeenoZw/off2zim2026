@@ -4,6 +4,7 @@ import { BookingService } from "@/services/BookingService";
 import { EmailService } from "@/services/EmailService";
 import { BookingConfirmation } from "@/types/payment";
 
+export const dynamic = "force-dynamic";
 // Initialize Paynow for webhook verification
 function initializePaynow() {
   const integrationId = process.env.PAYNOW_INTEGRATION_ID;

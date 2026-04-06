@@ -1,20 +1,16 @@
 import React from "react";
-import TripPlannerHero from "../../components/trip-planner/TripPlannerHero";
 import TripPlannerBuilder from "../../components/trip-planner/TripPlannerBuilder";
-import TripPlannerFeatures from "../../components/trip-planner/TripPlannerFeatures";
 
 export const metadata = {
-  title: "Trip Planner - Off2Zim | Build Your Zimbabwe Itinerary",
+  title: "Planner Studio - Off2Zim | Build Your Zimbabwe Itinerary",
   description:
-    "Build a polished Zimbabwe itinerary with timeline planning, budget tracking, and smarter trip organization in one place.",
+    "Use the Off2Zim planner studio to build, organize, and export a polished Zimbabwe itinerary in one focused workspace.",
 };
 
 export default function TripPlannerPage() {
   return (
     <div className="theme-page">
-      <TripPlannerHero />
       <TripPlannerBuilder />
-      <TripPlannerFeatures />
     </div>
   );
 }

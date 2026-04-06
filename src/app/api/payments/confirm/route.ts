@@ -6,6 +6,10 @@ import {
   CreateBookingRequest,
 } from "@/services/BookingService";
 import { EmailService } from "@/services/EmailService";
+import { prisma } from "@/lib/prisma";
+import { requireSessionUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not defined");
@@ -23,7 +27,8 @@ function generateConfirmationNumber(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { paymentIntentId, userId = "demo-user-id" } = await request.json();
+    const { user } = await requireSessionUser();
+    const { paymentIntentId } = await request.json();
 
     if (!paymentIntentId) {
       return NextResponse.json(
@@ -52,20 +57,21 @@ export async function POST(request: NextRequest) {
       name: item.name,
       description: item.description || `${item.name} booking`,
       price: item.price,
-      currency: paymentIntent.currency.toUpperCase(),
+      currency: item.currency || paymentIntent.currency.toUpperCase(),
       quantity: item.quantity,
+      checkIn: item.checkIn,
+      checkOut: item.checkOut,
+      guests: item.guests,
+      provider: item.provider,
       metadata: {
-        hotelId: item.type === "accommodation" ? item.id : undefined,
-        activityId: item.type === "activity" ? item.id : undefined,
-        restaurantId: item.type === "dining" ? item.id : undefined,
-        eventId: item.type === "event" ? item.id : undefined,
+        ...item.metadata,
       },
     }));
 
     try {
       // Create booking in database
       const bookingRequest: CreateBookingRequest = {
-        userId,
+        userId: user.id,
         items: bookingItems,
         totalAmount: paymentIntent.amount / 100, // Convert from cents
         currency: paymentIntent.currency.toUpperCase(),
@@ -84,9 +90,9 @@ export async function POST(request: NextRequest) {
       const booking = await BookingService.createBooking(bookingRequest);
 
       // Create payment record
-      await BookingService.createPayment({
+      const payment = await BookingService.createPayment({
         bookingId: booking.id,
-        userId,
+        userId: user.id,
         amount: paymentIntent.amount / 100,
         currency: paymentIntent.currency.toUpperCase(),
         method: "stripe",
@@ -94,11 +100,19 @@ export async function POST(request: NextRequest) {
         stripePaymentId: paymentIntent.id,
       });
 
+      await BookingService.updatePaymentStatus(payment.id, "COMPLETED", {
+        stripePaymentId: paymentIntent.id,
+      });
+
       // Create booking confirmation response
+      const currentUser = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+
       const confirmation: BookingConfirmation = {
         id: booking.id,
         paymentIntentId: paymentIntent.id,
-        userId,
+        userId: user.id,
         items: bookingItems,
         totalAmount: paymentIntent.amount / 100,
         currency: paymentIntent.currency.toUpperCase(),
@@ -108,8 +122,14 @@ export async function POST(request: NextRequest) {
         bookingDate: booking.createdAt.toISOString(),
         confirmationNumber: booking.confirmationNumber,
         customerInfo: {
-          name: "Demo User", // This should come from user data
-          email: "demo@off2zim.com", // This should come from user data
+          name:
+            currentUser?.name ||
+            [currentUser?.firstName, currentUser?.lastName]
+              .filter(Boolean)
+              .join(" ") ||
+            user.email,
+          email: currentUser?.email || user.email,
+          phone: currentUser?.phone || undefined,
         },
         metadata: paymentIntent.metadata,
       };
@@ -132,6 +152,12 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error("Error confirming payment:", error);
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json(
+        { error: "Please sign in before confirming payment." },
+        { status: 401 }
+      );
+    }
     return NextResponse.json(
       { error: "Failed to confirm payment" },
       { status: 500 }

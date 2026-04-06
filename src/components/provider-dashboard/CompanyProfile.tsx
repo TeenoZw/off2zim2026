@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Building2,
   FileText,
@@ -9,29 +9,50 @@ import {
   MapPin,
   Phone,
   Shield,
-  Star,
-  Users,
+  Tag,
 } from "lucide-react";
+import { apiFetch } from "@/lib/client-api";
+import type { ProviderCompanyRecord } from "@/types/platform";
 
 export default function CompanyProfile() {
-  const highlights = [
-    "Adventure tours",
-    "Scenic flights",
-    "River cruises",
-    "Wildlife safaris",
-  ];
+  const [company, setCompany] = useState<ProviderCompanyRecord | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const certifications = [
-    "Tourism Operator License",
-    "Aviation Safety Certificate",
-    "First Aid Certification",
-  ];
+  useEffect(() => {
+    const loadCompany = async () => {
+      try {
+        const payload = await apiFetch<{ company: ProviderCompanyRecord }>(
+          "/api/provider/company"
+        );
+        setCompany(payload.company);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to load company profile.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const policies = [
-    "Free cancellation up to 24 hours before start time",
-    "Full refund for weather-related cancellations",
-    "Safety equipment provided where required",
-    "Insurance coverage included",
+    loadCompany();
+  }, []);
+
+  if (loading) {
+    return <PanelMessage title="Loading company profile" body="Pulling the latest onboarding and company details." />;
+  }
+
+  if (error || !company) {
+    return (
+      <PanelMessage
+        title="Company profile unavailable"
+        body={error || "No provider company profile was found for this account."}
+      />
+    );
+  }
+
+  const profileSignals = [
+    company.businessCategory || "No category selected yet",
+    company.onboardingStatus.replace(/_/g, " "),
+    company.verificationTier.replace(/_/g, " "),
   ];
 
   return (
@@ -39,15 +60,17 @@ export default function CompanyProfile() {
       <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-white">Company profile</h2>
+            <h2 className="text-2xl font-semibold text-white">{company.companyName}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
-              This view now presents the provider profile more like a polished business
-              storefront rather than a raw admin form.
+              {company.businessDescription ||
+                "Complete the business description in onboarding to explain what makes this service provider trustworthy and distinctive."}
             </p>
           </div>
-          <button className="rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white">
-            Edit profile
-          </button>
+          <div className="rounded-full border border-[#ff5630]/30 bg-[#2d1714] px-4 py-2 text-sm font-medium text-[#ffb09c]">
+            {company.verificationTier === "verified_premium"
+              ? "Verified / Premium Partner"
+              : "Basic Review Track"}
+          </div>
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.95fr]">
@@ -56,59 +79,113 @@ export default function CompanyProfile() {
               <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#13283a]">
                 <Building2 className="h-7 w-7 text-[#8dc9ff]" />
               </div>
-              <div>
+              <div className="flex-1">
                 <h3 className="text-2xl font-semibold text-white">
-                  Victoria Falls Adventure Co.
+                  {company.tradingName || company.companyName}
                 </h3>
-                <p className="mt-2 text-sm text-white/55">
-                  Premier adventure tour operator specializing in Victoria Falls
-                  experiences with a focus on safety, sustainability, and memorable
-                  traveler moments.
-                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {profileSignals.map((signal) => (
+                    <span
+                      key={signal}
+                      className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/55"
+                    >
+                      {signal}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <InfoTile icon={<MapPin className="h-4 w-4 text-[#ff7352]" />} text="Victoria Falls, Matabeleland North" />
-              <InfoTile icon={<Phone className="h-4 w-4 text-[#8cf0a1]" />} text="+263 13 44321" />
-              <InfoTile icon={<Mail className="h-4 w-4 text-[#ffca74]" />} text="info@vfadventure.co.zw" />
-              <InfoTile icon={<Globe className="h-4 w-4 text-[#8dc9ff]" />} text="vfadventure.co.zw" />
+              <InfoTile
+                icon={<MapPin className="h-4 w-4 text-[#ff7352]" />}
+                text={company.physicalAddress}
+              />
+              <InfoTile
+                icon={<Phone className="h-4 w-4 text-[#8cf0a1]" />}
+                text={company.businessPhone}
+              />
+              <InfoTile
+                icon={<Mail className="h-4 w-4 text-[#ffca74]" />}
+                text={company.businessEmail}
+              />
+              <InfoTile
+                icon={<Globe className="h-4 w-4 text-[#8dc9ff]" />}
+                text={company.websiteUrl || "Website not set"}
+              />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Stat label="Rating" value="4.8" icon={<Star className="h-4 w-4 text-[#ffc247]" />} />
-            <Stat label="Reviews" value="156" icon={<Users className="h-4 w-4 text-[#8dc9ff]" />} />
-            <Stat label="Bookings completed" value="892" icon={<FileText className="h-4 w-4 text-[#8cf0a1]" />} />
-            <Stat label="Verification" value="Verified" icon={<Shield className="h-4 w-4 text-[#ff8a63]" />} />
+            <Stat
+              label="Listings"
+              value={`${company.listingStats?.total || 0}`}
+              icon={<Tag className="h-4 w-4 text-[#ffc247]" />}
+            />
+            <Stat
+              label="Active listings"
+              value={`${company.listingStats?.active || 0}`}
+              icon={<Shield className="h-4 w-4 text-[#8dc9ff]" />}
+            />
+            <Stat
+              label="Bookings"
+              value={`${company.bookingStats?.total || 0}`}
+              icon={<FileText className="h-4 w-4 text-[#8cf0a1]" />}
+            />
+            <Stat
+              label="Documents"
+              value={`${company.documents.length}`}
+              icon={<Building2 className="h-4 w-4 text-[#ff8a63]" />}
+            />
           </div>
         </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-3">
-        <CardBlock title="Service focus">
-          {highlights.map((item) => (
-            <p key={item} className="text-sm text-white/60">
-              {item}
-            </p>
-          ))}
+        <CardBlock title="Services offered">
+          {company.servicesOffered.length > 0 ? (
+            company.servicesOffered.map((item) => (
+              <p key={item} className="text-sm text-white/60">
+                {item}
+              </p>
+            ))
+          ) : (
+            <p className="text-sm text-white/45">No services added yet.</p>
+          )}
         </CardBlock>
-        <CardBlock title="Certifications">
-          {certifications.map((item) => (
-            <p key={item} className="text-sm text-white/60">
-              {item}
-            </p>
-          ))}
+        <CardBlock title="Coverage">
+          {company.serviceAreas.length > 0 ? (
+            company.serviceAreas.map((item) => (
+              <p key={item} className="text-sm text-white/60">
+                {item}
+              </p>
+            ))
+          ) : (
+            <p className="text-sm text-white/45">Service areas have not been defined yet.</p>
+          )}
         </CardBlock>
-        <CardBlock title="Policies">
-          {policies.map((item) => (
-            <p key={item} className="text-sm text-white/60">
-              {item}
-            </p>
-          ))}
+        <CardBlock title="Documents on file">
+          {company.documents.length > 0 ? (
+            company.documents.map((document) => (
+              <p key={document.id} className="text-sm text-white/60">
+                {document.type}: {document.status}
+              </p>
+            ))
+          ) : (
+            <p className="text-sm text-white/45">No verification documents uploaded yet.</p>
+          )}
         </CardBlock>
       </section>
     </div>
+  );
+}
+
+function PanelMessage({ title, body }: { title: string; body: string }) {
+  return (
+    <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
+      <h2 className="text-2xl font-semibold text-white">{title}</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-white/55">{body}</p>
+    </section>
   );
 }
 

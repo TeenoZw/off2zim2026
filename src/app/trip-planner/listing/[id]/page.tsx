@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, useParams, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   ChevronLeft,
@@ -16,9 +16,11 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { getPlannerCatalogItem, toTripPlannerItem } from "@/lib/trip-planner/catalog";
 import { useTripPlanner } from "@/contexts/TripPlannerContext";
 import { usePayment } from "@/contexts/PaymentContext";
+import { apiFetch } from "@/lib/client-api";
+import type { PublicListingRecord } from "@/types/platform";
+import { publicListingToPlannerCatalogItem } from "@/lib/public-listing-adapter";
 
 export default function TripPlannerListingDetailPage() {
   const params = useParams<{ id: string }>();
@@ -28,29 +30,54 @@ export default function TripPlannerListingDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedDate, setSelectedDate] = useState("");
   const [guests, setGuests] = useState(2);
+  const [listing, setListing] = useState<PublicListingRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadListing = async () => {
+      try {
+        const payload = await apiFetch<{ listing: PublicListingRecord }>(
+          `/api/listings/${params.id}`
+        );
+        setListing(payload.listing);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to load listing.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadListing();
+  }, [params.id]);
 
   const plannerItem = useMemo(
-    () => getPlannerCatalogItem(Number(params.id)),
-    [params.id]
+    () => (listing ? publicListingToPlannerCatalogItem(listing) : null),
+    [listing]
   );
 
-  if (!plannerItem) {
-    notFound();
+  if (loading) {
+    return <div className="theme-page p-8">Loading listing...</div>;
   }
 
-  const images = [
-    plannerItem.image,
-    "/images/palm-river-hotel-604329-original.jpg",
-    "/images/old-drift.jpg",
-    "/images/ivoryLodge.jpg",
-  ];
+  if (error || !listing || !plannerItem) {
+    return <div className="theme-page p-8">{error || "Listing not found."}</div>;
+  }
+
+  const images = listing.images.length
+    ? listing.images
+    : [
+        "/images/palm-river-hotel-604329-original.jpg",
+        "/images/old-drift.jpg",
+        "/images/ivoryLodge.jpg",
+      ];
 
   const amenityLike = plannerItem.amenities || plannerItem.highlights || [];
   const policies = [
     ["Availability", plannerItem.availability],
     ["Recommended date", selectedDate || "Choose your date"],
     ["Pricing model", plannerItem.priceUnit],
-    ["Trip Planner fit", "Best used for timeline planning and budget tracking"],
+    ["Provider", listing.provider.companyName],
   ];
 
   const handleAddToPlanner = () => {
@@ -58,19 +85,31 @@ export default function TripPlannerListingDetailPage() {
   };
 
   const handleBookNow = () => {
-    const item = toTripPlannerItem(plannerItem, selectedDate ? { date: selectedDate } : {});
     addToBooking({
-      id: item.id,
-      type: plannerItem.type === "activity" ? "activity" : "accommodation",
+      id: listing.id,
+      type:
+        plannerItem.type === "activity"
+          ? "activity"
+          : plannerItem.type === "transport"
+            ? "transport"
+            : "accommodation",
       name: plannerItem.name,
       description: plannerItem.description,
-      price: item.cost,
-      currency: "USD",
+      price: listing.basePrice || 0,
+      currency: listing.currency,
       quantity: 1,
       checkIn: selectedDate || undefined,
       checkOut: selectedDate || undefined,
       guests,
+      provider: {
+        id: listing.provider.id,
+        name: listing.provider.companyName,
+        email: "",
+      },
       metadata: {
+        providerId: listing.provider.id,
+        listingId: listing.id,
+        slug: listing.slug,
         location: plannerItem.location,
         category: plannerItem.category,
         rating: plannerItem.rating,
@@ -162,7 +201,7 @@ export default function TripPlannerListingDetailPage() {
               )}
               <span className="inline-flex items-center gap-2">
                 <Star className="h-4 w-4 fill-[#ffc247] text-[#ffc247]" />
-                {plannerItem.rating} ({plannerItem.reviews} reviews)
+                {plannerItem.rating} ({plannerItem.reviews} bookings)
               </span>
             </div>
 
@@ -180,7 +219,7 @@ export default function TripPlannerListingDetailPage() {
                   </div>
                 </div>
                 <div className="theme-chip rounded-full px-4 py-2 text-sm">
-                  Trusted listing
+                  {listing.bookingMode === "instant" ? "Instant booking" : "Request booking"}
                 </div>
               </div>
 
@@ -221,15 +260,15 @@ export default function TripPlannerListingDetailPage() {
               <div className="theme-muted mt-6 border-t border-black/10 pt-5 text-sm dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  +263 13 44751
+                  {listing.provider.location}
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  reservations@off2zim.co.zw
+                  Contact available after booking request
                 </div>
                 <div className="mt-2 flex items-center gap-2">
                   <Globe className="h-4 w-4" />
-                  www.off2zim.co.zw
+                  {listing.provider.companyName}
                 </div>
               </div>
             </div>

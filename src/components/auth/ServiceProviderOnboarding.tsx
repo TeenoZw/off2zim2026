@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiFetch } from "@/lib/client-api";
 
 interface ServiceProviderOnboardingProps {
   onComplete?: () => void;
@@ -11,6 +12,7 @@ interface ServiceProviderOnboardingProps {
 interface DocumentUpload {
   type: string;
   file: File | null;
+  fileUrl?: string | null;
   status: "pending" | "uploaded" | "verified" | "rejected";
 }
 
@@ -121,16 +123,46 @@ const ServiceProviderOnboarding = ({
     setIsSubmitting(true);
 
     try {
-      // Simulate API call for Basic Review submission
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const uploadedDocuments = await Promise.all(
+        documents.map(async (document) => {
+          if (!document.file) {
+            return document;
+          }
 
-      // Update user profile with business information
+          const formData = new FormData();
+          formData.append("file", document.file);
+          formData.append("documentType", document.type);
+
+          const payload = await apiFetch<{
+            asset: {
+              fileName: string;
+              fileUrl: string;
+              contentType: string;
+              size: number;
+            };
+          }>("/api/provider/uploads/documents", {
+            method: "POST",
+            body: formData,
+          });
+
+          return {
+            ...document,
+            fileUrl: payload.asset.fileUrl,
+            status: "uploaded" as const,
+          };
+        })
+      );
+
       await updateProfile({
         ...businessInfo,
-        businessDocuments: documents,
+        businessDocuments: uploadedDocuments,
         onboardingCompleted: true,
         basicReviewSubmitted: true,
         basicReviewSubmittedAt: new Date().toISOString(),
+      });
+
+      await apiFetch("/api/provider/company/review", {
+        method: "POST",
       });
 
       onComplete?.();

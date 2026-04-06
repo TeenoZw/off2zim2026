@@ -23,19 +23,29 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-black/10 bg-white/85 backdrop-blur-xl dark:border-white/10 dark:bg-[#070707]/85">
+      <header className="sticky top-0 z-[120] border-b border-black/10 bg-white/85 backdrop-blur-xl dark:border-white/10 dark:bg-[#070707]/85">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[#2a1614] text-[#ff7352] transition hover:bg-[#351b18] md:hidden"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setIsMobileMenuOpen(true);
+              }}
+              className="relative z-[130] inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[#2a1614] text-[#ff7352] transition hover:bg-[#351b18] md:hidden"
               aria-label="Open menu"
+              aria-expanded={isMobileMenuOpen}
             >
               <Menu className="h-5 w-5" />
             </button>
 
-            <SiteLogo width={128} height={40} className="h-10 w-auto" priority />
+            <SiteLogo
+              width={128}
+              height={40}
+              className="h-9 w-auto sm:h-10"
+              priority
+            />
           </div>
 
           <nav className="hidden items-center gap-7 lg:flex">
@@ -87,7 +97,7 @@ export default function Header() {
 
             <Link
               href="/checkout"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#ff5630] text-white transition hover:bg-[#ff6f4d] md:hidden"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ff5630] text-white transition hover:bg-[#ff6f4d] md:hidden"
               aria-label="Open cart"
             >
               <ShoppingBag className="h-5 w-5" />
