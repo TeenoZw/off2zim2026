@@ -25,7 +25,7 @@
     "db:bootstrap:postgres": "./scripts/bootstrap-postgres.sh",
     "db:reset:postgres": "./scripts/bootstrap-postgres.sh --reset",
     "analyze": "cross-env ANALYZE=true next build",
-    "netlify:build": "next build",
+    "netlify:build": "prisma generate && next build",
     "clean": "rimraf .next out dist build",
     "prepare": "husky install"
   },
