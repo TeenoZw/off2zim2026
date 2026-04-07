@@ -102,7 +102,7 @@ function DesktopDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white/84 dark:hover:bg-white/10 dark:hover:text-white"
+        className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
         aria-expanded={isOpen}
       >
         <Icon className="h-4 w-4 text-[#ff7352]" />
@@ -130,7 +130,7 @@ function DesktopDropdown({
                 <div className="text-sm font-semibold text-black dark:text-white">
                   {item.label}
                 </div>
-                <div className="mt-1 text-sm leading-5 text-black/68 dark:text-white/66">
+                <div className="mt-1 text-sm leading-5 text-black/68 dark:text-white/78">
                   {item.description}
                 </div>
               </Link>
@@ -199,7 +199,7 @@ export default function Header() {
 
             <Link
               href="/marketplace"
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white/84 dark:hover:bg-white/10 dark:hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
             >
               Marketplace
             </Link>
@@ -210,7 +210,7 @@ export default function Header() {
               <>
                 <Link
                   href={getSurfaceHref("explorer", "/login")}
-                  className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white/84 dark:hover:bg-white/10 dark:hover:text-white md:inline-flex"
+                  className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-black/[0.06] hover:text-slate-950 dark:text-white dark:hover:bg-white/10 dark:hover:text-white md:inline-flex"
                 >
                   Sign in
                 </Link>
@@ -231,7 +231,7 @@ export default function Header() {
 
             <Link
               href={user ? accountRoute : getSurfaceHref("explorer", "/login")}
-              className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#161616] dark:text-white/90 dark:hover:bg-[#1d1d1d] md:px-4"
+              className="inline-flex h-11 min-w-11 items-center justify-center rounded-full border border-black/10 bg-white px-3 text-slate-800 transition hover:bg-slate-50 dark:border-white/10 dark:bg-[#161616] dark:text-white dark:hover:bg-[#1d1d1d] md:px-4"
               aria-label={user ? "Open workspace" : "Sign in"}
             >
               {user ? (
