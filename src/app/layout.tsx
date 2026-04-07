@@ -74,7 +74,10 @@ export default async function RootLayout({
 }) {
   const headerStore = await headers();
   const host = headerStore.get("host");
-  const surface = resolveAppSurface(host);
+  const surfaceHeader = headerStore.get("x-off2zim-surface");
+  const surface = surfaceHeader
+    ? resolveAppSurface(surfaceHeader)
+    : resolveAppSurface(host);
   const isPublicSurface = surface === "public";
 
   return (

@@ -1,10 +1,63 @@
 export type AppSurface = "public" | "explorer" | "provider" | "admin";
 
+const surfacePathPrefixes: Record<Exclude<AppSurface, "public">, string> = {
+  explorer: "/explorer",
+  provider: "/sp",
+  admin: "/admin-app",
+};
+
 function normalizeHost(hostname: string | null | undefined) {
   return (hostname || "").toLowerCase().split(":")[0];
 }
 
-export function resolveAppSurface(hostname: string | null | undefined): AppSurface {
+function normalizePath(pathname: string | null | undefined) {
+  const path = pathname || "/";
+  return path.startsWith("/") ? path : `/${path}`;
+}
+
+export function resolveSurfaceFromPath(pathname: string | null | undefined): AppSurface {
+  const path = normalizePath(pathname);
+
+  if (path === surfacePathPrefixes.admin || path.startsWith(`${surfacePathPrefixes.admin}/`)) {
+    return "admin";
+  }
+
+  if (
+    path === surfacePathPrefixes.provider ||
+    path.startsWith(`${surfacePathPrefixes.provider}/`)
+  ) {
+    return "provider";
+  }
+
+  if (
+    path === surfacePathPrefixes.explorer ||
+    path.startsWith(`${surfacePathPrefixes.explorer}/`)
+  ) {
+    return "explorer";
+  }
+
+  return "public";
+}
+
+export function resolveAppSurface(
+  hostname: string | null | undefined,
+  pathname?: string | null | undefined,
+): AppSurface {
+  if (
+    hostname === "public" ||
+    hostname === "explorer" ||
+    hostname === "provider" ||
+    hostname === "admin"
+  ) {
+    return hostname;
+  }
+
+  const surfaceFromPath = resolveSurfaceFromPath(pathname);
+
+  if (surfaceFromPath !== "public") {
+    return surfaceFromPath;
+  }
+
   const host = normalizeHost(hostname);
 
   if (
@@ -37,6 +90,23 @@ export function resolveAppSurface(hostname: string | null | undefined): AppSurfa
   return "public";
 }
 
+export function stripSurfacePrefix(pathname: string) {
+  const path = normalizePath(pathname);
+  const surface = resolveSurfaceFromPath(path);
+
+  if (surface === "public") {
+    return path;
+  }
+
+  const prefix = surfacePathPrefixes[surface];
+  const stripped = path.slice(prefix.length);
+  return stripped ? normalizePath(stripped) : "/";
+}
+
+export function getSurfacePrefix(surface: Exclude<AppSurface, "public">) {
+  return surfacePathPrefixes[surface];
+}
+
 export function getSurfaceHome(surface: AppSurface) {
   switch (surface) {
     case "admin":
@@ -55,23 +125,23 @@ export function getDefaultPostAuthRoute(
   role?: "explorer" | "provider" | "guide" | "admin" | null,
 ) {
   if (role === "provider") {
-    return "/provider-dashboard";
+    return getSurfaceHref("provider", "/provider-dashboard");
   }
 
   if (role === "admin") {
-    return "/admin/providers";
+    return getSurfaceHref("admin", "/admin/providers");
   }
 
   if (surface === "provider") {
-    return "/provider-dashboard";
+    return getSurfaceHref("provider", "/provider-dashboard");
   }
 
   if (surface === "admin") {
-    return "/admin/providers";
+    return getSurfaceHref("admin", "/admin/providers");
   }
 
   if (surface === "explorer") {
-    return "/dashboard";
+    return getSurfaceHref("explorer", "/dashboard");
   }
 
   return "/travel-guide";
@@ -121,6 +191,14 @@ export function isPathAllowedOnSurface(pathname: string, surface: AppSurface) {
 }
 
 function getBaseUrl() {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    try {
+      return new URL(window.location.origin);
+    } catch {
+      // fall through to configured URL
+    }
+  }
+
   const configured = process.env.NEXT_PUBLIC_APP_URL;
 
   if (!configured) {
@@ -136,12 +214,16 @@ function getBaseUrl() {
 
 export function getSurfaceHref(surface: AppSurface, pathname = "/") {
   const baseUrl = getBaseUrl();
+  const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
 
   if (!baseUrl) {
-    return pathname;
+    if (surface === "public") {
+      return normalizedPath;
+    }
+
+    return `${getSurfacePrefix(surface)}${normalizedPath === "/" ? "" : normalizedPath}`;
   }
 
-  const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
   const isLocalHost =
     baseUrl.hostname === "localhost" ||
     baseUrl.hostname === "127.0.0.1" ||
@@ -152,7 +234,7 @@ export function getSurfaceHref(surface: AppSurface, pathname = "/") {
   }
 
   if (isLocalHost) {
-    return normalizedPath;
+    return `${getSurfacePrefix(surface)}${normalizedPath === "/" ? "" : normalizedPath}`;
   }
 
   const hostParts = baseUrl.hostname.split(".");

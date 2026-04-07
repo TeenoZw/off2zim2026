@@ -1,3 +1,4 @@
+import { getSurfaceHref } from "@/lib/app-surface";
 import type { User, UserRole } from "@/types/auth";
 
 function getRoleFromUser(user?: Pick<User, "role"> | null): UserRole | null {
@@ -8,26 +9,26 @@ export function getPostAuthRoute(user?: Pick<User, "role"> | null) {
   const role = getRoleFromUser(user);
 
   if (role === "provider") {
-    return "/provider-dashboard";
+    return getSurfaceHref("provider", "/provider-dashboard");
   }
 
   if (role === "admin") {
-    return "/admin/providers";
+    return getSurfaceHref("admin", "/admin/providers");
   }
 
-  return "/travel-guide";
+  return getSurfaceHref("explorer", "/travel-guide");
 }
 
 export function getAccountRoute(user?: Pick<User, "role"> | null) {
   const role = getRoleFromUser(user);
 
   if (role === "provider") {
-    return "/provider-dashboard";
+    return getSurfaceHref("provider", "/provider-dashboard");
   }
 
   if (role === "admin") {
-    return "/admin/providers";
+    return getSurfaceHref("admin", "/admin/providers");
   }
 
-  return "/dashboard";
+  return getSurfaceHref("explorer", "/dashboard");
 }

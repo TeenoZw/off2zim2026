@@ -12,7 +12,10 @@ export default function PortalChrome({ surface }: { surface: Exclude<AppSurface,
     <div className="sticky top-0 z-[120] border-b border-black/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#070707]/90">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
-          <Link href={meta.href} className="inline-flex items-center">
+          <Link
+            href={getSurfaceHref(surface, meta.href)}
+            className="inline-flex items-center"
+          >
             <SiteLogo width={128} height={40} className="h-9 w-auto sm:h-10" priority />
           </Link>
           <div className="hidden border-l border-black/10 pl-4 dark:border-white/10 md:block">
@@ -28,7 +31,7 @@ export default function PortalChrome({ surface }: { surface: Exclude<AppSurface,
           {links.map((link) => (
             <Link
               key={link.label}
-              href={link.href}
+              href={getSurfaceHref(surface, link.href)}
               className="inline-flex items-center rounded-full px-4 py-2 text-sm font-medium text-black/72 transition hover:bg-black/[0.045] hover:text-black dark:text-white/78 dark:hover:bg-white/8 dark:hover:text-white"
             >
               {link.label}
@@ -45,7 +48,7 @@ export default function PortalChrome({ surface }: { surface: Exclude<AppSurface,
 
         <div className="flex items-center gap-2 lg:hidden">
           <Link
-            href={meta.href}
+            href={getSurfaceHref(surface, meta.href)}
             className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-4 py-2 text-sm font-medium text-black/78 transition hover:bg-black/[0.05] dark:border-white/10 dark:bg-white/[0.05] dark:text-white/84 dark:hover:bg-white/[0.08]"
           >
             <Icon className="h-4 w-4 text-[#ff5630]" />
