@@ -172,14 +172,12 @@ export default function Header() {
               <Menu className="h-5 w-5" />
             </button>
 
-            <Link href="/" className="inline-flex items-center">
-              <SiteLogo
-                width={128}
-                height={40}
-                className="h-9 w-auto sm:h-10"
-                priority
-              />
-            </Link>
+            <SiteLogo
+              width={128}
+              height={40}
+              className="h-9 w-auto sm:h-10"
+              priority
+            />
           </div>
 
           <nav className="hidden items-center gap-2 lg:flex">

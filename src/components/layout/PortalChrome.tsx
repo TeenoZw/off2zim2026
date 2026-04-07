@@ -12,12 +12,13 @@ export default function PortalChrome({ surface }: { surface: Exclude<AppSurface,
     <div className="sticky top-0 z-[120] border-b border-black/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-[#070707]/90">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
-          <Link
+          <SiteLogo
             href={getSurfaceHref(surface, meta.href)}
-            className="inline-flex items-center"
-          >
-            <SiteLogo width={128} height={40} className="h-9 w-auto sm:h-10" priority />
-          </Link>
+            width={128}
+            height={40}
+            className="h-9 w-auto sm:h-10"
+            priority
+          />
           <div className="hidden border-l border-black/10 pl-4 dark:border-white/10 md:block">
             <div className="text-[11px] uppercase tracking-[0.28em] text-black/38 dark:text-white/35">
               {meta.label}
