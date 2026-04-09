@@ -6,6 +6,27 @@ const surfacePathPrefixes: Record<Exclude<AppSurface, "public">, string> = {
   admin: "/admin-app",
 };
 
+function getForcedSurface(): AppSurface | null {
+  const forced = (
+    process.env.NEXT_PUBLIC_FORCE_SURFACE ||
+    process.env.OFF2ZIM_FORCE_SURFACE ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  if (
+    forced === "public" ||
+    forced === "explorer" ||
+    forced === "provider" ||
+    forced === "admin"
+  ) {
+    return forced;
+  }
+
+  return null;
+}
+
 function normalizeHost(hostname: string | null | undefined) {
   return (hostname || "").toLowerCase().split(":")[0];
 }
@@ -56,6 +77,12 @@ export function resolveAppSurface(
 
   if (surfaceFromPath !== "public") {
     return surfaceFromPath;
+  }
+
+  const forcedSurface = getForcedSurface();
+
+  if (forcedSurface) {
+    return forcedSurface;
   }
 
   const host = normalizeHost(hostname);
@@ -215,8 +242,13 @@ function getBaseUrl() {
 export function getSurfaceHref(surface: AppSurface, pathname = "/") {
   const baseUrl = getBaseUrl();
   const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const forcedSurface = getForcedSurface();
 
   if (!baseUrl) {
+    if (forcedSurface && (surface === forcedSurface || surface === "public")) {
+      return normalizedPath;
+    }
+
     if (surface === "public") {
       return normalizedPath;
     }
@@ -231,6 +263,10 @@ export function getSurfaceHref(surface: AppSurface, pathname = "/") {
 
   if (surface === "public") {
     return `${baseUrl.origin}${normalizedPath}`;
+  }
+
+  if (forcedSurface && surface === forcedSurface) {
+    return normalizedPath;
   }
 
   if (isLocalHost) {

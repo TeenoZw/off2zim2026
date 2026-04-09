@@ -1,0 +1,7 @@
+{
+  "name": "@off2zim/backend",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix .. run dev:backend"
+  }
+}

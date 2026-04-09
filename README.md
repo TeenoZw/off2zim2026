@@ -1,102 +1,63 @@
-![full_logo_transparent (1)](https://github.com/user-attachments/assets/cafc953e-cd83-4fac-88ca-1156ec98fb58)
-Off2Zim is your ultimate guide to exploring the beauty and adventure of Zimbabwe. From breathtaking landscapes to vibrant culture, we are here to enhance your travel experience. This platform allows you to book events, reserve hotels, and make dining reservations seamlessly.
+# Off2Zim Platform
 
-**Table of Contents**
+Off2Zim now runs as a unified platform with one shared backend and database, while exposing separate app surfaces for customers, providers, administrators, and mobile.
 
-Features
-Technologies Used
-Installation
-Usage
-Contributing
-License
-Contact
-_________________________________________________________________________________________________
-**Features**
+## App structure
 
-Book Events: Easily find and book exciting events happening during your stay in Zimbabwe.
-Hotel Stays: Choose from a variety of accommodations that suit your style and budget.
-Dining Reservations: Reserve your table at top restaurants for a delightful culinary experience.
-Travel Tips: Get insider tips and recommendations for your trip.
-Newsletter Subscription: Stay updated with the latest travel updates and offers.
-_________________________________________________________________________________________________
-**Technologies Used**
+- [apps/main-web](/Users/tinotendamutami/Off2Zim/off2zim-v.3/apps/main-web)
+  - landing page
+  - explorer login and registration
+  - travel discovery, planning, and booking
+- [apps/provider-web](/Users/tinotendamutami/Off2Zim/off2zim-v.3/apps/provider-web)
+  - provider sign in
+  - provider dashboard
+  - listings, orders, and verification
+- [apps/admin-web](/Users/tinotendamutami/Off2Zim/off2zim-v.3/apps/admin-web)
+  - admin sign in
+  - platform operations workspace
+- [Mobile](/Users/tinotendamutami/Off2Zim/off2zim-v.3/Mobile)
+  - explorer, provider, and admin mobile variants
+- [backend](/Users/tinotendamutami/Off2Zim/off2zim-v.3/backend)
+  - unified API and Prisma-backed data layer
 
-Frontend:
-HTML5
-CSS3
-JavaScript
-Icons:
-Font Awesome
-Fonts:
-Google Fonts - Inter
-Responsive Design:
-Media queries for mobile and tablet compatibility.
-_________________________________________________________________________________________________
-**Installation**
+## Local development
 
-To run this project locally, follow these steps:
+Main web app:
 
-Clone the repository:
-bash
-Copy
-git clone https://github.com/your-username/off2zim.git
-cd off2zim
-Open the project:
-Open the index.html file in your browser.
-Customize:
-Replace placeholder images and text with your own content.
-_________________________________________________________________________________________________
-**Usage**
+```bash
+npm run dev:main-web
+```
 
-Explore Destinations:
-Navigate through the website to discover popular destinations in Zimbabwe.
-Book Services:
-Use the "Book Now" button to reserve hotels, events, or dining options.
-Subscribe to Newsletter:
-Enter your email in the newsletter section to stay updated.
-Contact Us:
-Reach out to us through the "Contact Us" section for any inquiries.
-_________________________________________________________________________________________________
-**Contributing**
+Provider web app:
 
-We welcome contributions! If you'd like to contribute to this project, please follow these steps:
+```bash
+npm run dev:provider-web
+```
 
-Fork the repository.
-Create a new branch:
-bash
-Copy
-git checkout -b feature/your-feature-name
-Commit your changes:
-bash
-Copy
-git commit -m "Add your feature"
-Push to the branch:
-bash
-Copy
-git push origin feature/your-feature-name
-Open a pull request.
-_________________________________________________________________________________________________
-**License**
+Admin web app:
 
-This project is licensed under the MIT License. See the LICENSE file for details.
-_________________________________________________________________________________________________
-**Contact**
+```bash
+npm run dev:admin-web
+```
 
-For any questions or inquiries, feel free to reach out:
+Backend:
 
-Email: info@off2zim.co.zw
+```bash
+npm run dev:backend
+```
 
-Website: off2Zim.co.zw
+Mobile:
 
-**Social Media**
-Facebook - https://www.facebook.com/Off2Zim
+```bash
+cd Mobile
+npm run start:explorer
+```
 
-Instagram - https://www.instagram.com/off2zim/
+## Local URLs
 
-X - https://x.com/Off2Zim
-_________________________________________________________________________________________________
-**Acknowledgments**
+- main web app: [http://localhost:3000](http://localhost:3000)
+- provider web app: [http://localhost:3002](http://localhost:3002)
+- admin web app: [http://localhost:3003](http://localhost:3003)
+- backend health: [http://localhost:4000/api/health](http://localhost:4000/api/health)
 
-Thanks to Font Awesome for the icons.
-Special thanks to Google Fonts for the Inter font.
-Enjoy exploring Zimbabwe with Off2Zim! 🌍✈️
+All surfaces use the same backend logic and the same database connection.

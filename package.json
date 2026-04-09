@@ -5,6 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:main-web": "cross-env NEXT_PUBLIC_FORCE_SURFACE=public next dev -p 3000",
+    "dev:provider-web": "cross-env NEXT_PUBLIC_FORCE_SURFACE=provider next dev -p 3002",
+    "dev:admin-web": "cross-env NEXT_PUBLIC_FORCE_SURFACE=admin next dev -p 3003",
+    "dev:backend": "cross-env NEXT_PUBLIC_FORCE_SURFACE=public next dev -p 4000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

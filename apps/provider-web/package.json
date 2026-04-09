@@ -1,0 +1,7 @@
+{
+  "name": "@off2zim/provider-web",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix ../.. run dev:provider-web"
+  }
+}
