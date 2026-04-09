@@ -1,33 +1,33 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, CalendarDays, MapPin, MessageCircle } from "lucide-react";
+import { ArrowRight, Compass, MapPin, MessageCircle } from "lucide-react";
 import { getSurfaceHref } from "@/lib/app-surface";
 
 const footerColumns = [
   {
-    title: "Explore",
+    title: "Platform",
     links: [
       { label: "Destinations", href: "/travel-guide" },
-      { label: "Accommodation", href: "/accommodation" },
-      { label: "Activities", href: "/activities" },
+      { label: "Trip Planner", href: "/trip-planner" },
+      { label: "Ask a Local", href: "/community-guides" },
       { label: "Events", href: "/events" },
     ],
   },
   {
-    title: "Experience",
+    title: "Access",
     links: [
-      { label: "Trip Planner", href: "/trip-planner" },
-      { label: "Bookings", href: "/checkout" },
-      { label: "Ask a Local", href: "/community-guides" },
-      { label: "Travel Guide", href: "/travel-guide" },
+      { label: "Client login", href: getSurfaceHref("explorer", "/login") },
+      { label: "Create account", href: getSurfaceHref("explorer", "/register") },
+      { label: "Provider registration", href: getSurfaceHref("provider", "/register") },
+      { label: "Provider sign in", href: getSurfaceHref("provider", "/login") },
     ],
   },
   {
-    title: "Account",
+    title: "Company",
     links: [
-      { label: "Explorer sign in", href: getSurfaceHref("explorer", "/login") },
-      { label: "Explorer account", href: getSurfaceHref("explorer", "/register") },
-      { label: "Provider access", href: getSurfaceHref("provider", "/login") },
       { label: "Contact", href: "/contact" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms & Conditions", href: "/terms" },
+      { label: "Main site", href: "/" },
     ],
   },
 ];
@@ -42,48 +42,45 @@ export default function Footer() {
               Off2Zim
             </p>
             <h2 className="mt-3 max-w-xl text-3xl font-semibold text-white">
-              Explore, experience, and enjoy Zimbabwe through one trusted
-              destination marketplace.
+              Off2Zim gives travelers a cleaner way to explore Zimbabwe before any booking conversation begins.
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/60">
-              Built around trusted suppliers, strong visual storytelling,
-              mobile-first browsing, smoother booking journeys, and richer local
-              context.
+              Use the public platform to understand destinations, organize ideas, plan routes, ask locals, and send travel enquiries with more confidence.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/trip-planner"
+                href={getSurfaceHref("explorer", "/login")}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6f4d]"
               >
-                Start exploring
+                Client login
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href={getSurfaceHref("provider", "/register")}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                Partner with Off2Zim
+                Service provider registration
               </Link>
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <div className="rounded-[24px] bg-white/[0.04] p-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-white">
-                  <BadgeCheck className="h-4 w-4 text-[#7ddf8c]" />
-                  Verified suppliers
+                  <Compass className="h-4 w-4 text-[#7ddf8c]" />
+                  Destination-first discovery
                 </div>
               </div>
               <div className="rounded-[24px] bg-white/[0.04] p-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-white">
-                  <CalendarDays className="h-4 w-4 text-[#5aa7ff]" />
-                  Better trip organization
+                  <MessageCircle className="h-4 w-4 text-[#5aa7ff]" />
+                  Local guidance and enquiries
                 </div>
               </div>
               <div className="rounded-[24px] bg-white/[0.04] p-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-white">
-                  <MessageCircle className="h-4 w-4 text-[#ffc247]" />
-                  Local guidance
+                  <ArrowRight className="h-4 w-4 text-[#ffc247]" />
+                  Cleaner next-step navigation
                 </div>
               </div>
             </div>
