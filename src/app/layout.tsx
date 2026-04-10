@@ -79,6 +79,7 @@ export default async function RootLayout({
     ? resolveAppSurface(surfaceHeader)
     : resolveAppSurface(host);
   const isPublicSurface = surface === "public";
+  const showPortalChrome = surface !== "public" && surface !== "admin";
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -103,7 +104,8 @@ export default async function RootLayout({
       <body className="font-century-gothic antialiased">
         <GlobalBackground />
         <Providers>
-          {isPublicSurface ? <Header /> : <PortalChrome surface={surface} />}
+          {isPublicSurface ? <Header /> : null}
+          {showPortalChrome ? <PortalChrome surface={surface} /> : null}
           <main className="min-h-screen">{children}</main>
           {isPublicSurface ? <Footer /> : null}
         </Providers>
