@@ -40,55 +40,71 @@ function LoginContent() {
 
   return (
     <div className="theme-page min-h-screen">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.06fr_0.94fr] lg:px-8">
-        <section
-          className="relative overflow-hidden rounded-[34px] bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.58)), url('/images/eastern-highlands.jpg')",
-          }}
-        >
-          <div className="flex h-full min-h-[420px] flex-col justify-between p-6 text-white md:p-8 lg:min-h-[720px] lg:p-10">
-            <div>
-              <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-white/78 backdrop-blur">
-                {panelCopy.eyebrow}
+      {surface === "admin" ? (
+        <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+          <LoginForm
+            redirectTo={redirectTo}
+            eyebrow="Internal admin"
+            title="Admin sign in"
+            body="Use your assigned internal credentials to access Off2Zim administration."
+            helpHref="mailto:info@off2zim.co.zw"
+            helpLabel="Request admin support"
+            signupHref=""
+            signupLabel=""
+            showSocialButtons={false}
+          />
+        </div>
+      ) : (
+        <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.06fr_0.94fr] lg:px-8">
+          <section
+            className="relative overflow-hidden rounded-[34px] bg-cover bg-center"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.58)), url('/images/eastern-highlands.jpg')",
+            }}
+          >
+            <div className="flex h-full min-h-[420px] flex-col justify-between p-6 text-white md:p-8 lg:min-h-[720px] lg:p-10">
+              <div>
+                <div className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-white/78 backdrop-blur">
+                  {panelCopy.eyebrow}
+                </div>
+                <h1 className="mt-5 max-w-xl text-4xl font-semibold leading-tight md:text-5xl">
+                  {panelCopy.title}
+                </h1>
+                <p className="mt-4 max-w-md text-sm leading-7 text-white/74 md:text-base">
+                  {panelCopy.body}
+                </p>
               </div>
-              <h1 className="mt-5 max-w-xl text-4xl font-semibold leading-tight md:text-5xl">
-                {panelCopy.title}
-              </h1>
-              <p className="mt-4 max-w-md text-sm leading-7 text-white/74 md:text-base">
-                {panelCopy.body}
-              </p>
-            </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-[26px] border border-white/15 bg-black/28 p-5 backdrop-blur-sm">
-                <Compass className="h-5 w-5 text-[#ffca74]" />
-                <div className="mt-4 text-lg font-semibold">{panelCopy.cardA}</div>
-                <div className="mt-2 text-sm leading-6 text-white/72">
-                  {panelCopy.cardABody}
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-[26px] border border-white/15 bg-black/28 p-5 backdrop-blur-sm">
+                  <Compass className="h-5 w-5 text-[#ffca74]" />
+                  <div className="mt-4 text-lg font-semibold">{panelCopy.cardA}</div>
+                  <div className="mt-2 text-sm leading-6 text-white/72">
+                    {panelCopy.cardABody}
+                  </div>
+                </div>
+                <div className="rounded-[26px] border border-white/15 bg-black/28 p-5 backdrop-blur-sm">
+                  <MapPinned className="h-5 w-5 text-[#9fc7ff]" />
+                  <div className="mt-4 text-lg font-semibold">{panelCopy.cardB}</div>
+                  <div className="mt-2 text-sm leading-6 text-white/72">
+                    {panelCopy.cardBBody}
+                  </div>
                 </div>
               </div>
-              <div className="rounded-[26px] border border-white/15 bg-black/28 p-5 backdrop-blur-sm">
-                <MapPinned className="h-5 w-5 text-[#9fc7ff]" />
-                <div className="mt-4 text-lg font-semibold">{panelCopy.cardB}</div>
-                <div className="mt-2 text-sm leading-6 text-white/72">
-                  {panelCopy.cardBBody}
-                </div>
+
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/28 px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
+                <Sparkles className="h-4 w-4 text-[#ffca74]" />
+                Explore | Experience | Enjoy
               </div>
             </div>
+          </section>
 
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/28 px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
-              <Sparkles className="h-4 w-4 text-[#ffca74]" />
-              Explore | Experience | Enjoy
-            </div>
-          </div>
-        </section>
-
-        <aside className="flex items-center justify-center px-0 py-2 lg:px-10">
-          <LoginForm redirectTo={redirectTo} />
-        </aside>
-      </div>
+          <aside className="flex items-center justify-center px-0 py-2 lg:px-10">
+            <LoginForm redirectTo={redirectTo} />
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
