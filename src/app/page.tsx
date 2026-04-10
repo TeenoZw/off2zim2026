@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,7 +14,7 @@ import {
 } from "lucide-react";
 import SectionHeader from "@/components/ui/SectionHeader";
 import WeatherBadge from "@/components/ui/WeatherBadge";
-import { getSurfaceHref } from "@/lib/app-surface";
+import { getSurfaceHref, getSurfaceHome, resolveAppSurface } from "@/lib/app-surface";
 
 const hero = {
   eyebrow: "Explore | Experience | Enjoy",
@@ -90,7 +92,18 @@ const quickRoutes = [
   { label: "Enquiries", href: "/contact" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const headerStore = await headers();
+  const host = headerStore.get("host");
+  const surfaceHeader = headerStore.get("x-off2zim-surface");
+  const surface = surfaceHeader
+    ? resolveAppSurface(surfaceHeader)
+    : resolveAppSurface(host, "/");
+
+  if (surface !== "public") {
+    redirect(getSurfaceHome(surface));
+  }
+
   return (
     <div className="theme-page relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top,rgba(255,106,61,0.22),transparent_58%)]" />
