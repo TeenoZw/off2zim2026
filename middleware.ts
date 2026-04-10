@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   getSurfaceHome,
   isPathAllowedOnSurface,
+  getSurfacePrefix,
   resolveAppSurface,
   stripSurfacePrefix,
 } from "@/lib/app-surface";
@@ -26,6 +27,19 @@ export function middleware(request: NextRequest) {
 
   if (surface === "public") {
     return NextResponse.next();
+  }
+
+  const surfaceRoot = getSurfacePrefix(surface);
+
+  if (pathname === surfaceRoot) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-off2zim-surface", surface);
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   }
 
   if (internalPath === "/") {

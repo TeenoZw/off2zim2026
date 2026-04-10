@@ -105,24 +105,12 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
-          source: "/explorer",
-          destination: "/dashboard",
-        },
-        {
           source: "/explorer/:path*",
           destination: "/:path*",
         },
         {
-          source: "/sp",
-          destination: "/provider-dashboard",
-        },
-        {
           source: "/sp/:path*",
           destination: "/:path*",
-        },
-        {
-          source: "/admin-app",
-          destination: "/admin/providers",
         },
         {
           source: "/admin-app/:path*",
