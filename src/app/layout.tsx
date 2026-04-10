@@ -75,11 +75,14 @@ export default async function RootLayout({
   const headerStore = await headers();
   const host = headerStore.get("host");
   const surfaceHeader = headerStore.get("x-off2zim-surface");
+  const isAuthScreen = headerStore.get("x-off2zim-auth-screen") === "true";
   const surface = surfaceHeader
     ? resolveAppSurface(surfaceHeader)
     : resolveAppSurface(host);
   const isPublicSurface = surface === "public";
-  const showPortalChrome = surface !== "public" && surface !== "admin";
+  const showPortalChrome =
+    !isAuthScreen && surface !== "public" && surface !== "admin";
+  const showPublicChrome = !isAuthScreen && isPublicSurface;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -104,10 +107,10 @@ export default async function RootLayout({
       <body className="font-century-gothic antialiased">
         <GlobalBackground />
         <Providers>
-          {isPublicSurface ? <Header /> : null}
+          {showPublicChrome ? <Header /> : null}
           {showPortalChrome ? <PortalChrome surface={surface} /> : null}
           <main className="min-h-screen">{children}</main>
-          {isPublicSurface ? <Footer /> : null}
+          {showPublicChrome ? <Footer /> : null}
         </Providers>
       </body>
     </html>
