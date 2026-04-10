@@ -137,7 +137,7 @@ export function getSurfacePrefix(surface: Exclude<AppSurface, "public">) {
 export function getSurfaceHome(surface: AppSurface) {
   switch (surface) {
     case "admin":
-      return "/admin/overview";
+      return "/login";
     case "provider":
       return "/provider-dashboard";
     case "explorer":
