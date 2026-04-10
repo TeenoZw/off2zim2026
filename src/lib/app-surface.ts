@@ -64,6 +64,8 @@ export function resolveAppSurface(
   hostname: string | null | undefined,
   pathname?: string | null | undefined,
 ): AppSurface {
+  const rawHost = (hostname || "").toLowerCase();
+
   if (
     hostname === "public" ||
     hostname === "explorer" ||
@@ -83,6 +85,18 @@ export function resolveAppSurface(
 
   if (forcedSurface) {
     return forcedSurface;
+  }
+
+  if (rawHost.endsWith(":3003")) {
+    return "admin";
+  }
+
+  if (rawHost.endsWith(":3002")) {
+    return "provider";
+  }
+
+  if (rawHost.endsWith(":3000") || rawHost.endsWith(":3001")) {
+    return "public";
   }
 
   const host = normalizeHost(hostname);
