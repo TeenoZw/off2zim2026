@@ -44,14 +44,14 @@ function LoginContent() {
         <div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
           <LoginForm
             redirectTo={redirectTo}
-            eyebrow="Internal admin"
             title="Admin sign in"
-            body="Use your assigned internal credentials to access Off2Zim administration."
+            body=""
             helpHref="mailto:info@off2zim.co.zw"
             helpLabel="Request admin support"
             signupHref=""
             signupLabel=""
             showSocialButtons={false}
+            compactHeader
           />
         </div>
       ) : (

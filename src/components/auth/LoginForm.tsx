@@ -16,6 +16,7 @@ interface LoginFormProps {
   signupHref?: string;
   signupLabel?: string;
   showSocialButtons?: boolean;
+  compactHeader?: boolean;
 }
 
 const LoginForm = ({
@@ -29,6 +30,7 @@ const LoginForm = ({
   signupHref = "/register",
   signupLabel = "Create account",
   showSocialButtons = true,
+  compactHeader = false,
 }: LoginFormProps) => {
   const { login, isLoading, error } = useAuth();
   const [formData, setFormData] = useState({
@@ -60,15 +62,26 @@ const LoginForm = ({
   return (
     <div className="theme-panel w-full max-w-[28rem] rounded-[32px] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:p-8">
       <div className="border-b border-black/10 pb-6 dark:border-white/10">
-        <div className="theme-chip inline-flex rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.28em]">
-          {eyebrow}
-        </div>
-        <h2 className="theme-heading mt-4 text-3xl font-semibold">
-          {title}
-        </h2>
-        <p className="theme-muted mt-3 max-w-sm text-sm leading-6">
-          {body}
-        </p>
+        {!compactHeader ? (
+          <>
+            <div className="theme-chip inline-flex rounded-full px-4 py-2 text-[11px] uppercase tracking-[0.28em]">
+              {eyebrow}
+            </div>
+            <h2 className="theme-heading mt-4 text-3xl font-semibold">
+              {title}
+            </h2>
+            <p className="theme-muted mt-3 max-w-sm text-sm leading-6">
+              {body}
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="theme-heading text-3xl font-semibold">{title}</h2>
+            {body ? (
+              <p className="theme-muted mt-2 text-sm leading-6">{body}</p>
+            ) : null}
+          </>
+        )}
       </div>
 
       {error ? (
