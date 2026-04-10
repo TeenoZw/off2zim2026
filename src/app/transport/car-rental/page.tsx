@@ -24,7 +24,7 @@ export default function CarRentalPage() {
                 multiple destinations, stays, or scenic routes.
               </p>
             </div>
-            <div className="min-h-[260px] bg-cover bg-center" style={{ backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.5)), url('/images/eastern-highlands.jpg')" }} />
+            <div className="min-h-[260px] bg-cover bg-center" style={{ backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.5)), url('/images/destinations/eastern-highlands.jpg')" }} />
           </div>
         </div>
       </section>

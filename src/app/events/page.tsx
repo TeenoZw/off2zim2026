@@ -116,7 +116,7 @@ const events: Event[] = [
     location: "Kariba",
     category: "Sport",
     price: "$100 - $300",
-    image: "/images/eastern-highlands.jpg",
+    image: "/images/destinations/eastern-highlands.jpg",
     featured: false,
     capacity: "500",
     organizer: "Zimbabwe Fishing Association",

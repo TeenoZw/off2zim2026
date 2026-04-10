@@ -60,7 +60,7 @@ function LoginContent() {
             className="relative overflow-hidden rounded-[34px] bg-cover bg-center"
             style={{
               backgroundImage:
-                "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.58)), url('/images/eastern-highlands.jpg')",
+                "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.58)), url('/images/destinations/eastern-highlands.jpg')",
             }}
           >
             <div className="flex h-full min-h-[420px] flex-col justify-between p-6 text-white md:p-8 lg:min-h-[720px] lg:p-10">

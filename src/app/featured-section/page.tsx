@@ -110,7 +110,7 @@ export default function FeaturedSectionPage() {
               className="min-h-[260px] bg-cover bg-center"
               style={{
                 backgroundImage:
-                  "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.52)), url('/images/eastern-highlands.jpg')",
+                  "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.52)), url('/images/destinations/eastern-highlands.jpg')",
               }}
             />
           </div>

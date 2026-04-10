@@ -59,7 +59,7 @@ const destinations = [
     bestTime: "March - November",
     climate: "Temperate",
     highlights: ["Mountain Hiking", "Waterfalls", "Tea Estates", "Cool Weather"],
-    image: "/images/eastern-highlands.jpg",
+    image: "/images/destinations/eastern-highlands.jpg",
     meta: "Scenic escape",
   },
 ];

@@ -28,7 +28,7 @@ const transportTypes = [
     description: "Self-drive flexibility for travelers building multi-stop Zimbabwe routes.",
     icon: CarFront,
     href: "/transport/car-rental",
-    image: "/images/eastern-highlands.jpg",
+    image: "/images/destinations/eastern-highlands.jpg",
     features: ["SUV and 4x4", "Self-drive", "Flexible pickup"],
   },
   {
@@ -91,7 +91,7 @@ export default function TransportPage() {
               className="min-h-[280px] bg-cover bg-center"
               style={{
                 backgroundImage:
-                  "linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.48)), url('/images/eastern-highlands.jpg')",
+                  "linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.48)), url('/images/destinations/eastern-highlands.jpg')",
               }}
             />
           </div>

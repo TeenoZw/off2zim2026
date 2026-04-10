@@ -102,7 +102,7 @@ export default function TripPlannerHero() {
             className="order-2 min-h-[240px] bg-cover bg-center lg:min-h-[320px]"
             style={{
               backgroundImage:
-                "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.45)), url('/images/eastern-highlands.jpg')",
+                "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.45)), url('/images/destinations/eastern-highlands.jpg')",
             }}
           >
             <div className="flex h-full items-end p-4 md:p-6 lg:hidden">

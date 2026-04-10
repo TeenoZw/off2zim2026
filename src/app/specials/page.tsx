@@ -35,7 +35,7 @@ const specials = [
     originalPrice: "$699",
     specialPrice: "$499",
     discount: "29%",
-    image: "/images/eastern-highlands.jpg",
+    image: "/images/destinations/eastern-highlands.jpg",
     location: "Nyanga",
     duration: "5 days",
     features: ["Hiking", "Fishing", "Scenic views", "Lodge stay"],
