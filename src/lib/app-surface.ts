@@ -137,7 +137,7 @@ export function getSurfacePrefix(surface: Exclude<AppSurface, "public">) {
 export function getSurfaceHome(surface: AppSurface) {
   switch (surface) {
     case "admin":
-      return "/admin/providers";
+      return "/admin/overview";
     case "provider":
       return "/provider-dashboard";
     case "explorer":
@@ -156,7 +156,7 @@ export function getDefaultPostAuthRoute(
   }
 
   if (role === "admin") {
-    return getSurfaceHref("admin", "/admin/providers");
+    return getSurfaceHref("admin", "/admin/overview");
   }
 
   if (surface === "provider") {
@@ -164,7 +164,7 @@ export function getDefaultPostAuthRoute(
   }
 
   if (surface === "admin") {
-    return getSurfaceHref("admin", "/admin/providers");
+    return getSurfaceHref("admin", "/admin/overview");
   }
 
   if (surface === "explorer") {

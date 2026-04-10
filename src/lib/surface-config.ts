@@ -1,9 +1,14 @@
 import {
+  BadgeCheck,
   Building2,
   Compass,
+  FileSearch,
+  Flag,
+  ListChecks,
   LayoutDashboard,
   MapPinned,
   ShieldCheck,
+  ShoppingBag,
   Users,
 } from "lucide-react";
 import type { AppSurface } from "@/lib/app-surface";
@@ -37,16 +42,20 @@ export const portalMeta: Record<
   admin: {
     label: "Admin",
     title: "Admin workspace",
-    description: "Provider reviews, bookings, disputes, and operations.",
-    href: "/admin/providers",
+    description: "Operations, onboarding, account oversight, and platform control.",
+    href: "/admin/overview",
     icon: ShieldCheck,
   },
 };
 
-export const portalLinks: Record<
-  NonPublicSurface,
-  Array<{ label: string; href: string }>
-> = {
+export type PortalLink = {
+  label: string;
+  href: string;
+  icon?: typeof LayoutDashboard;
+  section?: string;
+};
+
+export const portalLinks: Record<NonPublicSurface, PortalLink[]> = {
   explorer: [
     { label: "Workspace", href: "/dashboard" },
     { label: "Trip planner", href: "/trip-planner" },
@@ -60,9 +69,42 @@ export const portalLinks: Record<
     { label: "Verification", href: "/provider-dashboard?tab=verification" },
   ],
   admin: [
-    { label: "Providers", href: "/admin/providers" },
-    { label: "Bookings", href: "/admin/bookings" },
-    { label: "Disputes", href: "/admin/disputes" },
+    {
+      label: "Overview",
+      href: "/admin/overview",
+      icon: LayoutDashboard,
+      section: "Operations",
+    },
+    {
+      label: "Provider onboarding",
+      href: "/admin/providers",
+      icon: BadgeCheck,
+      section: "Providers",
+    },
+    {
+      label: "Listings",
+      href: "/admin/listings",
+      icon: ShoppingBag,
+      section: "Providers",
+    },
+    {
+      label: "Bookings",
+      href: "/admin/bookings",
+      icon: ListChecks,
+      section: "Travelers",
+    },
+    {
+      label: "Disputes",
+      href: "/admin/disputes",
+      icon: Flag,
+      section: "Risk",
+    },
+    {
+      label: "Compliance queue",
+      href: "/admin/providers",
+      icon: FileSearch,
+      section: "Risk",
+    },
   ],
 };
 

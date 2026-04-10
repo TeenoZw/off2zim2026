@@ -13,7 +13,7 @@ export function getPostAuthRoute(user?: Pick<User, "role"> | null) {
   }
 
   if (role === "admin") {
-    return getSurfaceHref("admin", "/admin/providers");
+    return getSurfaceHref("admin", "/admin/overview");
   }
 
   return getSurfaceHref("explorer", "/travel-guide");
@@ -27,7 +27,7 @@ export function getAccountRoute(user?: Pick<User, "role"> | null) {
   }
 
   if (role === "admin") {
-    return getSurfaceHref("admin", "/admin/providers");
+    return getSurfaceHref("admin", "/admin/overview");
   }
 
   return getSurfaceHref("explorer", "/dashboard");
