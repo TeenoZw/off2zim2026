@@ -15,6 +15,7 @@ import type {
   PublicListingRecord,
   ExplorerBookingRecord,
   AdminBookingRecord,
+  AdminListingRecord,
   DisputeRecord,
 } from "@/types/platform";
 
@@ -339,6 +340,47 @@ export function serializeAdminBooking(
         }
       : null,
     disputesCount: booking.disputes.length,
+  };
+}
+
+export function serializeAdminListing(
+  listing: ProviderListing & {
+    company: ProviderCompany;
+    availability: ListingAvailability[];
+    bookings: (Booking & { disputes: Dispute[] })[];
+  }
+): AdminListingRecord {
+  return {
+    id: listing.id,
+    companyId: listing.companyId,
+    title: listing.title,
+    slug: listing.slug,
+    category: listing.category,
+    listingType: listing.listingType,
+    location: listing.location,
+    pricingModel: listing.pricingModel,
+    basePrice: listing.basePrice,
+    currency: listing.currency,
+    instantBooking: listing.instantBooking,
+    bookingMode: listing.bookingMode,
+    status: listing.status as AdminListingRecord["status"],
+    visibility: listing.visibility as AdminListingRecord["visibility"],
+    availabilityCount: listing.availability.length,
+    bookingsCount: listing.bookings.length,
+    disputesCount: listing.bookings.reduce(
+      (total, booking) => total + booking.disputes.length,
+      0
+    ),
+    createdAt: listing.createdAt.toISOString(),
+    updatedAt: listing.updatedAt.toISOString(),
+    provider: {
+      id: listing.company.id,
+      companyName: listing.company.companyName,
+      verificationTier:
+        listing.company.verificationTier as AdminListingRecord["provider"]["verificationTier"],
+      onboardingStatus:
+        listing.company.onboardingStatus as AdminListingRecord["provider"]["onboardingStatus"],
+    },
   };
 }
 

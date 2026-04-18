@@ -401,22 +401,39 @@ const RegisterForm = ({ onClose, redirectTo }: RegisterFormProps) => {
                   </div>
                 </div>
                 <div>
-                  <label
-                    htmlFor="explorerType"
-                    className="theme-muted mb-2 block text-sm font-medium"
-                  >
-                    Explorer profile
-                  </label>
-                  <select
-                    id="explorerType"
-                    name="explorerType"
-                    value={formData.explorerType}
-                    onChange={handleChange}
-                    className="theme-input h-12 w-full rounded-[18px] px-4"
-                  >
-                    <option value="foreign">Visiting Zimbabwe</option>
-                    <option value="local">Local Zimbabwean</option>
-                  </select>
+                  <div className="theme-muted mb-2 text-sm font-medium">
+                    Where are you based?
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, explorerType: "foreign" }))
+                      }
+                      className={`rounded-[18px] border px-4 py-3 text-left text-sm transition ${
+                        formData.explorerType === "foreign"
+                          ? "border-[#ff5630] bg-[#ff5630]/8 font-medium"
+                          : "border-black/10 bg-black/[0.03] hover:bg-black/[0.05] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="theme-heading font-semibold">Visiting</div>
+                      <div className="theme-muted mt-0.5 text-xs">Traveling to Zimbabwe</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, explorerType: "local" }))
+                      }
+                      className={`rounded-[18px] border px-4 py-3 text-left text-sm transition ${
+                        formData.explorerType === "local"
+                          ? "border-[#ff5630] bg-[#ff5630]/8 font-medium"
+                          : "border-black/10 bg-black/[0.03] hover:bg-black/[0.05] dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <div className="theme-heading font-semibold">Local</div>
+                      <div className="theme-muted mt-0.5 text-xs">Zimbabwe resident</div>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

@@ -14,6 +14,19 @@ export function middleware(request: NextRequest) {
   const surface = resolveAppSurface(hostname, pathname);
   const internalPath = stripSurfacePrefix(pathname);
   const isAuthScreen = internalPath === "/login" || internalPath === "/register";
+  const withSurfaceHeaders = (url = request.nextUrl.clone()) => {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-off2zim-surface", surface);
+    if (isAuthScreen) {
+      requestHeaders.set("x-off2zim-auth-screen", "true");
+    }
+
+    return NextResponse.rewrite(url, {
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  };
 
   if (
     internalPath.startsWith("/_next") ||
@@ -30,30 +43,13 @@ export function middleware(request: NextRequest) {
     if (!isAuthScreen) {
       return NextResponse.next();
     }
-
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-off2zim-auth-screen", "true");
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return withSurfaceHeaders();
   }
 
   const surfaceRoot = getSurfacePrefix(surface);
 
   if (pathname === surfaceRoot) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-off2zim-surface", surface);
-    if (isAuthScreen) {
-      requestHeaders.set("x-off2zim-auth-screen", "true");
-    }
-
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return withSurfaceHeaders();
   }
 
   if (internalPath === "/") {
@@ -61,16 +57,7 @@ export function middleware(request: NextRequest) {
     url.pathname = getSurfaceHome(surface);
 
     if (pathname !== url.pathname) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set("x-off2zim-surface", surface);
-      if (isAuthScreen) {
-        requestHeaders.set("x-off2zim-auth-screen", "true");
-      }
-      return NextResponse.rewrite(url, {
-        request: {
-          headers: requestHeaders,
-        },
-      });
+      return withSurfaceHeaders(url);
     }
 
     return NextResponse.redirect(url);
@@ -81,42 +68,18 @@ export function middleware(request: NextRequest) {
     url.pathname = getSurfaceHome(surface);
 
     if (pathname !== url.pathname) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set("x-off2zim-surface", surface);
-      if (isAuthScreen) {
-        requestHeaders.set("x-off2zim-auth-screen", "true");
-      }
-      return NextResponse.rewrite(url, {
-        request: {
-          headers: requestHeaders,
-        },
-      });
+      return withSurfaceHeaders(url);
     }
 
     return NextResponse.redirect(url);
   }
-
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-off2zim-surface", surface);
-  if (isAuthScreen) {
-    requestHeaders.set("x-off2zim-auth-screen", "true");
-  }
-
   if (pathname !== internalPath) {
     const url = request.nextUrl.clone();
     url.pathname = internalPath;
-    return NextResponse.rewrite(url, {
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return withSurfaceHeaders(url);
   }
 
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  return withSurfaceHeaders();
 }
 
 export const config = {

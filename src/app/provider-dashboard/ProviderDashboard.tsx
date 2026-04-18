@@ -8,11 +8,13 @@ import ListingManagement from "../../components/provider-dashboard/ListingManage
 import EnhancedOrderManagement from "../../components/provider-dashboard/EnhancedOrderManagement";
 import VerificationStatus from "../../components/provider-dashboard/VerificationStatus";
 import CompanyProfile from "../../components/provider-dashboard/CompanyProfile";
+import ShopProductManagement from "../../components/provider-dashboard/ShopProductManagement";
 import {
   BarChart3,
   Building2,
   Package,
   Shield,
+  ShoppingBag,
   Star,
   Users,
 } from "lucide-react";
@@ -66,6 +68,12 @@ export default function ProviderDashboard() {
           : "bg-orange-100 text-orange-800",
     },
     {
+      id: "shop",
+      label: "Shop Products",
+      icon: ShoppingBag,
+      description: "Manage purchasable products and stock",
+    },
+    {
       id: "verification",
       label: "Verification",
       icon: Shield,
@@ -106,6 +114,8 @@ export default function ProviderDashboard() {
         return <ListingManagement />;
       case "orders":
         return <EnhancedOrderManagement />;
+      case "shop":
+        return <ShopProductManagement />;
       case "verification":
         return <VerificationStatus />;
       default:

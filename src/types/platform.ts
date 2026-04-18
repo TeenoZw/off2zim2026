@@ -222,6 +222,34 @@ export interface AdminBookingRecord {
   disputesCount: number;
 }
 
+export interface AdminListingRecord {
+  id: string;
+  companyId: string;
+  title: string;
+  slug: string;
+  category: string;
+  listingType: string;
+  location: string;
+  pricingModel: string;
+  basePrice?: number | null;
+  currency: string;
+  instantBooking: boolean;
+  bookingMode: string;
+  status: ProviderListingStatus;
+  visibility: ProviderListingVisibility;
+  availabilityCount: number;
+  bookingsCount: number;
+  disputesCount: number;
+  createdAt: string;
+  updatedAt: string;
+  provider: {
+    id: string;
+    companyName: string;
+    verificationTier: ProviderVerificationTier;
+    onboardingStatus: ProviderOnboardingStatus;
+  };
+}
+
 export interface DisputeRecord {
   id: string;
   bookingId: string;

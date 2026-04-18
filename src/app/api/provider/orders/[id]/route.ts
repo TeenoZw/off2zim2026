@@ -4,6 +4,7 @@ import { apiError } from "@/lib/http";
 import { requireSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { serializeOrder } from "@/lib/platform";
+import { recalculateExplorerScore } from "@/lib/explorer-score";
 
 export const dynamic = "force-dynamic";
 const updateSchema = z.object({
@@ -59,6 +60,13 @@ export async function PATCH(
         },
       },
     });
+
+    // Recalculate explorer score on completion or cancellation
+    if (payload.status === "COMPLETED" || payload.status === "CANCELLED") {
+      recalculateExplorerScore(updated.userId).catch(() => {
+        // Non-blocking - score will be recalculated on next relevant event
+      });
+    }
 
     return NextResponse.json({
       order: serializeOrder(updated),

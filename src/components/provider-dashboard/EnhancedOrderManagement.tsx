@@ -1,28 +1,53 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  Calendar,
-  Mail,
-  MapPin,
-  MessageSquare,
-  Phone,
-  Search,
-} from "lucide-react";
+import { Calendar, Search } from "lucide-react";
 import { apiFetch } from "@/lib/client-api";
 import type { DisputeRecord, ProviderOrderRecord } from "@/types/platform";
 
+type OrderTab = "new" | "upcoming" | "completed" | "disputed" | "all";
+
+const ORDER_TABS: { id: OrderTab; label: string }[] = [
+  { id: "new", label: "New" },
+  { id: "upcoming", label: "Upcoming" },
+  { id: "completed", label: "Completed" },
+  { id: "disputed", label: "Disputed" },
+  { id: "all", label: "All orders" },
+];
+
+function matchesTab(order: ProviderOrderRecord, tab: OrderTab): boolean {
+  if (tab === "all") return true;
+  if (tab === "new") return order.status === "PENDING" || order.status === "REQUESTED";
+  if (tab === "upcoming") return order.status === "CONFIRMED";
+  if (tab === "completed") return order.status === "COMPLETED";
+  if (tab === "disputed") return order.disputesCount > 0;
+  return true;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  CONFIRMED: "bg-[#153220] text-[#8cf0a1]",
+  COMPLETED: "bg-[#0f2a1e] text-[#4ade80]",
+  CANCELLED: "bg-[#2d1714] text-[#ff8a78]",
+  PENDING: "bg-[#13283a] text-[#8dc9ff]",
+  REQUESTED: "bg-[#1a1f2e] text-[#b5c7ff]",
+};
+
+const PAYMENT_COLORS: Record<string, string> = {
+  COMPLETED: "bg-[#153220] text-[#8cf0a1]",
+  PENDING: "bg-white/10 text-white/60",
+};
+
 export default function EnhancedOrderManagement() {
   const [orders, setOrders] = useState<ProviderOrderRecord[]>([]);
-  const [query, setQuery] = useState("");
   const [disputes, setDisputes] = useState<DisputeRecord[]>([]);
+  const [query, setQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<OrderTab>("new");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState("");
 
   useEffect(() => {
-    const loadOrders = async () => {
+    const load = async () => {
       try {
         const [ordersPayload, disputesPayload] = await Promise.all([
           apiFetch<{ orders: ProviderOrderRecord[] }>("/api/provider/orders"),
@@ -31,80 +56,139 @@ export default function EnhancedOrderManagement() {
         setOrders(ordersPayload.orders);
         setDisputes(disputesPayload.disputes);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unable to load provider orders.");
+        setError(err instanceof Error ? err.message : "Unable to load orders.");
       } finally {
         setLoading(false);
       }
     };
-
-    loadOrders();
+    load();
   }, []);
 
-  const filteredOrders = useMemo(() => {
+  const tabCounts = useMemo(
+    () => ({
+      new: orders.filter((o) => matchesTab(o, "new")).length,
+      upcoming: orders.filter((o) => matchesTab(o, "upcoming")).length,
+      completed: orders.filter((o) => matchesTab(o, "completed")).length,
+      disputed: orders.filter((o) => matchesTab(o, "disputed")).length,
+      all: orders.length,
+    }),
+    [orders]
+  );
+
+  const visibleOrders = useMemo(() => {
     const normalized = query.toLowerCase();
-    return orders.filter((order) =>
-      [order.confirmationNumber, order.customer.name, order.listing?.title || ""]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalized)
-    );
-  }, [orders, query]);
+    return orders
+      .filter((o) => matchesTab(o, activeTab))
+      .filter((o) =>
+        [o.confirmationNumber, o.customer.name, o.listing?.title ?? ""]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalized)
+      );
+  }, [orders, activeTab, query]);
+
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    setUpdatingId(orderId);
+    try {
+      const payload = await apiFetch<{ order: ProviderOrderRecord }>(
+        `/api/provider/orders/${orderId}`,
+        { method: "PATCH", body: JSON.stringify({ status }) }
+      );
+      setOrders((current) =>
+        current.map((item) => (item.id === payload.order.id ? payload.order : item))
+      );
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to update order.");
+    } finally {
+      setUpdatingId("");
+    }
+  };
 
   return (
     <div className="space-y-6">
+      {/* Header + Search */}
       <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-white">Orders and disputes</h2>
-            <p className="mt-2 text-sm text-white/50">
-              Live provider-facing order stream for booking requests, confirmations,
-              payouts, and disputes.
+            <h2 className="text-2xl font-semibold text-white">Orders</h2>
+            <p className="mt-1 text-sm text-white/50">
+              Manage incoming requests, confirmations, and fulfilment.
             </p>
-          </div>
-          <div className="flex gap-3">
-            <button className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black">
-              Orders
-            </button>
-            <button className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/70">
-              Disputes
-            </button>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-3 lg:grid-cols-[1.1fr_auto]">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
-            <input
-              type="text"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search orders"
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/35"
-            />
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 text-sm text-white/75">
-            {filteredOrders.length} orders
-          </div>
+        {/* Status tabs */}
+        <div className="mt-5 flex flex-wrap gap-2 border-b border-white/10 pb-5">
+          {ORDER_TABS.map((tab) => {
+            const count = tabCounts[tab.id];
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-[#ff5630] text-white"
+                    : "border border-white/10 bg-white/[0.04] text-white/65 hover:bg-white/[0.08] hover:text-white"
+                }`}
+              >
+                {tab.label}
+                {count > 0 ? (
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-xs tabular-nums ${
+                      isActive ? "bg-white/20" : "bg-white/10"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 relative">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by confirmation, customer, or listing"
+            className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/35"
+          />
         </div>
       </section>
 
       {error ? (
-        <section className="rounded-[32px] border border-red-500/30 bg-red-500/10 p-6 text-sm text-red-200">
+        <div className="rounded-[28px] border border-[#ff5630]/30 bg-[#2d1714] px-4 py-3 text-sm text-[#ffb09c]">
           {error}
-        </section>
+        </div>
       ) : null}
 
+      {/* Orders list */}
       <section className="space-y-4">
         {loading ? (
           <article className="rounded-[32px] border border-white/10 bg-[#111111] p-6 text-white/60">
             Loading orders...
           </article>
-        ) : filteredOrders.length === 0 ? (
+        ) : visibleOrders.length === 0 ? (
           <article className="rounded-[32px] border border-white/10 bg-[#111111] p-6 text-white/60">
-            No orders found.
+            {query
+              ? "No orders match that search."
+              : activeTab === "new"
+                ? "No new orders awaiting action."
+                : activeTab === "upcoming"
+                  ? "No upcoming confirmed bookings."
+                  : activeTab === "completed"
+                    ? "No completed orders yet."
+                    : activeTab === "disputed"
+                      ? "No disputed orders."
+                      : "No orders found."}
           </article>
         ) : (
-          filteredOrders.map((order) => (
+          visibleOrders.map((order) => (
             <article
               key={order.id}
               className="rounded-[32px] border border-white/10 bg-[#111111] p-6"
@@ -116,84 +200,65 @@ export default function EnhancedOrderManagement() {
                       {order.confirmationNumber}
                     </h3>
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        order.status === "CONFIRMED"
-                          ? "bg-[#153220] text-[#8cf0a1]"
-                          : order.status === "CANCELLED"
-                            ? "bg-[#2d1714] text-[#ff8a78]"
-                            : "bg-[#13283a] text-[#8dc9ff]"
-                      }`}
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLORS[order.status] ?? "bg-white/10 text-white/60"}`}
                     >
                       {order.status}
                     </span>
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        order.paymentStatus === "COMPLETED"
-                          ? "bg-[#153220] text-[#8cf0a1]"
-                          : order.paymentStatus === "PENDING"
-                            ? "bg-white/10 text-white/60"
-                            : "bg-[#332913] text-[#ffca74]"
-                      }`}
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${PAYMENT_COLORS[order.paymentStatus] ?? "bg-[#332913] text-[#ffca74]"}`}
                     >
                       {order.paymentStatus}
                     </span>
+                    {order.disputesCount > 0 ? (
+                      <span className="rounded-full bg-[#332913] px-3 py-1 text-xs font-medium text-[#ffca74]">
+                        {order.disputesCount} dispute{order.disputesCount > 1 ? "s" : ""}
+                      </span>
+                    ) : null}
                   </div>
 
-                  <div className="mt-3 text-lg font-medium text-white">
+                  <div className="mt-2 text-lg font-medium text-white">
                     {order.listing?.title || order.bookingType}
                   </div>
+
                   <div className="mt-3 flex flex-wrap gap-4 text-sm text-white/55">
                     <span>{order.customer.name}</span>
                     <span className="inline-flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-[#8dc9ff]" />
                       {new Date(order.createdAt).toLocaleDateString()}
                     </span>
-                    <span>{order.guests || 1} guests</span>
+                    <span>{order.guests ?? 1} guest{(order.guests ?? 1) > 1 ? "s" : ""}</span>
                     <span>
                       ${order.totalAmount.toFixed(2)} {order.currency}
                     </span>
                   </div>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-3 xl:w-[360px] xl:grid-cols-1">
-                  <button className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/75">
-                    View details
-                  </button>
-                  <button className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/75">
-                    Message customer
-                  </button>
+                <div className="grid gap-3 md:grid-cols-2 xl:w-[300px] xl:grid-cols-1">
+                  {/* Confirm action for new orders */}
+                  {(order.status === "PENDING" || order.status === "REQUESTED") ? (
+                    <button
+                      disabled={updatingId === order.id}
+                      onClick={() => updateOrderStatus(order.id, "CONFIRMED")}
+                      className="rounded-full bg-[#ff5630] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                    >
+                      Confirm booking
+                    </button>
+                  ) : null}
+                  {/* Mark complete for confirmed orders */}
+                  {order.status === "CONFIRMED" ? (
+                    <button
+                      disabled={updatingId === order.id}
+                      onClick={() => updateOrderStatus(order.id, "COMPLETED")}
+                      className="rounded-full bg-[#153220] px-4 py-3 text-sm font-semibold text-[#4ade80] ring-1 ring-[#4ade80]/20 disabled:opacity-50"
+                    >
+                      Mark complete
+                    </button>
+                  ) : null}
                   <select
                     value={order.status}
                     disabled={updatingId === order.id}
-                    onChange={async (event) => {
-                      setUpdatingId(order.id);
-                      try {
-                        const payload = await apiFetch<{ order: ProviderOrderRecord }>(
-                          `/api/provider/orders/${order.id}`,
-                          {
-                            method: "PATCH",
-                            body: JSON.stringify({
-                              status: event.target.value,
-                            }),
-                          }
-                        );
-                        setOrders((current) =>
-                          current.map((item) =>
-                            item.id === payload.order.id ? payload.order : item
-                          )
-                        );
-                        setError("");
-                      } catch (err) {
-                        setError(
-                          err instanceof Error
-                            ? err.message
-                            : "Unable to update booking status."
-                        );
-                      } finally {
-                        setUpdatingId("");
-                      }
-                    }}
-                    className="rounded-full bg-[#ff5630] px-4 py-3 text-sm font-medium text-white"
+                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/75"
                   >
                     <option value="REQUESTED">Requested</option>
                     <option value="PENDING">Pending</option>
@@ -208,44 +273,17 @@ export default function EnhancedOrderManagement() {
         )}
       </section>
 
-      <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
-        <div className="flex items-start gap-4">
-          <div className="rounded-2xl bg-[#332913] p-3">
-            <AlertTriangle className="h-5 w-5 text-[#ffca74]" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-white">Dispute handling</h3>
-            <div className="mt-4 flex flex-wrap gap-3 text-sm text-white/55">
-              <span className="inline-flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-[#8dc9ff]" />
-                Keep communication visible
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[#ff8a63]" />
-                Email-linked support
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Phone className="h-4 w-4 text-[#8cf0a1]" />
-                Direct escalation ready
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-[#ffc247]" />
-                Service context preserved
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
-        <h3 className="text-lg font-semibold text-white">Active disputes</h3>
-        <div className="mt-4 space-y-3">
-          {disputes.length === 0 ? (
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4 text-sm text-white/55">
-              No active disputes.
-            </div>
-          ) : (
-            disputes.map((dispute) => (
+      {/* Disputes section */}
+      {disputes.length > 0 ? (
+        <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
+          <h3 className="text-lg font-semibold text-white">
+            Active disputes
+            <span className="ml-2 rounded-full bg-[#332913] px-2 py-0.5 text-xs text-[#ffca74]">
+              {disputes.length}
+            </span>
+          </h3>
+          <div className="mt-4 space-y-3">
+            {disputes.map((dispute) => (
               <div
                 key={dispute.id}
                 className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4"
@@ -257,14 +295,16 @@ export default function EnhancedOrderManagement() {
                   <span className="text-sm text-white/75">
                     {dispute.bookingConfirmationNumber}
                   </span>
+                  {dispute.listing ? (
+                    <span className="text-sm text-white/50">{dispute.listing.title}</span>
+                  ) : null}
                 </div>
-                <div className="mt-2 text-sm font-medium text-white">{dispute.reason}</div>
-                <div className="mt-1 text-sm text-white/55">{dispute.details}</div>
+                <p className="mt-2 text-sm text-white/60">{dispute.reason}</p>
               </div>
-            ))
-          )}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
