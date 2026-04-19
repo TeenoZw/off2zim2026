@@ -5,16 +5,17 @@ import { prisma } from "@/lib/prisma";
 import { serializeExplorerBooking } from "@/lib/platform";
 
 export const dynamic = "force-dynamic";
+
 export async function GET(
   request: Request,
-  { params }: { params: { confirmation: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const { user } = await requireSessionUser();
 
     const booking = await prisma.booking.findFirst({
       where: {
-        confirmationNumber: params.confirmation,
+        confirmationNumber: params.id,
         userId: user.id,
       },
       include: {

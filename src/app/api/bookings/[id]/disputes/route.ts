@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { serializeDispute } from "@/lib/platform";
 
 export const dynamic = "force-dynamic";
+
 const createDisputeSchema = z.object({
   reason: z.string().min(3),
   details: z.string().min(10),
@@ -13,7 +14,7 @@ const createDisputeSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { confirmation: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const { user } = await requireSessionUser();
@@ -21,7 +22,7 @@ export async function POST(
 
     const booking = await prisma.booking.findFirst({
       where: {
-        confirmationNumber: params.confirmation,
+        confirmationNumber: params.id,
         OR: [
           { userId: user.id },
           ...(user.role === "provider"
