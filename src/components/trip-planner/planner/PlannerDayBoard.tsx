@@ -22,7 +22,11 @@ import {
   getStatusTone,
   getTripTotals,
 } from "@/lib/trip-planner/planner";
-import { TripPlannerItem, TripPlannerMeta } from "@/types/trip-planner";
+import {
+  PlannerScheduleDefaults,
+  TripPlannerItem,
+  TripPlannerMeta,
+} from "@/types/trip-planner";
 
 const segments: Array<{ key: DaySegment; label: string; range: string }> = [
   { key: "morning", label: "Morning", range: "06:00 - 11:59" },
@@ -30,13 +34,22 @@ const segments: Array<{ key: DaySegment; label: string; range: string }> = [
   { key: "evening", label: "Evening", range: "17:00 onwards" },
 ];
 
+const segmentDefaults: Record<
+  DaySegment,
+  Required<Pick<PlannerScheduleDefaults, "startTime" | "endTime">>
+> = {
+  morning: { startTime: "09:00", endTime: "11:00" },
+  afternoon: { startTime: "13:00", endTime: "16:00" },
+  evening: { startTime: "18:00", endTime: "20:00" },
+};
+
 interface PlannerDayBoardProps {
   items: TripPlannerItem[];
   meta: TripPlannerMeta;
   totalBudget: number;
   activeDay: string | null;
   onActiveDayChange: (dayKey: string) => void;
-  onOpenAddDrawer: (date?: string) => void;
+  onOpenAddDrawer: (date?: string, defaults?: PlannerScheduleDefaults) => void;
   onRemoveItem: (itemId: string) => void;
   onDeleteDay: (dayKey: string) => void;
   onShare: () => void;
@@ -66,6 +79,12 @@ export default function PlannerDayBoard({
   const totals = getTripTotals(items, totalBudget);
   const counts = getSectionCounts(items);
   const budgetBreakdown = getBudgetBreakdown(items);
+  const openSegmentDrawer = (date: string, segment: DaySegment) => {
+    onOpenAddDrawer(date, {
+      date,
+      ...segmentDefaults[segment],
+    });
+  };
 
   return (
     <section className="grid gap-5 xl:grid-cols-[260px_minmax(0,1fr)_320px]">
@@ -185,7 +204,7 @@ export default function PlannerDayBoard({
                         <p className="theme-muted mt-1 text-xs">{segment.range}</p>
                       </div>
                       <button
-                        onClick={() => onOpenAddDrawer(selectedDay.key)}
+                        onClick={() => openSegmentDrawer(selectedDay.key, segment.key)}
                         className="theme-button-secondary rounded-full p-2"
                         aria-label={`Add item to ${segment.label.toLowerCase()}`}
                       >
@@ -195,7 +214,7 @@ export default function PlannerDayBoard({
 
                     {segmentItems.length === 0 ? (
                       <button
-                        onClick={() => onOpenAddDrawer(selectedDay.key)}
+                        onClick={() => openSegmentDrawer(selectedDay.key, segment.key)}
                         className="mt-4 flex w-full items-center justify-between rounded-[22px] border border-dashed border-black/15 bg-white/50 px-4 py-4 text-left text-sm transition hover:border-[#ff5630] hover:text-[#ff5630] dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-[#ff7352]"
                       >
                         <span className="theme-muted">

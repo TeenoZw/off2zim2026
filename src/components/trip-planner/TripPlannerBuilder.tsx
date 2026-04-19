@@ -5,6 +5,7 @@ import { CheckCircle2, LayoutGrid, PanelRightOpen, Plus } from "lucide-react";
 import { useTripPlanner } from "@/contexts/TripPlannerContext";
 import {
   getBudgetBreakdown,
+  detectLogisticsGaps,
   getExpandedTripMeta,
   getItemDateLabel,
   getItemRangeLabel,
@@ -16,6 +17,8 @@ import {
 import PlannerAddDrawer from "./planner/PlannerAddDrawer";
 import PlannerDayBoard from "./planner/PlannerDayBoard";
 import PlannerOverviewSection from "./planner/PlannerOverviewSection";
+import LogisticsWarning from "./LogisticsWarning";
+import { PlannerScheduleDefaults } from "@/types/trip-planner";
 
 interface NoticeState {
   tone: "success" | "error";
@@ -39,13 +42,16 @@ export default function TripPlannerBuilder() {
   const [activeSection, setActiveSection] = useState<PlannerSectionId>("overview");
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerDate, setDrawerDate] = useState<string | undefined>(meta.startDate);
+  const [drawerDefaults, setDrawerDefaults] = useState<PlannerScheduleDefaults>({
+    date: meta.startDate,
+  });
   const [notice, setNotice] = useState<NoticeState | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
 
   const days = useMemo(() => getPlannerDays(items, meta), [items, meta]);
   const totals = useMemo(() => getTripTotals(items, totalBudget), [items, totalBudget]);
   const budgetBreakdown = useMemo(() => getBudgetBreakdown(items), [items]);
+  const logisticsGaps = useMemo(() => detectLogisticsGaps(items, meta), [items, meta]);
 
   useEffect(() => {
     if (!days.length) {
@@ -95,8 +101,14 @@ export default function TripPlannerBuilder() {
     }
   }, [isHydrated, loadSharedPlan]);
 
-  const openAddDrawer = (date?: string) => {
-    setDrawerDate(date || activeDay || meta.startDate);
+  const openAddDrawer = (
+    date?: string,
+    scheduleDefaults?: PlannerScheduleDefaults
+  ) => {
+    setDrawerDefaults({
+      ...scheduleDefaults,
+      date: scheduleDefaults?.date || date || activeDay || meta.startDate,
+    });
     setIsDrawerOpen(true);
   };
 
@@ -270,6 +282,13 @@ export default function TripPlannerBuilder() {
           </div>
         ) : null}
 
+        {/* Logistics warnings — shown on the board view where gaps are most actionable */}
+        {activeSection === "board" && logisticsGaps.length > 0 && (
+          <div className="mb-4">
+            <LogisticsWarning gaps={logisticsGaps} />
+          </div>
+        )}
+
         <div className="space-y-5 md:space-y-6">
           {activeSection === "overview" ? (
             <PlannerOverviewSection
@@ -300,7 +319,7 @@ export default function TripPlannerBuilder() {
 
         <PlannerAddDrawer
           isOpen={isDrawerOpen}
-          defaultDate={drawerDate}
+          defaults={drawerDefaults}
           onClose={() => setIsDrawerOpen(false)}
           onAddItem={(item, overrides) => {
             const added = addCatalogItem(item, overrides);

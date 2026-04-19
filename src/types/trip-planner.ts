@@ -56,6 +56,12 @@ export interface TripPlannerMeta {
   excludedDates?: string[];
 }
 
+export interface PlannerScheduleDefaults {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
 export interface TripPlannerState {
   items: TripPlannerItem[];
   totalBudget: number;

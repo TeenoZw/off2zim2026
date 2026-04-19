@@ -15,11 +15,16 @@ import {
 } from "lucide-react";
 import { addDays } from "@/lib/trip-planner/planner";
 import { tripPlannerCatalog } from "@/lib/trip-planner/catalog";
-import { PlannerCatalogItem, PlannerItemType, TripPlannerItem } from "@/types/trip-planner";
+import {
+  PlannerCatalogItem,
+  PlannerItemType,
+  PlannerScheduleDefaults,
+  TripPlannerItem,
+} from "@/types/trip-planner";
 
 interface PlannerAddDrawerProps {
   isOpen: boolean;
-  defaultDate?: string;
+  defaults?: PlannerScheduleDefaults;
   onClose: () => void;
   onAddItem: (
     item: PlannerCatalogItem,
@@ -39,11 +44,11 @@ const typeFilters: Array<{
   { key: "dining", label: "Dining", icon: UtensilsCrossed },
 ];
 
-function getDefaultSchedule(date?: string) {
+function getDefaultSchedule(defaults?: PlannerScheduleDefaults) {
   return {
-    date: date || new Date().toISOString().slice(0, 10),
-    startTime: "09:00",
-    endTime: "12:00",
+    date: defaults?.date || new Date().toISOString().slice(0, 10),
+    startTime: defaults?.startTime || "09:00",
+    endTime: defaults?.endTime || "12:00",
     quantity: 1,
   };
 }
@@ -63,19 +68,19 @@ function getTypeDefaults(type: PlannerItemType) {
 
 export default function PlannerAddDrawer({
   isOpen,
-  defaultDate,
+  defaults,
   onClose,
   onAddItem,
 }: PlannerAddDrawerProps) {
   const [query, setQuery] = useState("");
   const [selectedType, setSelectedType] = useState<PlannerItemType | "all">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [schedule, setSchedule] = useState(getDefaultSchedule(defaultDate));
+  const [schedule, setSchedule] = useState(getDefaultSchedule(defaults));
 
   useEffect(() => {
     if (!isOpen) return;
-    setSchedule(getDefaultSchedule(defaultDate));
-  }, [defaultDate, isOpen]);
+    setSchedule(getDefaultSchedule(defaults));
+  }, [defaults, isOpen]);
 
   const filteredItems = useMemo(() => {
     return tripPlannerCatalog.filter((item) => {
@@ -98,14 +103,21 @@ export default function PlannerAddDrawer({
 
   useEffect(() => {
     if (!selectedItem) return;
-    const defaults = getTypeDefaults(selectedItem.type);
+    const typeDefaults = getTypeDefaults(selectedItem.type);
+    const hasTimeBlockDefault = Boolean(defaults?.startTime || defaults?.endTime);
     setSchedule((current) => ({
       ...current,
-      startTime: defaults.startTime,
-      endTime: defaults.endTime,
+      startTime:
+        selectedItem.type === "accommodation" || !hasTimeBlockDefault
+          ? typeDefaults.startTime
+          : current.startTime,
+      endTime:
+        selectedItem.type === "accommodation" || !hasTimeBlockDefault
+          ? typeDefaults.endTime
+          : current.endTime,
       quantity: selectedItem.type === "accommodation" ? Math.max(1, current.quantity) : 1,
     }));
-  }, [selectedItem]);
+  }, [defaults?.endTime, defaults?.startTime, selectedItem]);
 
   const quantityLabel =
     selectedItem?.type === "accommodation" ? "Nights" : "Quantity";
