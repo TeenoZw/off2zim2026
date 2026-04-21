@@ -49,10 +49,12 @@ export default function ActivitiesPage() {
                 Things to do
               </div>
               <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
-                Book provider-led Zimbabwe experiences from the live catalog
+                The experiences that make Zimbabwe worth the trip
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                Browse live experiences, compare options, and add the right moments to your trip.
+                Rafting, game drives, guided walks, cultural tours — browse
+                verified activities, compare what fits your route, and add the
+                right moments directly to your itinerary.
               </p>
             </div>
             <div
@@ -95,22 +97,52 @@ export default function ActivitiesPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {error ? (
-          <div className="theme-panel rounded-[36px] p-12 text-center">
-            <p className="theme-muted text-sm">{error}</p>
+          <div className="theme-panel rounded-[36px] p-12 text-center space-y-4">
+            <p className="theme-heading text-lg font-semibold">Could not load experiences</p>
+            <p className="theme-muted text-sm max-w-sm mx-auto">
+              There was a problem connecting to the catalog. Check your connection and try again.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center gap-2 rounded-full bg-[#ff5630] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#ff7352] transition-colors"
+            >
+              Retry
+            </button>
           </div>
         ) : loading ? (
-          <div className="theme-panel rounded-[36px] p-12 text-center">
-            <p className="theme-muted text-sm">Loading experiences...</p>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="theme-panel rounded-[28px] overflow-hidden animate-pulse">
+                <div className="h-56 bg-white/[0.06]" />
+                <div className="p-6 space-y-3">
+                  <div className="h-3 w-24 rounded-full bg-white/[0.08]" />
+                  <div className="h-5 w-3/4 rounded-full bg-white/[0.08]" />
+                  <div className="h-3 w-1/2 rounded-full bg-white/[0.06]" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : activities.length === 0 ? (
-          <div className="theme-panel rounded-[36px] p-12 text-center">
-            <p className="theme-muted text-sm">No experiences found.</p>
+          <div className="theme-panel rounded-[36px] p-12 text-center space-y-4">
+            <p className="theme-heading text-lg font-semibold">No experiences found</p>
+            <p className="theme-muted text-sm max-w-sm mx-auto">
+              {searchTerm
+                ? `Nothing matched "${searchTerm}". Try a different keyword or clear the search.`
+                : "No experiences are listed yet. Check back soon or browse the full marketplace."}
+            </p>
+            <Link
+              href="/marketplace"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-sm font-semibold theme-muted hover:bg-white/[0.06] transition-colors"
+            >
+              Browse marketplace
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         ) : (
           <>
             <SectionHeader
               eyebrow="Live catalog"
-              title="Provider-led experiences worth adding to the route"
+              title="Verified experiences across Zimbabwe"
             />
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {activities.map((activity) => (

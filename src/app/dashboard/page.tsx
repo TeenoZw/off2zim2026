@@ -12,12 +12,23 @@ import { apiFetch } from "@/lib/client-api";
 interface DashboardStats {
   savedCount: number;
   bookingCount: number;
+  plannerItemCount: number;
 }
 
 function useDashboardStats(): DashboardStats {
-  const [stats, setStats] = useState<DashboardStats>({ savedCount: 0, bookingCount: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ savedCount: 0, bookingCount: 0, plannerItemCount: 0 });
 
   useEffect(() => {
+    // Read planner item count from localStorage (no API needed)
+    let plannerItemCount = 0;
+    try {
+      const raw = localStorage.getItem("off2zim_trip_planner_v1");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        plannerItemCount = Array.isArray(parsed.items) ? parsed.items.length : 0;
+      }
+    } catch { /* ignore */ }
+
     Promise.all([
       apiFetch<{ favorites: unknown[] }>("/api/favorites").catch(() => ({ favorites: [] })),
       apiFetch<{ bookings: unknown[] }>("/api/bookings").catch(() => ({ bookings: [] })),
@@ -25,6 +36,7 @@ function useDashboardStats(): DashboardStats {
       setStats({
         savedCount: fav.favorites.length,
         bookingCount: bk.bookings.length,
+        plannerItemCount,
       });
     });
   }, []);
@@ -82,8 +94,8 @@ function ExplorerDashboardShell() {
               />
               <WorkspaceStat
                 label="Trip plans"
-                value="—"
-                meta="Active itineraries"
+                value={stats.plannerItemCount > 0 ? String(stats.plannerItemCount) : "—"}
+                meta={stats.plannerItemCount > 0 ? `Item${stats.plannerItemCount !== 1 ? "s" : ""} in planner` : "Start planning"}
                 icon={<MapPinned className="h-5 w-5 text-[#5aa7ff]" />}
               />
               <WorkspaceStat

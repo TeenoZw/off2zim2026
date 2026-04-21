@@ -249,11 +249,12 @@ export default function SpecialsPage() {
                 Specials
               </div>
               <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">
-                Limited offers built around real travel routes
+                More of Zimbabwe, at a better price
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
-                Specials package destination logic, timing, and value to help
-                travelers move faster from interest to decision.
+                Each special bundles accommodation, guided experiences, and key
+                activities into one price — so you spend less time planning and
+                more time in the destination.
               </p>
             </div>
             <div

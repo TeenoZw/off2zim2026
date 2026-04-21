@@ -41,16 +41,16 @@ export default function FeaturedPage() {
         <div className="mb-10">
           <div className="mb-3 flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-[#fbbf24]" />
-            <span className="text-sm font-medium text-white/40 uppercase tracking-wider">
-              Curated for you
+            <span className="theme-label text-xs uppercase tracking-[0.24em]">
+              Editorially curated
             </span>
           </div>
           <h1 className="theme-heading text-3xl font-bold sm:text-4xl">
-            Featured in Zimbabwe
+            Featured across Zimbabwe
           </h1>
-          <p className="theme-muted mt-2 max-w-xl text-sm">
-            Hand-picked experiences, top-rated providers, and sponsored listings from across
-            Zimbabwe's finest destinations.
+          <p className="theme-muted mt-2 max-w-xl text-sm leading-6">
+            Editor's picks, top-rated providers, and exceptional experiences — selected
+            from across Zimbabwe's destinations and refreshed every week.
           </p>
         </div>
 
@@ -78,10 +78,18 @@ export default function FeaturedPage() {
             ))}
           </div>
         ) : !hasContent ? (
-          <div className="rounded-[28px] border border-white/10 bg-[#111111] p-16 text-center">
-            <Sparkles className="mx-auto mb-4 h-10 w-10 text-white/15" />
-            <p className="font-medium text-white/40">No featured listings right now.</p>
-            <p className="mt-1 text-sm text-white/25">Check back soon — we update this regularly.</p>
+          <div className="rounded-[28px] border border-white/10 bg-[#111111] p-16 text-center space-y-4">
+            <Sparkles className="mx-auto h-10 w-10 text-white/15" />
+            <p className="font-semibold text-white/50">No featured listings yet</p>
+            <p className="text-sm text-white/30 max-w-xs mx-auto">
+              Our editorial team refreshes this selection weekly. Browse the full catalog in the meantime.
+            </p>
+            <a
+              href="/marketplace"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors"
+            >
+              Browse all listings
+            </a>
           </div>
         ) : (
           <div className="space-y-14">

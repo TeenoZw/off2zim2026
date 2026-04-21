@@ -12,12 +12,12 @@ const sampleRestaurants = [
   {
     id: "rest-001",
     name: "Victoria Falls Safari Lodge Restaurant",
-    description: "Bush-facing dining with stronger atmosphere, higher-value memory making, and polished evening service.",
+    description: "Elevated dining with open views across the bushveld — best suited for a long, unhurried evening during your Victoria Falls stay.",
     price: 75,
     currency: "USD",
     category: "dining",
     location: "Victoria Falls",
-    cuisine: "International and local",
+    cuisine: "International & local",
     rating: 4.8,
     image: "/images/victoria-falls.jpg",
     reservationTimes: ["18:00", "19:00", "20:00"],
@@ -25,7 +25,7 @@ const sampleRestaurants = [
   {
     id: "rest-002",
     name: "The Boma",
-    description: "A social, culture-led dinner experience that works well inside an evening events or destination stay flow.",
+    description: "Traditional drums, communal seating, and a parade of Zimbabwean dishes — as much of an experience as it is a meal.",
     price: 55,
     currency: "USD",
     category: "dining",
@@ -38,7 +38,7 @@ const sampleRestaurants = [
   {
     id: "rest-003",
     name: "Mukwa Lodge Restaurant",
-    description: "A quieter lodge dining moment for travelers wanting a more intimate atmosphere with less crowd energy.",
+    description: "Intimate farm-to-table dining in a quieter lodge setting — ideal for evenings away from the main tourist circuit.",
     price: 65,
     currency: "USD",
     category: "dining",
@@ -66,7 +66,7 @@ function RestaurantCard({ restaurant, onBook }: { restaurant: Restaurant; onBook
         }}
       />
       <div className="p-5">
-        <div className="theme-label text-xs uppercase tracking-[0.24em]">Dining moment</div>
+        <div className="theme-label text-xs uppercase tracking-[0.24em]">{restaurant.cuisine}</div>
         <h2 className="theme-heading mt-2 text-xl font-semibold">{restaurant.name}</h2>
         <p className="theme-muted mt-3 text-sm leading-6">{restaurant.description}</p>
 
@@ -203,7 +203,9 @@ export default function RestaurantsPage() {
                 Add the evening moments that make the route memorable
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
-                Dining should feel like part of the itinerary, not a disconnected booking. These curated restaurant moments help travelers place the right meal in the right city at the right time.
+                Reserve a table at the places worth the stop — from cultural dinner
+                experiences in Victoria Falls to lodge dining deep in the bush.
+                Each restaurant is bookable and ready to sit inside your itinerary.
               </p>
             </div>
             <div
@@ -222,8 +224,8 @@ export default function RestaurantsPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <SectionHeader
-          eyebrow="Dining moments"
-          title="Place the right meal in the right stop"
+          eyebrow="Curated dining"
+          title="Reserve meals worth the stop"
         />
         <div className="grid gap-5 lg:grid-cols-3">
           {sampleRestaurants.map((restaurant) => (

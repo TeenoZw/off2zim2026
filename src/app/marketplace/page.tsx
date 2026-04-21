@@ -170,10 +170,10 @@ function MarketplacePageContent() {
             {loading ? (
               <SkeletonGrid count={6} />
             ) : listings.length === 0 ? (
-              <div className="theme-panel rounded-[28px] p-10 text-center">
-                <p className="theme-heading font-semibold">No listings found</p>
-                <p className="theme-muted mt-1 text-sm">
-                  Try a different search or category.
+              <div className="theme-panel rounded-[28px] p-10 text-center space-y-3">
+                <p className="theme-heading font-semibold">No listings match your search</p>
+                <p className="theme-muted text-sm max-w-xs mx-auto leading-6">
+                  Try adjusting the filters, clearing the search, or browsing a different category.
                 </p>
               </div>
             ) : (

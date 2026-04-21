@@ -154,30 +154,30 @@ export default function AccommodationPage() {
                 Stays
               </div>
               <h1 className="theme-heading mt-4 max-w-2xl text-4xl font-bold leading-tight md:text-6xl">
-                Accommodation that feels like part of the journey
+                Where you stay shapes how the trip feels
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                From Victoria Falls luxury to safari camps and houseboat escapes,
-                browse verified Zimbabwe stays in a layout inspired by the mobile
-                app’s darker, more immersive destination experience.
+                From Victoria Falls riverfront lodges to Hwange safari camps and
+                Kariba houseboats — every stay is verified, placed on the right
+                route, and ready to add straight to your itinerary.
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="theme-panel-soft rounded-[24px] p-4">
-                  <div className="theme-subtle text-sm">Verified supply</div>
-                  <div className="theme-heading mt-1 font-semibold">Supplier-first</div>
+                  <div className="theme-heading text-2xl font-bold">150+</div>
+                  <div className="theme-subtle mt-1 text-sm">Verified stays</div>
                 </div>
                 <div className="theme-panel-soft rounded-[24px] p-4">
-                  <div className="theme-subtle text-sm">Discovery</div>
-                  <div className="theme-heading mt-1 font-semibold">Destination-led</div>
+                  <div className="theme-heading text-2xl font-bold">8</div>
+                  <div className="theme-subtle mt-1 text-sm">Destinations covered</div>
                 </div>
                 <div className="theme-panel-soft rounded-[24px] p-4">
-                  <div className="theme-subtle text-sm">Planning</div>
-                  <div className="theme-heading mt-1 font-semibold">Trip-ready</div>
+                  <div className="theme-heading text-2xl font-bold">Free</div>
+                  <div className="theme-subtle mt-1 text-sm">Cancellation on most stays</div>
                 </div>
                 <div className="theme-panel-soft rounded-[24px] p-4">
-                  <div className="theme-subtle text-sm">Trust</div>
-                  <div className="theme-heading mt-1 font-semibold">Review-aware</div>
+                  <div className="theme-heading text-2xl font-bold">4.7★</div>
+                  <div className="theme-subtle mt-1 text-sm">Average guest rating</div>
                 </div>
               </div>
             </div>

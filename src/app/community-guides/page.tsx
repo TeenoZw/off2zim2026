@@ -408,20 +408,20 @@ export default function CommunityGuidesPage() {
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="theme-panel rounded-[30px] p-5">
-            <div className="theme-label text-sm">Forum questions</div>
-            <div className="theme-heading mt-2 text-3xl font-semibold">1,247</div>
+            <div className="theme-heading text-3xl font-bold">1,247</div>
+            <div className="theme-subtle mt-1 text-sm">Questions answered</div>
           </div>
           <div className="theme-panel rounded-[30px] p-5">
-            <div className="theme-label text-sm">Active locals</div>
-            <div className="theme-heading mt-2 text-3xl font-semibold">856</div>
+            <div className="theme-heading text-3xl font-bold">856</div>
+            <div className="theme-subtle mt-1 text-sm">Active local guides</div>
           </div>
           <div className="theme-panel rounded-[30px] p-5">
-            <div className="theme-label text-sm">Answered rate</div>
-            <div className="theme-heading mt-2 text-3xl font-semibold">94%</div>
+            <div className="theme-heading text-3xl font-bold">94%</div>
+            <div className="theme-subtle mt-1 text-sm">Questions get answered</div>
           </div>
           <div className="theme-panel rounded-[30px] p-5">
-            <div className="theme-label text-sm">Avg response</div>
-            <div className="theme-heading mt-2 text-3xl font-semibold">2.3h</div>
+            <div className="theme-heading text-3xl font-bold">2.3h</div>
+            <div className="theme-subtle mt-1 text-sm">Average response time</div>
           </div>
         </div>
       </section>
@@ -429,9 +429,9 @@ export default function CommunityGuidesPage() {
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="theme-panel rounded-[36px] p-6 md:p-8">
-            <p className="theme-label text-sm uppercase tracking-[0.28em]">Two lanes</p>
+            <p className="theme-label text-sm uppercase tracking-[0.28em]">Two ways to get help</p>
             <h2 className="theme-heading mt-2 text-3xl font-semibold">
-              Free advice or premium local help
+              Community wisdom or personal guidance
             </h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="theme-card-soft p-5">
@@ -440,8 +440,8 @@ export default function CommunityGuidesPage() {
                 </div>
                 <h3 className="theme-heading mt-4 text-xl font-semibold">Forum</h3>
                 <p className="theme-muted mt-2 text-sm leading-6">
-                  Community-driven Q&amp;A where verified local voices can stand out
-                  and help explorers make better decisions.
+                  Post a question and get answers from verified locals and fellow
+                  travelers who know the destination first-hand.
                 </p>
               </div>
               <div className="rounded-[28px] border border-[#ff5630]/20 bg-[#1a120f] p-5">

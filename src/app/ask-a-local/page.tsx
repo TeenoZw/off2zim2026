@@ -160,11 +160,14 @@ export default function AskALocalPage() {
               ))}
             </div>
           ) : questions.length === 0 ? (
-            <div className="theme-panel rounded-[28px] p-8 text-center">
-              <p className="theme-muted text-sm">
+            <div className="theme-panel rounded-[28px] p-10 text-center space-y-3">
+              <p className="theme-heading font-semibold">
+                {searchQuery ? "No matching questions" : "No questions yet"}
+              </p>
+              <p className="theme-muted text-sm max-w-xs mx-auto leading-6">
                 {searchQuery
-                  ? `No questions found for "${searchQuery}".`
-                  : "No questions yet. Be the first to ask!"}
+                  ? `Nothing matched "${searchQuery}". Try different keywords or ask a new question.`
+                  : "Be the first to ask. Local guides and fellow travelers are ready to help."}
               </p>
             </div>
           ) : (

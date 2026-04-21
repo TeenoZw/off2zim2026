@@ -211,12 +211,12 @@ export default function EventsPage() {
                 Events
               </div>
               <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">
-                Find the moments that give the itinerary its energy
+                Find events worth building your trip around
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
-                Off2Zim events should help travelers discover what is happening,
-                understand whether it fits their route, and move into booking or
-                itinerary planning without losing context.
+                Festivals, cultural showcases, and live events across Zimbabwe —
+                filter by destination or date, pick your tickets, and add them
+                straight to your itinerary or cart.
               </p>
 
               <div className="mt-8 grid gap-3 md:grid-cols-[1.2fr_0.8fr_0.8fr]">

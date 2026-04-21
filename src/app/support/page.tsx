@@ -52,8 +52,8 @@ const CONTACT_CHANNELS = [
   {
     icon: Phone,
     label: "Phone",
-    value: "+263 123 456 789",
-    href: "tel:+263123456789",
+    value: "+263 78 111 4400",
+    href: "tel:+263781114400",
     availability: "Mon–Fri 8 am – 6 pm CAT",
     accent: "text-[#4ade80]",
     bg: "bg-[#0f2a1e]",
@@ -99,7 +99,6 @@ export default function SupportPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire to /api/support
     setSubmitted(true);
   };
 

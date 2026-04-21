@@ -197,9 +197,10 @@ export default function BookingsPage() {
         <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="theme-heading text-2xl font-bold">My Bookings</h1>
-            <p className="theme-muted mt-1 text-sm">
-              Your full booking history with Off2Zim.
+            <p className="theme-label text-xs uppercase tracking-[0.24em]">Your trips</p>
+            <h1 className="theme-heading mt-2 text-3xl font-bold">Bookings</h1>
+            <p className="theme-muted mt-2 text-sm leading-6">
+              Confirmed stays, activities, dining, and transport — all in one place.
             </p>
           </div>
 
@@ -209,13 +210,13 @@ export default function BookingsPage() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`rounded-xl px-3 py-2 text-sm font-medium transition ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                   filter === f
                     ? "bg-[#ff5630] text-white"
-                    : "border border-white/10 text-white/50 hover:text-white/80"
+                    : "theme-chip hover:bg-white/[0.08]"
                 }`}
               >
-                {f === "all" ? "All" : (STATUS_STYLES[f]?.label ?? f)}
+                {f === "all" ? "All bookings" : (STATUS_STYLES[f]?.label ?? f)}
               </button>
             ))}
           </div>
@@ -233,14 +234,24 @@ export default function BookingsPage() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="theme-panel rounded-[28px] p-12 text-center">
-              <Calendar className="mx-auto mb-3 h-8 w-8 text-white/20" />
-              <p className="font-medium text-white/50">No bookings found.</p>
-              <p className="mt-1 text-sm text-white/30">
-                {filter === "all"
-                  ? "You haven't made any bookings yet."
-                  : `No ${STATUS_STYLES[filter]?.label.toLowerCase() ?? filter} bookings.`}
+            <div className="theme-panel rounded-[28px] p-12 text-center space-y-3">
+              <Calendar className="mx-auto h-8 w-8 text-white/20" />
+              <p className="font-semibold text-white/50">
+                {filter === "all" ? "No bookings yet" : `No ${STATUS_STYLES[filter]?.label.toLowerCase() ?? filter} bookings`}
               </p>
+              <p className="text-sm text-white/30 max-w-xs mx-auto">
+                {filter === "all"
+                  ? "Your confirmed stays, activities, and dining reservations will appear here."
+                  : "Try switching to a different filter or check your full booking history."}
+              </p>
+              {filter === "all" && (
+                <a
+                  href="/accommodation"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors"
+                >
+                  Browse stays
+                </a>
+              )}
             </div>
           ) : (
             <div className="space-y-4">
