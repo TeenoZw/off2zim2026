@@ -13,17 +13,25 @@ declare module "paynow" {
     additionalInfo?: string;
   }
 
-  export interface PaymentResponse {
+  /** Returned by processPayment() — mirrors the SDK's InitResponse class */
+  export interface InitResponse {
+    /** true when Paynow accepted the payment request */
     success: boolean;
-    reference: string;
-    paynowReference: string;
-    redirectUrl?: string;
-    error?: string;
+    /** Lowercase status string, e.g. "ok" or "error" */
     status: string;
-    amount: number;
-    hash: string;
+    /** true when a browser redirect URL is available (web payments) */
+    hasRedirect: boolean;
+    /** Redirect URL for hosted Paynow page (web flow) */
+    redirectUrl?: string;
+    /** URL to poll for transaction status updates */
+    pollUrl?: string;
+    /** Paynow-supplied instructions (mobile flow) */
+    instructions?: string;
+    /** Error message when success === false */
+    error?: string;
   }
 
+  /** Returned by pollTransaction() and parseStatusUpdate() */
   export interface StatusResponse {
     reference: string;
     paynowReference: string;
@@ -39,6 +47,7 @@ declare module "paynow" {
       | "Disputed";
     pollUrl: string;
     hash: string;
+    error?: string;
   }
 
   export class Paynow {
@@ -50,8 +59,21 @@ declare module "paynow" {
     );
 
     createPayment(reference: string, authEmail?: string): Payment;
-    processPayment(payment: Payment, method: string): Promise<PaymentResponse>;
+
+    /**
+     * Initiate a payment. Pass an empty string for method to use the hosted
+     * redirect page; pass "ecocash" / "onemoney" / "telecash" for mobile money.
+     */
+    processPayment(payment: Payment, method: string): Promise<InitResponse>;
+
+    /** Poll a previously initiated transaction for its current status */
     pollTransaction(pollUrl: string): Promise<StatusResponse>;
+
+    /**
+     * Parse and verify the URL-encoded status update POSTed by Paynow to the
+     * result URL. Throws if the hash is invalid.
+     */
+    parseStatusUpdate(queryString: string): StatusResponse;
   }
 
   export class Payment {

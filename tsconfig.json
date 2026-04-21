@@ -36,5 +36,5 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "mobile", "project"]
+  "exclude": ["node_modules", "mobile", "project", "src/__tests__", "tests", "jest.config.ts", "jest.setup.ts", "playwright.config.ts"]
 }

@@ -6,6 +6,7 @@ import {
   PhoneIcon,
 } from "@heroicons/react/24/solid";
 import { GlobeAltIcon } from "@heroicons/react/24/outline";
+import ContactForm from "@/components/contact/ContactForm";
 
 const contactMethods = [
   {
@@ -149,30 +150,7 @@ export default function ContactPage() {
               type, trip intent, and what still needs solving.
             </p>
 
-            <form className="mt-6 space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <input className="theme-input h-12 rounded-[18px] px-4" placeholder="First name" />
-                <input className="theme-input h-12 rounded-[18px] px-4" placeholder="Last name" />
-              </div>
-              <input className="theme-input h-12 rounded-[18px] px-4" placeholder="Email address" />
-              <div className="grid gap-4 sm:grid-cols-2">
-                <input className="theme-input h-12 rounded-[18px] px-4" placeholder="Preferred dates" />
-                <select className="theme-input h-12 rounded-[18px] px-4">
-                  <option>Traveler type</option>
-                  <option>Foreign explorer</option>
-                  <option>Local explorer</option>
-                  <option>Family or group</option>
-                  <option>Business traveler</option>
-                </select>
-              </div>
-              <textarea
-                className="theme-input min-h-[180px] rounded-[24px] px-4 py-3"
-                placeholder="Share the route, experiences, budget expectations, or support you need."
-              />
-              <button className="inline-flex w-full items-center justify-center rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white">
-                Send to Off2Zim support
-              </button>
-            </form>
+            <ContactForm />
           </div>
 
           <div className="space-y-6">

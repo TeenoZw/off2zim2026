@@ -16,6 +16,7 @@ import {
   MagnifyingGlassIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
+import { Minus, Plus } from "lucide-react";
 import { usePayment } from "@/contexts/PaymentContext";
 import { BookingItem } from "@/types/payment";
 
@@ -28,7 +29,9 @@ interface Event {
   time: string;
   location: string;
   category: string;
-  price: string;
+  price: string;         // display string e.g. "$15 - $45"
+  priceGeneral: number;  // actual price for General tier
+  priceVip: number;      // actual price for VIP tier (= priceGeneral if no range)
   image: string;
   featured: boolean;
   capacity: string;
@@ -47,7 +50,9 @@ const events: Event[] = [
     time: "Various times",
     location: "Harare",
     category: "Arts & Culture",
-    price: "$15 - $45",
+    price: "$15 – $45",
+    priceGeneral: 15,
+    priceVip: 45,
     image: "/images/jacaranda.JPG",
     featured: true,
     capacity: "10,000+",
@@ -64,7 +69,9 @@ const events: Event[] = [
     time: "18:00",
     location: "Victoria Falls",
     category: "Festival",
-    price: "$20 - $60",
+    price: "$20 – $60",
+    priceGeneral: 20,
+    priceVip: 60,
     image: "/images/victoria-falls.jpg",
     featured: true,
     capacity: "5,000+",
@@ -78,10 +85,12 @@ const events: Event[] = [
       "A major business and exhibition calendar anchor for travelers combining meetings, networking, and city stays.",
     date: "2026-04-24",
     endDate: "2026-04-28",
-    time: "09:00 - 17:00",
+    time: "09:00 – 17:00",
     location: "Bulawayo",
     category: "Business",
-    price: "$15 - $50",
+    price: "$15 – $50",
+    priceGeneral: 15,
+    priceVip: 50,
     image: "/images/bulawayo.jpg",
     featured: false,
     capacity: "50,000+",
@@ -98,7 +107,9 @@ const events: Event[] = [
     time: "Various times",
     location: "Bulawayo",
     category: "Arts & Culture",
-    price: "$8 - $25",
+    price: "$8 – $25",
+    priceGeneral: 8,
+    priceVip: 25,
     image: "/images/bulawayo.jpg",
     featured: true,
     capacity: "8,000+",
@@ -112,10 +123,12 @@ const events: Event[] = [
       "A multi-day sports event that works well for group itineraries, stays, and lakeside transport planning.",
     date: "2026-10-15",
     endDate: "2026-10-18",
-    time: "06:00 - 18:00",
+    time: "06:00 – 18:00",
     location: "Kariba",
     category: "Sport",
-    price: "$100 - $300",
+    price: "$100 – $300",
+    priceGeneral: 100,
+    priceVip: 300,
     image: "/images/destinations/eastern-highlands.jpg",
     featured: false,
     capacity: "500",
@@ -158,25 +171,29 @@ export default function EventsPage() {
 
   const featured = filteredEvents.filter((event) => event.featured);
 
-  const handleBookEvent = (event: Event) => {
-    const priceValue = Number(event.price.replace(/[^0-9.]/g, "")) || 0;
+  const handleBookEvent = (event: Event, qty: number, tier: "general" | "vip") => {
+    const ticketPrice = tier === "vip" ? event.priceVip : event.priceGeneral;
     const bookingItem: BookingItem = {
-      id: `event_${event.id}`,
+      id: `event_${event.id}_${Date.now()}`,
       type: "activity",
       name: event.title,
-      description: event.description,
-      price: priceValue,
+      description: `${tier === "vip" ? "VIP" : "General"} ticket · ${event.title}`,
+      price: ticketPrice,
       currency: "USD",
       category: "events",
-      quantity: 1,
+      quantity: qty,
       metadata: {
+        tier,
         date: event.date,
+        endDate: event.endDate,
         location: event.location,
         time: event.time,
         capacity: event.capacity,
         organizer: event.organizer,
         category: event.category,
         image: event.image,
+        priceGeneral: event.priceGeneral,
+        priceVip: event.priceVip,
       },
     };
 
@@ -315,12 +332,18 @@ function EventCard({
   onBook,
 }: {
   event: Event;
-  onBook: (event: Event) => void;
+  onBook: (event: Event, qty: number, tier: "general" | "vip") => void;
 }) {
+  const [qty, setQty] = useState(1);
+  const [tier, setTier] = useState<"general" | "vip">("general");
+  const hasVip = event.priceVip > event.priceGeneral;
+  const ticketPrice = tier === "vip" ? event.priceVip : event.priceGeneral;
+  const lineTotal = ticketPrice * qty;
+
   return (
-    <article className="theme-card overflow-hidden">
+    <article className="theme-card overflow-hidden flex flex-col">
       <div
-        className="relative min-h-[240px] bg-cover bg-center"
+        className="relative min-h-[220px] bg-cover bg-center"
         style={{
           backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.55)), url('${event.image}')`,
         }}
@@ -333,45 +356,99 @@ function EventCard({
         </button>
       </div>
 
-      <div className="p-5">
+      <div className="flex flex-1 flex-col p-5">
         <div className="theme-label text-xs uppercase tracking-[0.24em]">{event.category}</div>
         <h3 className="theme-heading mt-2 text-xl font-semibold">{event.title}</h3>
-        <p className="theme-muted mt-3 text-sm leading-6">{event.description}</p>
+        <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">{event.description}</p>
 
-        <div className="theme-muted mt-4 space-y-2 text-sm">
-          <div className="inline-flex items-center gap-2">
+        <div className="theme-muted mt-4 space-y-1.5 text-sm">
+          <div className="flex items-center gap-2">
             <CalendarDaysIcon className="h-4 w-4 text-[#ff7352]" />
             {formatDate(event.date)}
-            {event.endDate !== event.date ? ` to ${formatDate(event.endDate)}` : ""}
+            {event.endDate !== event.date ? ` – ${formatDate(event.endDate)}` : ""}
           </div>
-          <div className="inline-flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4 text-[#5aa7ff]" />
             {event.time}
           </div>
-          <div className="inline-flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <MapPinIcon className="h-4 w-4 text-[#ff7352]" />
             {event.location}
           </div>
-          <div className="inline-flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <UserGroupIcon className="h-4 w-4 text-[#8cf0a1]" />
             {event.capacity} capacity
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2">
-            <TicketIcon className="h-5 w-5 text-[#ffca74]" />
-            <span className="theme-heading text-lg font-semibold">{event.price}</span>
+        {/* Ticket tier selector */}
+        <div className="mt-4 border-t border-white/[0.07] pt-4">
+          <p className="theme-subtle mb-2 flex items-center gap-1.5 text-xs">
+            <TicketIcon className="h-3.5 w-3.5" /> Select ticket tier
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setTier("general")}
+              className={`flex flex-col items-center rounded-[14px] border px-3 py-2.5 text-xs transition-colors ${
+                tier === "general"
+                  ? "border-[#ff5630] bg-[#ff5630]/10 text-[#ff7352]"
+                  : "border-white/[0.08] bg-white/[0.03] theme-muted hover:bg-white/[0.06]"
+              }`}
+            >
+              <span className="font-semibold">General</span>
+              <span className="mt-0.5 text-lg font-bold">${event.priceGeneral}</span>
+              <span className="opacity-60">per ticket</span>
+            </button>
+            {hasVip && (
+              <button
+                onClick={() => setTier("vip")}
+                className={`flex flex-col items-center rounded-[14px] border px-3 py-2.5 text-xs transition-colors ${
+                  tier === "vip"
+                    ? "border-[#ffc247] bg-[#ffc247]/10 text-[#ffc247]"
+                    : "border-white/[0.08] bg-white/[0.03] theme-muted hover:bg-white/[0.06]"
+                }`}
+              >
+                <span className="font-semibold">VIP</span>
+                <span className="mt-0.5 text-lg font-bold">${event.priceVip}</span>
+                <span className="opacity-60">per ticket</span>
+              </button>
+            )}
           </div>
-          <button
-            onClick={() => onBook(event)}
-            className="rounded-full bg-[#ff5630] px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            Book event
-          </button>
         </div>
 
-        <div className="theme-muted mt-4 border-t border-black/10 pt-4 text-xs dark:border-white/10">
+        {/* Quantity + total */}
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setQty((q) => Math.max(1, q - 1))}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/60 hover:bg-white/[0.07] transition-colors disabled:opacity-30"
+              disabled={qty <= 1}
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="theme-heading w-6 text-center text-sm font-semibold">{qty}</span>
+            <button
+              onClick={() => setQty((q) => q + 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/60 hover:bg-white/[0.07] transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+            <span className="theme-subtle ml-1 text-xs">ticket{qty !== 1 ? "s" : ""}</span>
+          </div>
+          <div className="text-right">
+            <span className="theme-heading text-lg font-bold">${lineTotal.toFixed(2)}</span>
+            <p className="theme-subtle text-xs">${ticketPrice} × {qty}</p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onBook(event, qty, tier)}
+          className="mt-3 w-full rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white hover:bg-[#ff7352] transition-colors"
+        >
+          Book {qty} {tier === "vip" ? "VIP" : "General"} ticket{qty !== 1 ? "s" : ""}
+        </button>
+
+        <div className="theme-muted mt-4 border-t border-white/[0.06] pt-3 text-xs">
           Hosted by {event.organizer}
         </div>
       </div>

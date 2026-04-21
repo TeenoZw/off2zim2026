@@ -3,8 +3,7 @@ import { z } from "zod";
 import { apiError } from "@/lib/http";
 import { requireSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-const GUIDE_COMMISSION_RATE = 0.25; // 25% platform commission on Guide+ services
+import { calculateCommission, recordCommission } from "@/lib/commission";
 
 const bookSchema = z.object({
   serviceId: z.string().min(1),
@@ -41,12 +40,10 @@ export async function POST(
       return apiError("Service not found or no longer available.", 404);
     }
 
-    const commissionAmount = parseFloat(
-      (service.price * GUIDE_COMMISSION_RATE).toFixed(2)
-    );
-    const netAmount = parseFloat((service.price - commissionAmount).toFixed(2));
+    const { commissionAmount, netAmount } = calculateCommission(service.price, "guide_booking");
 
-    const booking = await prisma.guideBooking.create({
+    const booking = await prisma.$transaction(async (tx) => {
+    const created = await tx.guideBooking.create({
       data: {
         serviceId: service.id,
         explorerId: user.id,
@@ -61,6 +58,17 @@ export async function POST(
       include: {
         service: { select: { title: true, serviceType: true, durationMin: true } },
       },
+    });
+
+      // Record platform commission
+      await recordCommission(tx, {
+        transactionType: "guide_booking",
+        transactionId: created.id,
+        grossAmount: service.price,
+        currency: service.currency,
+      });
+
+      return created;
     });
 
     return NextResponse.json({

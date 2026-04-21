@@ -3,322 +3,291 @@
 import React, { useState } from "react";
 import {
   ArrowLeft,
-  UserCheck,
-  Building,
+  Building2,
   MessageSquare,
+  Shield,
   Star,
   TrendingUp,
+  UserCheck,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import StarRating from "@/components/rating/StarRating";
 import ReviewForm from "@/components/rating/ReviewForm";
-import RatingSummary from "@/components/rating/RatingSummary";
+import { RatingSummary } from "@/components/rating/RatingSummary";
+import FilterChips from "@/components/ui/FilterChips";
 
-const RatingSystemPage = () => {
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "reviews" | "write-review"
-  >("overview");
-  const [selectedReviewType, setSelectedReviewType] = useState<
-    "service" | "explorer" | "guide"
-  >("service");
+// ── static sample data (explainer page) ──────────────────────────────────────
 
-  // Sample data - would come from API in real application
-  const ratingData = {
-    service: {
-      overallRating: 4.6,
-      totalReviews: 127,
-      ratingDistribution: { 5: 89, 4: 23, 3: 10, 2: 3, 1: 2 },
-      criteriaRatings: {
-        quality: 4.7,
-        communication: 4.5,
-        value: 4.4,
-        professionalism: 4.8,
-      },
-      recentReviews: [
-        {
-          id: "1",
-          reviewerName: "Sarah Johnson",
-          reviewerType: "explorer" as const,
-          rating: 5,
-          title: "Amazing safari experience!",
-          comment:
-            "The service was exceptional from start to finish. Our guide was knowledgeable and the wildlife viewing was incredible. Highly recommend for anyone visiting Zimbabwe.",
-          date: "2 days ago",
-          helpfulCount: 8,
-          isVerified: true,
-          response: {
-            author: "Zimbabwe Wildlife Tours",
-            date: "1 day ago",
-            content:
-              "Thank you Sarah! We're thrilled you had such a wonderful experience. Your feedback means the world to us.",
-          },
-        },
-        {
-          id: "2",
-          reviewerName: "Michael Chen",
-          reviewerType: "explorer" as const,
-          rating: 4,
-          title: "Great value for money",
-          comment:
-            "Solid experience overall. The accommodations were comfortable and the activities were well-organized. Only minor issue was some delays in transportation.",
-          date: "1 week ago",
-          helpfulCount: 5,
-          isVerified: true,
-        },
-      ],
+const RATING_DATA = {
+  service: {
+    overallRating: 4.6,
+    totalReviews: 127,
+    ratingDistribution: { 5: 89, 4: 23, 3: 10, 2: 3, 1: 2 },
+    criteriaRatings: {
+      quality: 4.7,
+      communication: 4.5,
+      value: 4.4,
+      professionalism: 4.8,
     },
-    explorer: {
-      overallRating: 4.8,
-      totalReviews: 45,
-      ratingDistribution: { 5: 35, 4: 8, 3: 2, 2: 0, 1: 0 },
-      criteriaRatings: {
-        communication: 4.9,
-        respect: 4.8,
-        reliability: 4.7,
-      },
-      recentReviews: [
-        {
-          id: "3",
-          reviewerName: "Victoria Falls Lodge",
-          reviewerType: "provider" as const,
-          rating: 5,
-          title: "Wonderful guests!",
-          comment:
-            "Sarah and her family were delightful guests. They were respectful of our property and followed all guidelines perfectly. Would welcome them back anytime.",
-          date: "3 days ago",
-          helpfulCount: 3,
-          isVerified: true,
+    recentReviews: [
+      {
+        id: "1",
+        reviewerName: "Sarah Johnson",
+        reviewerType: "explorer" as const,
+        rating: 5,
+        title: "Amazing safari experience!",
+        comment:
+          "The service was exceptional from start to finish. Our guide was knowledgeable and the wildlife viewing was incredible.",
+        date: "2 days ago",
+        helpfulCount: 8,
+        isVerified: true,
+        response: {
+          author: "Zimbabwe Wildlife Tours",
+          date: "1 day ago",
+          content: "Thank you Sarah! We're thrilled you had such a wonderful experience.",
         },
-      ],
-    },
-    guide: {
-      overallRating: 4.9,
-      totalReviews: 78,
-      ratingDistribution: { 5: 68, 4: 8, 3: 2, 2: 0, 1: 0 },
-      criteriaRatings: {
-        knowledge: 4.9,
-        helpfulness: 4.8,
-        responsiveness: 4.9,
       },
-      recentReviews: [
-        {
-          id: "4",
-          reviewerName: "Travel Explorer",
-          reviewerType: "explorer" as const,
-          rating: 5,
-          title: "Local expert with amazing insights",
-          comment:
-            "Tino provided incredible local insights that made our trip unforgettable. His recommendations for hidden gems were spot on!",
-          date: "5 days ago",
-          helpfulCount: 12,
-          isVerified: true,
-        },
-      ],
-    },
-  };
+      {
+        id: "2",
+        reviewerName: "Michael Chen",
+        reviewerType: "explorer" as const,
+        rating: 4,
+        title: "Great value for money",
+        comment: "Solid experience overall. Well-organised with minor transport delays.",
+        date: "1 week ago",
+        helpfulCount: 5,
+        isVerified: true,
+      },
+    ],
+  },
+  explorer: {
+    overallRating: 4.8,
+    totalReviews: 45,
+    ratingDistribution: { 5: 35, 4: 8, 3: 2, 2: 0, 1: 0 },
+    criteriaRatings: { communication: 4.9, respect: 4.8, reliability: 4.7 },
+    recentReviews: [
+      {
+        id: "3",
+        reviewerName: "Victoria Falls Lodge",
+        reviewerType: "provider" as const,
+        rating: 5,
+        title: "Wonderful guests!",
+        comment:
+          "Sarah and her family were respectful of our property and followed all guidelines perfectly.",
+        date: "3 days ago",
+        helpfulCount: 3,
+        isVerified: true,
+      },
+    ],
+  },
+  guide: {
+    overallRating: 4.9,
+    totalReviews: 78,
+    ratingDistribution: { 5: 68, 4: 8, 3: 2, 2: 0, 1: 0 },
+    criteriaRatings: { knowledge: 4.9, helpfulness: 4.8, responsiveness: 4.9 },
+    recentReviews: [
+      {
+        id: "4",
+        reviewerName: "Travel Explorer",
+        reviewerType: "explorer" as const,
+        rating: 5,
+        title: "Local expert with amazing insights",
+        comment:
+          "Incredible local insights that made our trip unforgettable. Hidden gem recommendations were spot on!",
+        date: "5 days ago",
+        helpfulCount: 12,
+        isVerified: true,
+      },
+    ],
+  },
+};
 
-  const tabs = [
-    {
-      id: "overview" as const,
-      label: "Rating Overview",
-      icon: TrendingUp,
-      description: "View comprehensive rating statistics",
-    },
-    {
-      id: "reviews" as const,
-      label: "All Reviews",
-      icon: MessageSquare,
-      description: "Browse all reviews and ratings",
-    },
-    {
-      id: "write-review" as const,
-      label: "Write Review",
-      icon: Star,
-      description: "Share your experience",
-    },
+type ReviewType = "service" | "explorer" | "guide";
+type TabId = "overview" | "reviews" | "write-review";
+
+// ── component ─────────────────────────────────────────────────────────────────
+
+export default function RatingSystemPage() {
+  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [selectedType, setSelectedType] = useState<ReviewType>("service");
+
+  const currentData = RATING_DATA[selectedType];
+
+  const totalReviews =
+    RATING_DATA.service.totalReviews +
+    RATING_DATA.explorer.totalReviews +
+    RATING_DATA.guide.totalReviews;
+
+  const avgRating = (
+    (RATING_DATA.service.overallRating +
+      RATING_DATA.explorer.overallRating +
+      RATING_DATA.guide.overallRating) /
+    3
+  ).toFixed(1);
+
+  const reviewTypeChips = [
+    { id: "service", label: "Service providers", count: RATING_DATA.service.totalReviews },
+    { id: "explorer", label: "Explorers", count: RATING_DATA.explorer.totalReviews },
+    { id: "guide", label: "Community guides", count: RATING_DATA.guide.totalReviews },
   ];
 
-  const reviewTypes = [
-    {
-      id: "service" as const,
-      label: "Service Provider Reviews",
-      icon: Building,
-      description: "Reviews from explorers about service providers",
-      count: ratingData.service.totalReviews,
-    },
-    {
-      id: "explorer" as const,
-      label: "Explorer Reviews",
-      icon: UserCheck,
-      description: "Reviews from providers about explorers",
-      count: ratingData.explorer.totalReviews,
-    },
-    {
-      id: "guide" as const,
-      label: "Community Guide Reviews",
-      icon: Users,
-      description: "Reviews about community guides",
-      count: ratingData.guide.totalReviews,
-    },
+  const tabChips = [
+    { id: "overview", label: "Overview" },
+    { id: "reviews", label: "Browse reviews" },
+    { id: "write-review", label: "Write a review" },
   ];
-
-  const handleReviewSubmit = (reviewData: {
-    rating: number;
-    comment: string;
-    criteria?: Record<string, number>;
-  }) => {
-    console.log("Review submitted:", reviewData);
-    // In real app, this would submit to API
-    setActiveTab("reviews");
-  };
-
-  const currentData = ratingData[selectedReviewType];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link href="/" className="text-gray-500 hover:text-gray-700">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Two-Way Rating System
-            </h1>
-          </div>
-          <p className="text-gray-600 max-w-3xl">
-            Our comprehensive rating system ensures trust and transparency
-            between all members of the Off2Zim community. Explorers rate service
-            providers, providers rate explorers, and everyone can review
-            community guides.
+    <div className="theme-page min-h-screen pb-20">
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+
+        {/* Back + heading */}
+        <Link
+          href="/"
+          className="theme-muted mb-8 inline-flex items-center gap-2 text-sm transition hover:text-current"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
+
+        <div className="mb-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#ff5630]">
+            Trust &amp; transparency
+          </p>
+          <h1 className="theme-heading mt-2 text-4xl font-semibold">
+            Two-way rating system
+          </h1>
+          <p className="theme-muted mt-3 max-w-2xl text-sm leading-7">
+            Explorers rate service providers, providers rate explorers, and everyone
+            can review community guides. Ratings are blind until both parties
+            complete them — keeping feedback honest.
           </p>
         </div>
 
-        {/* Review Type Selector */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {reviewTypes.map((type) => {
-            const Icon = type.icon;
-            const isActive = selectedReviewType === type.id;
-
-            return (
-              <button
-                key={type.id}
-                onClick={() => setSelectedReviewType(type.id)}
-                className={`p-6 rounded-lg border-2 transition-all text-left ${
-                  isActive
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 bg-white hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <Icon
-                    className={`h-6 w-6 ${isActive ? "text-blue-600" : "text-gray-500"}`}
-                  />
-                  <h3
-                    className={`font-semibold ${isActive ? "text-blue-900" : "text-gray-900"}`}
-                  >
-                    {type.label}
-                  </h3>
-                </div>
-                <p className="text-sm text-gray-600 mb-3">{type.description}</p>
-                <div className="flex items-center gap-2">
-                  <StarRating
-                    rating={currentData.overallRating}
-                    readonly
-                    showText={false}
-                    size="sm"
-                  />
-                  <span className="text-sm font-medium text-gray-900">
-                    {currentData.overallRating.toFixed(1)}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    ({type.count} reviews)
-                  </span>
-                </div>
-              </button>
-            );
-          })}
+        {/* Platform stats */}
+        <div className="mb-10 grid grid-cols-3 gap-4">
+          <div className="theme-panel rounded-[28px] p-5 text-center">
+            <div className="theme-heading text-3xl font-semibold">{avgRating}</div>
+            <div className="theme-muted mt-1 text-xs">Platform avg</div>
+            <div className="mt-2 flex justify-center">
+              <StarRating rating={Number(avgRating)} readonly showText={false} size="sm" />
+            </div>
+          </div>
+          <div className="theme-panel rounded-[28px] p-5 text-center">
+            <div className="theme-heading text-3xl font-semibold">
+              {totalReviews.toLocaleString()}
+            </div>
+            <div className="theme-muted mt-1 text-xs">Total reviews</div>
+            <div className="mt-2 flex justify-center">
+              <TrendingUp className="h-4 w-4 text-[#4ade80]" />
+            </div>
+          </div>
+          <div className="theme-panel rounded-[28px] p-5 text-center">
+            <div className="theme-heading text-3xl font-semibold">98%</div>
+            <div className="theme-muted mt-1 text-xs">Verified reviews</div>
+            <div className="mt-2 flex justify-center">
+              <Shield className="h-4 w-4 text-[#8dc9ff]" />
+            </div>
+          </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="flex space-x-8">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+        {/* How it works cards */}
+        <div className="mb-10 grid gap-4 md:grid-cols-3">
+          {[
+            {
+              icon: Building2,
+              color: "text-[#ff7352]",
+              bg: "bg-[#2d1714]",
+              title: "Rate service providers",
+              body: "After every completed experience, explorers rate providers on quality, communication, value, and professionalism.",
+            },
+            {
+              icon: UserCheck,
+              color: "text-[#4ade80]",
+              bg: "bg-[#0f2a1e]",
+              title: "Rate explorers",
+              body: "Providers rate the explorers they host — communication, respect, and reliability — helping build community trust.",
+            },
+            {
+              icon: Users,
+              color: "text-[#8dc9ff]",
+              bg: "bg-[#13283a]",
+              title: "Review community guides",
+              body: "Anyone can review the community guides who answer questions in Ask-a-Local and lead Guide+ sessions.",
+            },
+          ].map(({ icon: Icon, color, bg, title, body }) => (
+            <div key={title} className="theme-panel rounded-[28px] p-6">
+              <div className={`mb-4 inline-flex rounded-2xl p-3 ${bg}`}>
+                <Icon className={`h-5 w-5 ${color}`} />
+              </div>
+              <h3 className="theme-heading font-semibold">{title}</h3>
+              <p className="theme-muted mt-2 text-sm leading-6">{body}</p>
+            </div>
+          ))}
+        </div>
 
-              return (
+        {/* Blind rating explainer */}
+        <div className="mb-10 rounded-[28px] bg-gradient-to-r from-[#1e1b2e] to-[#1a1e2e] p-6">
+          <div className="flex items-start gap-4">
+            <div className="rounded-2xl bg-[#2d2455] p-3">
+              <Star className="h-5 w-5 text-[#c4b5fd]" />
+            </div>
+            <div>
+              <h3 className="theme-heading font-semibold">Blind rating window</h3>
+              <p className="theme-muted mt-2 text-sm leading-6">
+                Ratings are hidden for 7 days after a booking completes. Both parties
+                submit independently before seeing each other&apos;s score. This
+                eliminates retaliation bias and keeps feedback authentic.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive demo */}
+        <div className="theme-panel rounded-[32px] p-6">
+          <div className="mb-5 flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-[#ff5630]" />
+            <h2 className="theme-heading text-xl font-semibold">Live demo</h2>
+          </div>
+
+          {/* Review type selector */}
+          <FilterChips
+            options={reviewTypeChips}
+            selected={selectedType}
+            onSelect={(id) => setSelectedType(id as ReviewType)}
+            className="mb-6"
+          />
+
+          {/* Tab navigation */}
+          <div className="mb-6 border-b border-white/8">
+            <div className="flex gap-6">
+              {tabChips.map(({ id, label }) => (
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    isActive
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  key={id}
+                  onClick={() => setActiveTab(id as TabId)}
+                  className={`pb-3 text-sm font-medium transition ${
+                    activeTab === id
+                      ? "border-b-2 border-[#ff5630] text-[#ff5630]"
+                      : "theme-muted hover:text-current"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
+                  {label}
                 </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Tab Content */}
-        <div className="space-y-6">
-          {activeTab === "overview" && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Rating System Overview
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 mb-2">
-                      {(
-                        ratingData.service.overallRating +
-                        ratingData.explorer.overallRating +
-                        ratingData.guide.overallRating / 3
-                      ).toFixed(1)}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Average Platform Rating
-                    </div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 mb-2">
-                      {(
-                        ratingData.service.totalReviews +
-                        ratingData.explorer.totalReviews +
-                        ratingData.guide.totalReviews
-                      ).toLocaleString()}
-                    </div>
-                    <div className="text-sm text-gray-600">Total Reviews</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600 mb-2">
-                      98%
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Verified Reviews
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <RatingSummary
-                overallRating={currentData.overallRating}
-                totalReviews={currentData.totalReviews}
-                ratingDistribution={currentData.ratingDistribution}
-                criteriaRatings={currentData.criteriaRatings}
-                recentReviews={currentData.recentReviews}
-                showWriteReview={true}
-                onWriteReview={() => setActiveTab("write-review")}
-              />
+              ))}
             </div>
+          </div>
+
+          {activeTab === "overview" && (
+            <RatingSummary
+              overallRating={currentData.overallRating}
+              totalReviews={currentData.totalReviews}
+              ratingDistribution={currentData.ratingDistribution}
+              criteriaRatings={currentData.criteriaRatings}
+              recentReviews={currentData.recentReviews}
+              showWriteReview
+              onWriteReview={() => setActiveTab("write-review")}
+            />
           )}
 
           {activeTab === "reviews" && (
@@ -328,16 +297,16 @@ const RatingSystemPage = () => {
               ratingDistribution={currentData.ratingDistribution}
               criteriaRatings={currentData.criteriaRatings}
               recentReviews={currentData.recentReviews}
-              showWriteReview={true}
+              showWriteReview
               onWriteReview={() => setActiveTab("write-review")}
             />
           )}
 
           {activeTab === "write-review" && (
             <ReviewForm
-              reviewType={selectedReviewType}
+              reviewType={selectedType}
               targetName="Sample Target"
-              onSubmit={handleReviewSubmit}
+              onSubmit={() => setActiveTab("overview")}
               onCancel={() => setActiveTab("overview")}
             />
           )}
@@ -345,6 +314,4 @@ const RatingSystemPage = () => {
       </div>
     </div>
   );
-};
-
-export default RatingSystemPage;
+}

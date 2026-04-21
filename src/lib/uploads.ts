@@ -29,7 +29,7 @@ export function inferMimeType(filePath: string) {
 }
 
 export async function saveUploadedFile(
-  bucket: "provider-documents" | "provider-content",
+  bucket: "provider-documents" | "provider-content" | "avatars" | "listing-images",
   file: File,
   prefix: string
 ) {

@@ -13,6 +13,21 @@ interface StarRatingProps {
   className?: string;
 }
 
+const SIZE: Record<string, string> = {
+  sm: "h-4 w-4",
+  md: "h-5 w-5",
+  lg: "h-6 w-6",
+};
+
+const LABELS: Record<number, string> = {
+  0: "No rating",
+  1: "Poor",
+  2: "Fair",
+  3: "Good",
+  4: "Very good",
+  5: "Excellent",
+};
+
 export const StarRating: React.FC<StarRatingProps> = ({
   rating = 0,
   onRatingChange,
@@ -22,81 +37,42 @@ export const StarRating: React.FC<StarRatingProps> = ({
   showText = true,
   className = "",
 }) => {
-  const [hoverRating, setHoverRating] = useState(0);
-
-  const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-5 w-5",
-    lg: "h-6 w-6",
-  };
-
-  const handleStarClick = (starRating: number) => {
-    if (!readonly && onRatingChange) {
-      onRatingChange(starRating);
-    }
-  };
-
-  const handleStarHover = (starRating: number) => {
-    if (!readonly) {
-      setHoverRating(starRating);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (!readonly) {
-      setHoverRating(0);
-    }
-  };
-
-  const displayRating = hoverRating || rating;
-
-  const getRatingText = (rating: number): string => {
-    if (rating === 0) return "No rating";
-    if (rating <= 1) return "Poor";
-    if (rating <= 2) return "Fair";
-    if (rating <= 3) return "Good";
-    if (rating <= 4) return "Very Good";
-    return "Excellent";
-  };
+  const [hover, setHover] = useState(0);
+  const display = hover || rating;
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex items-center gap-1" onMouseLeave={handleMouseLeave}>
-        {[...Array(maxRating)].map((_, index) => {
-          const starRating = index + 1;
-          const isFilled = starRating <= displayRating;
-          const isHalfFilled =
-            !readonly &&
-            starRating - 0.5 <= displayRating &&
-            starRating > displayRating;
-
+      <div
+        className="flex items-center gap-0.5"
+        onMouseLeave={() => !readonly && setHover(0)}
+      >
+        {Array.from({ length: maxRating }).map((_, i) => {
+          const star = i + 1;
+          const filled = star <= display;
           return (
             <Star
-              key={index}
-              className={`
-                ${sizeClasses[size]}
-                ${readonly ? "cursor-default" : "cursor-pointer"}
-                transition-colors duration-200
-                ${
-                  isFilled
-                    ? "fill-yellow-400 text-yellow-400"
-                    : isHalfFilled
-                      ? "fill-yellow-200 text-yellow-400"
-                      : "fill-gray-200 text-gray-300 hover:fill-yellow-200 hover:text-yellow-400"
-                }
-              `}
-              onClick={() => handleStarClick(starRating)}
-              onMouseEnter={() => handleStarHover(starRating)}
+              key={i}
+              className={[
+                SIZE[size],
+                readonly ? "cursor-default" : "cursor-pointer",
+                "transition-colors duration-150",
+                filled
+                  ? "fill-[#fbbf24] text-[#fbbf24]"
+                  : readonly
+                    ? "fill-white/10 text-white/20"
+                    : "fill-white/10 text-white/20 hover:fill-[#fbbf24]/60 hover:text-[#fbbf24]/60",
+              ].join(" ")}
+              onClick={() => !readonly && onRatingChange?.(star)}
+              onMouseEnter={() => !readonly && setHover(star)}
             />
           );
         })}
       </div>
 
       {showText && (
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span className="font-medium">{displayRating.toFixed(1)}</span>
-          <span>•</span>
-          <span>{getRatingText(displayRating)}</span>
+        <div className="flex items-center gap-1.5 text-sm">
+          <span className="theme-heading font-semibold">{display.toFixed(1)}</span>
+          <span className="theme-muted">{LABELS[Math.round(display)] ?? ""}</span>
         </div>
       )}
     </div>

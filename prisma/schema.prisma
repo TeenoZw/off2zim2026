@@ -390,6 +390,8 @@ model ProviderCompany {
   verificationReviews ProviderVerificationReview[]
   disputes            Dispute[]
   auditLogs           AdminAuditLog[]
+  subscriptions       Subscription[]
+  payouts             Payout[]
 
   @@unique([ownerUserId])
   @@index([onboardingStatus])
@@ -460,6 +462,7 @@ model ProviderListing {
   availability     ListingAvailability[]
   bookings         Booking[]
   shoppingProduct  ShoppingProduct?
+  featuredEntries  FeaturedEntry[]
 
   @@index([companyId, status])
   @@index([category, visibility, status])
@@ -822,4 +825,85 @@ model ShoppingOrderItem {
   @@index([orderId])
   @@index([vendorCompanyId, status])
   @@map("shopping_order_items")
+}
+
+// ─── Monetization Engine ─────────────────────────────────────────────────────
+
+model Subscription {
+  id                String    @id @default(cuid())
+  companyId         String
+  planType          String    // verified_badge | featured_placement
+  billingCycle      String    // monthly | annual
+  status            String    @default("active") // active | cancelled | expired | past_due
+  // Payment reference — populated when integrated with Stripe or Paynow
+  externalRef       String?   // Stripe subscription ID or Paynow poll URL
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelledAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  company ProviderCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, planType, status])
+  @@map("subscriptions")
+}
+
+model PlatformCommission {
+  id              String   @id @default(cuid())
+  // transactionType: booking | guide_booking | shop_order
+  transactionType String
+  transactionId   String   // bookingId, guideBookingId, or shoppingOrderId
+  grossAmount     Float
+  commissionRate  Float    // e.g. 0.25 for 25%
+  commissionAmount Float
+  netAmount       Float    // grossAmount - commissionAmount
+  currency        String   @default("USD")
+  status          String   @default("held") // held | released | refunded
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([transactionType, transactionId])
+  @@index([status, createdAt])
+  @@map("platform_commissions")
+}
+
+model Payout {
+  id           String    @id @default(cuid())
+  companyId    String
+  amount       Float
+  currency     String    @default("USD")
+  method       String    // bank_transfer | ecocash | onemoney | telecash
+  accountRef   String    // phone number or bank account reference
+  status       String    @default("pending") // pending | processing | completed | failed
+  reference    String?   // external payment reference
+  notes        String?
+  requestedAt  DateTime  @default(now())
+  processedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  company ProviderCompany @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+  @@index([status, requestedAt])
+  @@map("payouts")
+}
+
+model FeaturedEntry {
+  id           String    @id @default(cuid())
+  listingId    String
+  pathway      String    // sponsored | top_rated | editors_choice
+  justification String?  // required for editors_choice
+  startDate    DateTime
+  endDate      DateTime
+  isActive     Boolean   @default(true)
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  listing ProviderListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([pathway, isActive, startDate])
+  @@map("featured_entries")
 }

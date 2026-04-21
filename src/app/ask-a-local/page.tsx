@@ -146,8 +146,18 @@ export default function AskALocalPage() {
         {/* Questions */}
         <div className="space-y-3">
           {loading ? (
-            <div className="theme-panel rounded-[28px] p-6 text-sm text-white/55">
-              Loading questions...
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="animate-pulse rounded-[24px] border border-white/[0.07] bg-white/[0.04] p-5">
+                  <div className="h-4 w-2/3 rounded-xl bg-white/[0.08]" />
+                  <div className="mt-2 h-3.5 w-full rounded-xl bg-white/[0.05]" />
+                  <div className="mt-2 h-3.5 w-4/5 rounded-xl bg-white/[0.05]" />
+                  <div className="mt-4 flex gap-2">
+                    <div className="h-5 w-12 rounded-full bg-white/[0.06]" />
+                    <div className="h-5 w-16 rounded-full bg-white/[0.06]" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : questions.length === 0 ? (
             <div className="theme-panel rounded-[28px] p-8 text-center">

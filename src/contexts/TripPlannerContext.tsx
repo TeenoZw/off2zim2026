@@ -120,6 +120,11 @@ export function TripPlannerProvider({ children }: { children: React.ReactNode })
           meta: {
             ...prev.meta,
             ...updates,
+            // Enforce minimum of 1 traveler so quantity never becomes 0
+            // (which would silently produce $0 bookings).
+            ...(updates.travelers !== undefined
+              ? { travelers: Math.max(1, updates.travelers) }
+              : {}),
           },
         }));
       },

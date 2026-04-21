@@ -3,6 +3,10 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/http";
 import { requireSessionUser } from "@/lib/auth";
+import {
+  sendBookingConfirmation,
+  sendProviderNewBookingAlert,
+} from "@/lib/platform-email";
 
 export const dynamic = "force-dynamic";
 const bookingRequestSchema = z.object({
@@ -56,6 +60,38 @@ export async function POST(
         }),
       },
     });
+
+    // Fire-and-forget emails
+    void sendBookingConfirmation({
+      to: user.email,
+      explorerName: user.name ?? user.email,
+      confirmationNumber: booking.confirmationNumber,
+      listingTitle: listing.title,
+      providerName: listing.company.companyName,
+      totalAmount: booking.totalAmount,
+      currency: booking.currency,
+      checkIn: payload.checkIn ?? null,
+    }).catch(() => {});
+
+    void (async () => {
+      const providerOwner = await prisma.user.findUnique({
+        where: { id: listing.company.ownerUserId },
+        select: { email: true, name: true },
+      });
+      if (providerOwner?.email) {
+        void sendProviderNewBookingAlert({
+          to: providerOwner.email,
+          providerName: listing.company.companyName,
+          confirmationNumber: booking.confirmationNumber,
+          listingTitle: listing.title,
+          explorerName: user.name ?? user.email,
+          guests: payload.guests,
+          totalAmount: booking.totalAmount,
+          currency: booking.currency,
+          checkIn: payload.checkIn ?? null,
+        }).catch(() => {});
+      }
+    })();
 
     return NextResponse.json({
       booking: {

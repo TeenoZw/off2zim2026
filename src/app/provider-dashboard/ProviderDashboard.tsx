@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProviderDashboardHeader from "../../components/provider-dashboard/ProviderDashboardHeader";
 import ProviderOverview from "../../components/provider-dashboard/ProviderOverview";
@@ -9,8 +9,11 @@ import EnhancedOrderManagement from "../../components/provider-dashboard/Enhance
 import VerificationStatus from "../../components/provider-dashboard/VerificationStatus";
 import CompanyProfile from "../../components/provider-dashboard/CompanyProfile";
 import ShopProductManagement from "../../components/provider-dashboard/ShopProductManagement";
+import SubscriptionManager from "../../components/provider-dashboard/SubscriptionManager";
+import { apiFetch } from "@/lib/client-api";
 import {
   BarChart3,
+  BadgeCheck,
   Building2,
   Package,
   Shield,
@@ -19,19 +22,62 @@ import {
   Users,
 } from "lucide-react";
 
+interface ProviderStats {
+  pendingOrders: number;
+  activeDisputes: number;
+  verificationProgress: number;
+  pendingListings: number;
+}
+
+function useProviderStats(): ProviderStats {
+  const [stats, setStats] = useState<ProviderStats>({
+    pendingOrders: 0,
+    activeDisputes: 0,
+    verificationProgress: 0,
+    pendingListings: 0,
+  });
+
+  useEffect(() => {
+    Promise.all([
+      apiFetch<{ orders: { status: string }[] }>("/api/provider/orders").catch(() => ({ orders: [] })),
+      apiFetch<{ disputes: { status: string }[] }>("/api/provider/disputes").catch(() => ({ disputes: [] })),
+      apiFetch<{ company: { verificationTier?: string; onboardingStatus?: string; listings?: { status: string }[] } | null }>("/api/provider/company").catch(() => ({ company: null })),
+    ]).then(([ordersData, disputesData, companyData]) => {
+      const pendingOrders = ordersData.orders.filter((o) =>
+        ["PENDING", "REQUESTED", "pending", "requested"].includes(o.status)
+      ).length;
+
+      const activeDisputes = disputesData.disputes.filter((d) =>
+        !["resolved", "closed"].includes((d.status ?? "").toLowerCase())
+      ).length;
+
+      const company = companyData.company;
+      let verificationProgress = 0;
+      if (company) {
+        if (company.verificationTier === "verified_premium") verificationProgress = 100;
+        else if (company.verificationTier === "basic") verificationProgress = 75;
+        else if (company.onboardingStatus === "pending_review") verificationProgress = 50;
+        else if (company.onboardingStatus === "profile_complete") verificationProgress = 25;
+        else verificationProgress = 10; // company exists
+      }
+
+      const pendingListings = (company?.listings ?? []).filter((l) =>
+        l.status === "pending_review"
+      ).length;
+
+      setStats({ pendingOrders, activeDisputes, verificationProgress, pendingListings });
+    });
+  }, []);
+
+  return stats;
+}
+
 export default function ProviderDashboard() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Mock data for notification badges
-  const notificationData = {
-    pendingOrders: 3,
-    activeDisputes: 1,
-    verificationProgress: 75,
-    unreadMessages: 2,
-    pendingListings: 1,
-  };
+  const notificationData = useProviderStats();
 
   const tabs = [
     {
@@ -64,14 +110,20 @@ export default function ProviderDashboard() {
       badge: notificationData.pendingOrders + notificationData.activeDisputes,
       badgeColor:
         notificationData.activeDisputes > 0
-          ? "bg-red-100 text-red-800"
-          : "bg-orange-100 text-orange-800",
+          ? "bg-[#2a0f0a] text-[#ff8a78]"
+          : "bg-[#2a1f00] text-[#ffc247]",
     },
     {
       id: "shop",
       label: "Shop Products",
       icon: ShoppingBag,
       description: "Manage purchasable products and stock",
+    },
+    {
+      id: "subscriptions",
+      label: "Subscriptions",
+      icon: BadgeCheck,
+      description: "Verified Badge, Featured Placement, and earnings",
     },
     {
       id: "verification",
@@ -81,8 +133,8 @@ export default function ProviderDashboard() {
       badge: `${notificationData.verificationProgress}%`,
       badgeColor:
         notificationData.verificationProgress === 100
-          ? "bg-green-100 text-green-800"
-          : "bg-blue-100 text-blue-800",
+          ? "bg-[#0f2a1e] text-[#4ade80]"
+          : "bg-[#13283a] text-[#8dc9ff]",
     },
   ];
 
@@ -116,6 +168,8 @@ export default function ProviderDashboard() {
         return <EnhancedOrderManagement />;
       case "shop":
         return <ShopProductManagement />;
+      case "subscriptions":
+        return <SubscriptionManager />;
       case "verification":
         return <VerificationStatus />;
       default:
@@ -184,29 +238,29 @@ export default function ProviderDashboard() {
           {/* Welcome Message for New Users */}
           {notificationData.verificationProgress < 50 &&
             activeTab === "overview" && (
-              <div className="mb-6 rounded-[28px] border border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 p-6 dark:border-[#ff5630]/20 dark:from-[#241612] dark:to-[#17110f]">
+              <div className="mb-6 rounded-[28px] border border-[#ff5630]/20 bg-[#1a100b] p-6">
                 <div className="flex items-start gap-4">
-                  <div className="rounded-lg bg-orange-100 p-2 dark:bg-[#2d1714]">
-                    <Star className="w-6 h-6 text-orange-600" />
+                  <div className="rounded-2xl bg-[#2d1714] p-3 shrink-0">
+                    <Star className="w-5 h-5 text-[#ff7352]" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="mb-2 text-lg font-semibold text-white">
                       Welcome to Off2Zim
                     </h3>
-                    <p className="mb-4 text-gray-700 dark:text-white/70">
+                    <p className="mb-4 text-sm text-white/60 leading-6">
                       Get started by completing your company profile and
                       verification process to unlock all features.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => setActiveTab("profile")}
-                        className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700"
+                        className="rounded-full bg-[#ff5630] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#ff7352]"
                       >
                         Complete Profile
                       </button>
                       <button
                         onClick={() => setActiveTab("verification")}
-                        className="rounded-lg border border-orange-600 bg-white px-4 py-2 text-sm font-medium text-orange-600 transition-colors hover:bg-orange-50 dark:bg-transparent dark:text-orange-300 dark:hover:bg-[#2d1714]"
+                        className="rounded-full border border-[#ff5630]/40 px-5 py-2 text-sm font-medium text-[#ff7352] transition-colors hover:bg-[#ff5630]/10"
                       >
                         Start Verification
                       </button>

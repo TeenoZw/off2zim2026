@@ -21,6 +21,10 @@ import {
   SunMedium,
 } from "lucide-react";
 
+function toSlug(name: string) {
+  return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
+
 const destinations = [
   {
     id: 1,
@@ -277,7 +281,7 @@ export default function TravelGuidePage() {
                 </div>
 
                 <Link
-                  href="/trip-planner"
+                  href={`/travel-guide/${toSlug(destination.name)}`}
                   className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#ff5630]"
                 >
                   Explore {destination.name}

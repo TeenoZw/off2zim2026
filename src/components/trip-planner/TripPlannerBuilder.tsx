@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, LayoutGrid, PanelRightOpen, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTripPlanner } from "@/contexts/TripPlannerContext";
+import { usePayment } from "@/contexts/PaymentContext";
 import {
   getBudgetBreakdown,
   detectLogisticsGaps,
@@ -26,6 +28,8 @@ interface NoticeState {
 }
 
 export default function TripPlannerBuilder() {
+  const router = useRouter();
+  const { addToBooking, currentBooking, removeFromBooking } = usePayment();
   const {
     items,
     meta,
@@ -218,6 +222,57 @@ export default function TripPlannerBuilder() {
     });
   };
 
+  const handleBookItinerary = () => {
+    if (!items.length) return;
+
+    // Remove any previously queued planner items to prevent duplicates on
+    // repeat clicks (e.g. user goes back from checkout and clicks again).
+    (currentBooking ?? [])
+      .filter((b) => b.metadata?.source === "trip-planner")
+      .forEach((b) => removeFromBooking(b.id));
+
+    // Guard: travelers must be at least 1 so quantity is never 0.
+    const travelers = Math.max(1, meta.travelers ?? 1);
+
+    items.forEach((item) => {
+      const isAccommodation = item.type === "accommodation";
+      // "dining" is a valid PlannerItemType but not a valid BookingItem type —
+      // map it to "activity" so the type constraint is satisfied at runtime.
+      const bookingType =
+        item.type === "dining" ? "activity" :
+        item.type as "accommodation" | "activity" | "transport";
+
+      addToBooking({
+        // Deterministic ID per planner item so the dedup check in PaymentContext
+        // correctly matches on a second call instead of silently appending.
+        id: `planner_${item.id}`,
+        type: bookingType,
+        name: item.title,
+        description: item.location ?? item.category,
+        price: item.cost,
+        currency: "USD",
+        quantity: travelers,
+        ...(isAccommodation && item.date && item.endDate
+          ? { checkIn: item.date, checkOut: item.endDate }
+          : {}),
+        // Preserve the original category (e.g. "dining") in the optional
+        // category field even though type is mapped to "activity".
+        category: item.category as string,
+        metadata: {
+          location: item.location,
+          source: "trip-planner",
+          planTitle: meta.title || "Off2Zim Itinerary",
+          date: item.date,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          image: item.image,
+        },
+      });
+    });
+
+    router.push("/checkout");
+  };
+
   return (
     <section
       id="planner-explore"
@@ -309,10 +364,12 @@ export default function TripPlannerBuilder() {
               onActiveDayChange={setActiveDay}
               onOpenAddDrawer={openAddDrawer}
               onRemoveItem={removeItem}
+              onReorderItems={reorderItems}
               onDeleteDay={handleDeleteDay}
               onShare={handleShare}
               onExport={handleExport}
               onReset={handleReset}
+              onBookItinerary={handleBookItinerary}
             />
           )}
         </div>

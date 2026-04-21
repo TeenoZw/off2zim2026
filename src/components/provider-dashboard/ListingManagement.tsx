@@ -2,7 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  Camera,
   CheckCircle,
+  ChevronDown,
+  ChevronUp,
   Eye,
   EyeOff,
   MapPin,
@@ -12,6 +15,7 @@ import {
 } from "lucide-react";
 import { apiFetch } from "@/lib/client-api";
 import type { ProviderListingRecord } from "@/types/platform";
+import ListingImageManager from "@/components/uploads/ListingImageManager";
 
 const initialForm = {
   title: "",
@@ -27,6 +31,123 @@ const initialForm = {
   visibility: "private" as "private" | "public",
   status: "draft" as ProviderListingRecord["status"],
 };
+
+// ── ListingCard ───────────────────────────────────────────────────────────────
+
+interface ListingCardProps {
+  listing: ProviderListingRecord;
+  onToggleVisibility: (listing: ProviderListingRecord) => Promise<void>;
+  onToggleStatus: (listing: ProviderListingRecord) => Promise<void>;
+  onImagesUpdated: (images: string[]) => void;
+}
+
+function ListingCard({
+  listing,
+  onToggleVisibility,
+  onToggleStatus,
+  onImagesUpdated,
+}: ListingCardProps) {
+  const [showPhotos, setShowPhotos] = useState(false);
+
+  return (
+    <article className="theme-panel rounded-[32px] p-6">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="theme-heading text-2xl font-semibold">{listing.title}</h3>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium ${
+                listing.status === "active"
+                  ? "bg-[#153220] text-[#8cf0a1]"
+                  : "bg-white/10 text-white/60"
+              }`}
+            >
+              {listing.status.replace(/_/g, " ")}
+            </span>
+          </div>
+          <div className="theme-muted mt-3 flex flex-wrap gap-3 text-sm">
+            <span>{listing.category}</span>
+            <span className="inline-flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-[#ff7352]" />
+              {listing.location}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Star className="h-4 w-4 fill-[#ffc247] text-[#ffc247]" />
+              {listing.bookingMode === "instant" ? "Instant booking" : "Booking request"}
+            </span>
+            <span>{listing.bookingsCount || 0} bookings</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="text-right">
+            <div className="theme-heading text-2xl font-semibold">
+              {listing.basePrice ? `$${listing.basePrice}` : "Quote"}
+            </div>
+            <div className="theme-subtle text-sm">{listing.visibility}</div>
+          </div>
+          <button
+            onClick={() => onToggleVisibility(listing)}
+            className="theme-button-secondary rounded-full p-3"
+            title={listing.visibility === "public" ? "Make private" : "Make public"}
+          >
+            {listing.visibility === "public" ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
+          </button>
+          <button
+            onClick={() => onToggleStatus(listing)}
+            className="theme-button-secondary rounded-full px-4 py-3 text-sm font-medium"
+          >
+            {listing.status === "active" ? "Pause" : "Publish"}
+          </button>
+          <button
+            onClick={() => setShowPhotos((v) => !v)}
+            className="theme-button-secondary inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium"
+          >
+            <Camera className="h-4 w-4" />
+            Photos
+            {showPhotos ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="theme-card-soft rounded-[24px] p-4 text-sm">
+          {listing.shortDescription || "Add a concise storefront summary for this listing."}
+        </div>
+        <div className="theme-card-soft rounded-[24px] p-4 text-sm">
+          {listing.visibility === "public"
+            ? "Publicly discoverable on the marketplace."
+            : "Private until the provider chooses to publish it."}
+        </div>
+        <div className="theme-card-soft rounded-[24px] p-4 text-sm">
+          {listing.bookingMode === "instant"
+            ? "Configured for instant confirmation."
+            : "Configured for booking requests and supplier review."}
+        </div>
+      </div>
+
+      {showPhotos && (
+        <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.03] p-5">
+          <ListingImageManager
+            listingId={listing.id}
+            images={listing.images ?? []}
+            onSaved={onImagesUpdated}
+          />
+        </div>
+      )}
+    </article>
+  );
+}
+
+// ── ListingManagement ─────────────────────────────────────────────────────────
 
 export default function ListingManagement() {
   const [listings, setListings] = useState<ProviderListingRecord[]>([]);
@@ -300,80 +421,20 @@ export default function ListingManagement() {
       ) : (
         <section className="grid gap-5">
           {filteredListings.map((listing) => (
-            <article key={listing.id} className="theme-panel rounded-[32px] p-6">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="theme-heading text-2xl font-semibold">{listing.title}</h3>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        listing.status === "active"
-                          ? "bg-[#153220] text-[#8cf0a1]"
-                          : "bg-white/10 text-white/60"
-                      }`}
-                    >
-                      {listing.status.replace(/_/g, " ")}
-                    </span>
-                  </div>
-                  <div className="theme-muted mt-3 flex flex-wrap gap-3 text-sm">
-                    <span>{listing.category}</span>
-                    <span className="inline-flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-[#ff7352]" />
-                      {listing.location}
-                    </span>
-                    <span className="inline-flex items-center gap-2">
-                      <Star className="h-4 w-4 fill-[#ffc247] text-[#ffc247]" />
-                      {listing.bookingMode === "instant" ? "Instant booking" : "Booking request"}
-                    </span>
-                    <span>{listing.bookingsCount || 0} bookings</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="text-right">
-                    <div className="theme-heading text-2xl font-semibold">
-                      {listing.basePrice ? `$${listing.basePrice}` : "Quote"}
-                    </div>
-                    <div className="theme-subtle text-sm">{listing.visibility}</div>
-                  </div>
-                  <button
-                    onClick={() => toggleVisibility(listing)}
-                    className="theme-button-secondary rounded-full p-3"
-                  >
-                    {listing.visibility === "public" ? (
-                      <Eye className="h-4 w-4" />
-                    ) : (
-                      <EyeOff className="h-4 w-4" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => toggleStatus(listing)}
-                    className="theme-button-secondary rounded-full px-4 py-3 text-sm font-medium"
-                  >
-                    {listing.status === "active" ? "Pause" : "Publish"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                <div className="theme-card-soft rounded-[24px] p-4 text-sm">
-                  {listing.shortDescription || "Add a concise storefront summary for this listing."}
-                </div>
-                <div className="theme-card-soft rounded-[24px] p-4 text-sm">
-                  {listing.visibility === "public"
-                    ? "Publicly discoverable on the marketplace."
-                    : "Private until the provider chooses to publish it."}
-                </div>
-                <div className="theme-card-soft rounded-[24px] p-4 text-sm">
-                  {listing.bookingMode === "instant"
-                    ? "Configured for instant confirmation."
-                    : "Configured for booking requests and supplier review."}
-                </div>
-              </div>
-            </article>
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              onToggleVisibility={toggleVisibility}
+              onToggleStatus={toggleStatus}
+              onImagesUpdated={(imgs) =>
+                setListings((prev) =>
+                  prev.map((l) => (l.id === listing.id ? { ...l, images: imgs } : l))
+                )
+              }
+            />
           ))}
 
-          {!loading && filteredListings.length === 0 ? (
+          {filteredListings.length === 0 ? (
             <article className="theme-panel rounded-[32px] p-6 text-sm">
               No listings found.
             </article>

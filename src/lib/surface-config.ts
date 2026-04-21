@@ -10,6 +10,7 @@ import {
   MessageCircleQuestion,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
   Users,
 } from "lucide-react";
 import type { AppSurface } from "@/lib/app-surface";
@@ -60,7 +61,8 @@ export const portalLinks: Record<NonPublicSurface, PortalLink[]> = {
   explorer: [
     { label: "Workspace", href: "/dashboard" },
     { label: "Trip planner", href: "/trip-planner" },
-    { label: "Bookings", href: "/checkout" },
+    { label: "Featured", href: "/featured" },
+    { label: "Bookings", href: "/bookings" },
     { label: "Shop", href: "/shop" },
     { label: "Cart", href: "/cart" },
     { label: "Profile", href: "/profile" },
@@ -70,6 +72,7 @@ export const portalLinks: Record<NonPublicSurface, PortalLink[]> = {
     { label: "Listings", href: "/provider-dashboard?tab=listings" },
     { label: "Shop Products", href: "/provider-dashboard?tab=shop" },
     { label: "Orders", href: "/provider-dashboard?tab=orders" },
+    { label: "Subscriptions", href: "/provider-dashboard?tab=subscriptions" },
     { label: "Verification", href: "/provider-dashboard?tab=verification" },
   ],
   admin: [
@@ -114,6 +117,18 @@ export const portalLinks: Record<NonPublicSurface, PortalLink[]> = {
       href: "/admin/guide-applications",
       icon: MessageCircleQuestion,
       section: "Community",
+    },
+    {
+      label: "Revenue",
+      href: "/admin/revenue",
+      icon: ShoppingBag,
+      section: "Monetization",
+    },
+    {
+      label: "Featured",
+      href: "/admin/featured",
+      icon: Sparkles,
+      section: "Monetization",
     },
   ],
 };
@@ -235,7 +250,7 @@ export const explorerWorkspaceCards = [
   {
     title: "Bookings",
     body: "Current reservations, confirmations, and next actions.",
-    href: "/checkout",
+    href: "/bookings",
     label: "View bookings",
     icon: Users,
     accent: "text-[#8cf0a1]",

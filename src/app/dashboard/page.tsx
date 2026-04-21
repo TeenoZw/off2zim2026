@@ -1,15 +1,40 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import { ArrowRight, Compass, Heart, MapPinned, ReceiptText } from "lucide-react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { explorerWorkspaceCards } from "@/lib/surface-config";
+import { apiFetch } from "@/lib/client-api";
+
+interface DashboardStats {
+  savedCount: number;
+  bookingCount: number;
+}
+
+function useDashboardStats(): DashboardStats {
+  const [stats, setStats] = useState<DashboardStats>({ savedCount: 0, bookingCount: 0 });
+
+  useEffect(() => {
+    Promise.all([
+      apiFetch<{ favorites: unknown[] }>("/api/favorites").catch(() => ({ favorites: [] })),
+      apiFetch<{ bookings: unknown[] }>("/api/bookings").catch(() => ({ bookings: [] })),
+    ]).then(([fav, bk]) => {
+      setStats({
+        savedCount: fav.favorites.length,
+        bookingCount: bk.bookings.length,
+      });
+    });
+  }, []);
+
+  return stats;
+}
 
 function ExplorerDashboardShell() {
   const { user } = useAuth();
+  const stats = useDashboardStats();
 
   return (
     <div className="theme-page min-h-screen px-4 py-8 sm:px-6 lg:px-8">
@@ -51,19 +76,19 @@ function ExplorerDashboardShell() {
             <div className="grid gap-3 bg-black/[0.03] p-6 dark:bg-white/[0.02] md:grid-cols-2 md:p-8">
               <WorkspaceStat
                 label="Saved places"
-                value="12"
+                value={stats.savedCount > 0 ? String(stats.savedCount) : "—"}
                 meta="Ready to revisit"
                 icon={<Heart className="h-5 w-5 text-[#ff7352]" />}
               />
               <WorkspaceStat
                 label="Trip plans"
-                value="3"
+                value="—"
                 meta="Active itineraries"
                 icon={<MapPinned className="h-5 w-5 text-[#5aa7ff]" />}
               />
               <WorkspaceStat
                 label="Bookings"
-                value="5"
+                value={stats.bookingCount > 0 ? String(stats.bookingCount) : "—"}
                 meta="Current trip activity"
                 icon={<ReceiptText className="h-5 w-5 text-[#8cf0a1]" />}
               />
@@ -84,7 +109,6 @@ function ExplorerDashboardShell() {
         <section className="grid gap-5 md:grid-cols-3">
           {explorerWorkspaceCards.map((card) => {
             const Icon = card.icon;
-
             return (
               <DashboardCard
                 key={card.title}
@@ -110,7 +134,7 @@ function ExplorerDashboardShell() {
             </div>
             <Link
               href="/travel-guide"
-              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80 dark:hover:bg-white/[0.08]"
+              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-4 py-2 text-sm font-medium theme-muted transition hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
             >
               Open explorer surface
             </Link>
@@ -164,7 +188,7 @@ function DashboardCard({
       <p className="theme-muted mt-3 text-sm leading-6">{body}</p>
       <Link
         href={href}
-        className="mt-6 inline-flex rounded-full border border-black/10 bg-black/[0.04] px-4 py-2 text-sm text-slate-800 transition hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80 dark:hover:bg-white/[0.08]"
+        className="mt-6 inline-flex rounded-full border border-black/10 bg-black/[0.04] px-4 py-2 text-sm theme-muted transition hover:bg-black/[0.07] dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
       >
         {label}
       </Link>

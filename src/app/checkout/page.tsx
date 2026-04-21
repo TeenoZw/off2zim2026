@@ -16,13 +16,16 @@ const CheckoutContent = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Read sources once on mount only. Do NOT add currentBooking or searchParams
+    // to the dep array — re-running this resets items and unmounts CheckoutComponent,
+    // which wipes any +/− edits the user has made.
     const itemsParam = searchParams.get("items");
 
     if (itemsParam) {
       try {
         const decodedItems = JSON.parse(decodeURIComponent(itemsParam));
         setItems(decodedItems);
-      } catch (error) {
+      } catch {
         const savedItems = localStorage.getItem("checkout_items");
         if (savedItems) setItems(JSON.parse(savedItems));
       }
@@ -31,12 +34,13 @@ const CheckoutContent = () => {
       if (savedItems) {
         setItems(JSON.parse(savedItems));
       } else if (currentBooking?.length) {
-        setItems(currentBooking);
+        setItems([...currentBooking]);
       }
     }
 
     setIsLoading(false);
-  }, [currentBooking, searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount only
 
   const handleSuccess = (confirmationNumber: string) => {
     localStorage.removeItem("checkout_items");
@@ -102,7 +106,7 @@ const CheckoutContent = () => {
             <div>
               <button
                 onClick={handleCancel}
-                className="theme-muted inline-flex items-center gap-2 text-sm transition hover:text-slate-950 dark:hover:text-white"
+                className="theme-muted inline-flex items-center gap-2 text-sm transition hover:text-black/90 dark:hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back

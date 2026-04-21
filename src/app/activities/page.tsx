@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { Clock3, MapPin, Search, Star, Users } from "lucide-react";
+import { ArrowRight, Clock3, MapPin, Search, Star, Users, Zap } from "lucide-react";
 import { apiFetch } from "@/lib/client-api";
 import type { PublicListingRecord } from "@/types/platform";
 import { publicListingToPlannerCatalogItem } from "@/lib/public-listing-adapter";
@@ -114,57 +114,76 @@ export default function ActivitiesPage() {
             />
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {activities.map((activity) => (
-              <article key={activity.id} className="theme-card overflow-hidden">
-                <div
-                  className="relative h-56 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.42)), url('${activity.image}')`,
-                  }}
-                />
+              <article key={activity.id} className="theme-card flex flex-col overflow-hidden">
+                {/* Linked image → detail page */}
+                <Link href={`/marketplace/${activity.id}`} className="block">
+                  <div
+                    className="relative h-56 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.42)), url('${activity.image}')`,
+                    }}
+                  />
+                </Link>
 
-                <div className="p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="theme-label text-sm">{activity.category}</p>
-                    <div className="inline-flex items-center gap-1 text-sm text-[#ffc247]">
-                      <Star className="h-4 w-4" />
-                      <span className="theme-heading">{activity.rating}</span>
+                <div className="flex flex-1 flex-col p-6">
+                  {/* Linked content → detail page */}
+                  <Link href={`/marketplace/${activity.id}`} className="block flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="theme-label text-sm">{activity.category}</p>
+                      <div className="inline-flex items-center gap-1 text-sm text-[#ffc247]">
+                        <Star className="h-4 w-4" />
+                        <span className="theme-heading">{activity.rating}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <h3 className="theme-heading mt-2 text-2xl font-semibold">{activity.name}</h3>
-                  <div className="theme-muted mt-3 flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-[#ff7352]" />
-                    {activity.location}
-                  </div>
-
-                  <div className="theme-muted mt-3 flex flex-wrap gap-4 text-sm">
-                    {activity.duration ? (
-                      <span className="inline-flex items-center gap-2">
-                        <Clock3 className="h-4 w-4 text-[#5aa7ff]" />
-                        {activity.duration}
-                      </span>
-                    ) : null}
-                    {activity.maxGuests ? (
-                      <span className="inline-flex items-center gap-2">
-                        <Users className="h-4 w-4 text-[#7ddf8c]" />
-                        Up to {activity.maxGuests}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <p className="theme-muted mt-4 text-sm leading-6">{activity.description}</p>
-
-                  <div className="mt-6 flex items-center justify-between">
-                    <div>
-                      <span className="theme-heading text-2xl font-bold">{activity.price}</span>
-                      <span className="theme-subtle ml-1 text-sm">{activity.priceUnit}</span>
+                    <h3 className="theme-heading mt-2 text-2xl font-semibold">{activity.name}</h3>
+                    <div className="theme-muted mt-3 flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-[#ff7352]" />
+                      {activity.location}
                     </div>
-                    <Link
-                      href={`/marketplace/${activity.id}`}
-                      className="rounded-full bg-[#ff5630] px-4 py-3 text-sm font-semibold text-white"
-                    >
-                      View details
-                    </Link>
+
+                    <div className="theme-muted mt-3 flex flex-wrap gap-4 text-sm">
+                      {activity.duration ? (
+                        <span className="inline-flex items-center gap-2">
+                          <Clock3 className="h-4 w-4 text-[#5aa7ff]" />
+                          {activity.duration}
+                        </span>
+                      ) : null}
+                      {activity.maxGuests ? (
+                        <span className="inline-flex items-center gap-2">
+                          <Users className="h-4 w-4 text-[#7ddf8c]" />
+                          Up to {activity.maxGuests}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <p className="theme-muted mt-4 text-sm leading-6 line-clamp-3">{activity.description}</p>
+                  </Link>
+
+                  {/* Price + CTA row */}
+                  <div className="mt-5 border-t border-white/[0.06] pt-4">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div>
+                        <span className="theme-heading text-2xl font-bold">{activity.price}</span>
+                        <span className="theme-subtle ml-1 text-sm">{activity.priceUnit}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/marketplace/${activity.id}`}
+                        className="theme-button-secondary flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-semibold transition"
+                      >
+                        <ArrowRight className="h-3.5 w-3.5" />
+                        See details
+                      </Link>
+                      <Link
+                        href={`/marketplace/${activity.id}#booking`}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[#ff5630] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#ff7352]"
+                      >
+                        <Zap className="h-3.5 w-3.5" />
+                        Book now
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </article>

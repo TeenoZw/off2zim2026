@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Calendar, Search } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, Search, Star } from "lucide-react";
 import { apiFetch } from "@/lib/client-api";
 import type { DisputeRecord, ProviderOrderRecord } from "@/types/platform";
+import BlindRatingForm from "@/components/rating/BlindRatingForm";
 
 type OrderTab = "new" | "upcoming" | "completed" | "disputed" | "all";
 
@@ -36,6 +37,132 @@ const PAYMENT_COLORS: Record<string, string> = {
   COMPLETED: "bg-[#153220] text-[#8cf0a1]",
   PENDING: "bg-white/10 text-white/60",
 };
+
+// ─── Order card ───────────────────────────────────────────────────────────────
+
+function OrderCard({
+  order,
+  updatingId,
+  onStatusChange,
+}: {
+  order: ProviderOrderRecord;
+  updatingId: string;
+  onStatusChange: (id: string, status: string) => void;
+}) {
+  const [ratingOpen, setRatingOpen] = useState(false);
+
+  return (
+    <article className="rounded-[32px] border border-white/10 bg-[#111111] overflow-hidden p-6">
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+        {/* Left: booking info */}
+        <div className="flex-1">
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="text-2xl font-semibold text-white">
+              {order.confirmationNumber}
+            </h3>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLORS[order.status] ?? "bg-white/10 text-white/60"}`}
+            >
+              {order.status}
+            </span>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium ${PAYMENT_COLORS[order.paymentStatus] ?? "bg-[#332913] text-[#ffca74]"}`}
+            >
+              {order.paymentStatus}
+            </span>
+            {order.disputesCount > 0 && (
+              <span className="rounded-full bg-[#332913] px-3 py-1 text-xs font-medium text-[#ffca74]">
+                {order.disputesCount} dispute{order.disputesCount > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+
+          <div className="mt-2 text-lg font-medium text-white">
+            {order.listing?.title || order.bookingType}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-4 text-sm text-white/55">
+            <span>{order.customer.name}</span>
+            <span className="inline-flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-[#8dc9ff]" />
+              {new Date(order.createdAt).toLocaleDateString()}
+            </span>
+            <span>
+              {order.guests ?? 1} guest{(order.guests ?? 1) > 1 ? "s" : ""}
+            </span>
+            <span>
+              ${order.totalAmount.toFixed(2)} {order.currency}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: actions */}
+        <div className="grid gap-3 md:grid-cols-2 xl:w-[300px] xl:grid-cols-1">
+          {(order.status === "PENDING" || order.status === "REQUESTED") && (
+            <button
+              disabled={updatingId === order.id}
+              onClick={() => onStatusChange(order.id, "CONFIRMED")}
+              className="rounded-full bg-[#ff5630] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              Confirm booking
+            </button>
+          )}
+
+          {order.status === "CONFIRMED" && (
+            <button
+              disabled={updatingId === order.id}
+              onClick={() => onStatusChange(order.id, "COMPLETED")}
+              className="rounded-full bg-[#153220] px-4 py-3 text-sm font-semibold text-[#4ade80] ring-1 ring-[#4ade80]/20 disabled:opacity-50"
+            >
+              Mark complete
+            </button>
+          )}
+
+          <select
+            value={order.status}
+            disabled={updatingId === order.id}
+            onChange={(e) => onStatusChange(order.id, e.target.value)}
+            className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/75"
+          >
+            <option value="REQUESTED">Requested</option>
+            <option value="PENDING">Pending</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+
+          {order.status === "COMPLETED" && (
+            <button
+              onClick={() => setRatingOpen((v) => !v)}
+              className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/60 transition hover:border-white/25 hover:text-white/85"
+            >
+              <Star className="h-4 w-4" />
+              Rate explorer
+              {ratingOpen ? (
+                <ChevronUp className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" />
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Blind rating form — expands inline for completed orders */}
+      {order.status === "COMPLETED" && ratingOpen && (
+        <div className="mt-5 border-t border-white/8 pt-5">
+          <BlindRatingForm
+            bookingId={order.id}
+            perspective="provider"
+            targetName={order.customer.name}
+          />
+        </div>
+      )}
+    </article>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function EnhancedOrderManagement() {
   const [orders, setOrders] = useState<ProviderOrderRecord[]>([]);
@@ -135,7 +262,7 @@ export default function EnhancedOrderManagement() {
                 }`}
               >
                 {tab.label}
-                {count > 0 ? (
+                {count > 0 && (
                   <span
                     className={`rounded-full px-1.5 py-0.5 text-xs tabular-nums ${
                       isActive ? "bg-white/20" : "bg-white/10"
@@ -143,13 +270,13 @@ export default function EnhancedOrderManagement() {
                   >
                     {count}
                   </span>
-                ) : null}
+                )}
               </button>
             );
           })}
         </div>
 
-        <div className="mt-4 relative">
+        <div className="relative mt-4">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
           <input
             type="text"
@@ -161,17 +288,17 @@ export default function EnhancedOrderManagement() {
         </div>
       </section>
 
-      {error ? (
+      {error && (
         <div className="rounded-[28px] border border-[#ff5630]/30 bg-[#2d1714] px-4 py-3 text-sm text-[#ffb09c]">
           {error}
         </div>
-      ) : null}
+      )}
 
       {/* Orders list */}
       <section className="space-y-4">
         {loading ? (
           <article className="rounded-[32px] border border-white/10 bg-[#111111] p-6 text-white/60">
-            Loading orders...
+            Loading orders…
           </article>
         ) : visibleOrders.length === 0 ? (
           <article className="rounded-[32px] border border-white/10 bg-[#111111] p-6 text-white/60">
@@ -189,92 +316,18 @@ export default function EnhancedOrderManagement() {
           </article>
         ) : (
           visibleOrders.map((order) => (
-            <article
+            <OrderCard
               key={order.id}
-              className="rounded-[32px] border border-white/10 bg-[#111111] p-6"
-            >
-              <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-2xl font-semibold text-white">
-                      {order.confirmationNumber}
-                    </h3>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLORS[order.status] ?? "bg-white/10 text-white/60"}`}
-                    >
-                      {order.status}
-                    </span>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${PAYMENT_COLORS[order.paymentStatus] ?? "bg-[#332913] text-[#ffca74]"}`}
-                    >
-                      {order.paymentStatus}
-                    </span>
-                    {order.disputesCount > 0 ? (
-                      <span className="rounded-full bg-[#332913] px-3 py-1 text-xs font-medium text-[#ffca74]">
-                        {order.disputesCount} dispute{order.disputesCount > 1 ? "s" : ""}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-2 text-lg font-medium text-white">
-                    {order.listing?.title || order.bookingType}
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-4 text-sm text-white/55">
-                    <span>{order.customer.name}</span>
-                    <span className="inline-flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-[#8dc9ff]" />
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </span>
-                    <span>{order.guests ?? 1} guest{(order.guests ?? 1) > 1 ? "s" : ""}</span>
-                    <span>
-                      ${order.totalAmount.toFixed(2)} {order.currency}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 md:grid-cols-2 xl:w-[300px] xl:grid-cols-1">
-                  {/* Confirm action for new orders */}
-                  {(order.status === "PENDING" || order.status === "REQUESTED") ? (
-                    <button
-                      disabled={updatingId === order.id}
-                      onClick={() => updateOrderStatus(order.id, "CONFIRMED")}
-                      className="rounded-full bg-[#ff5630] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
-                    >
-                      Confirm booking
-                    </button>
-                  ) : null}
-                  {/* Mark complete for confirmed orders */}
-                  {order.status === "CONFIRMED" ? (
-                    <button
-                      disabled={updatingId === order.id}
-                      onClick={() => updateOrderStatus(order.id, "COMPLETED")}
-                      className="rounded-full bg-[#153220] px-4 py-3 text-sm font-semibold text-[#4ade80] ring-1 ring-[#4ade80]/20 disabled:opacity-50"
-                    >
-                      Mark complete
-                    </button>
-                  ) : null}
-                  <select
-                    value={order.status}
-                    disabled={updatingId === order.id}
-                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                    className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/75"
-                  >
-                    <option value="REQUESTED">Requested</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="CONFIRMED">Confirmed</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="CANCELLED">Cancelled</option>
-                  </select>
-                </div>
-              </div>
-            </article>
+              order={order}
+              updatingId={updatingId}
+              onStatusChange={updateOrderStatus}
+            />
           ))
         )}
       </section>
 
-      {/* Disputes section */}
-      {disputes.length > 0 ? (
+      {/* Disputes section — only shown when disputes exist */}
+      {disputes.length > 0 && (
         <section className="rounded-[32px] border border-white/10 bg-[#111111] p-6">
           <h3 className="text-lg font-semibold text-white">
             Active disputes
@@ -295,16 +348,16 @@ export default function EnhancedOrderManagement() {
                   <span className="text-sm text-white/75">
                     {dispute.bookingConfirmationNumber}
                   </span>
-                  {dispute.listing ? (
+                  {dispute.listing && (
                     <span className="text-sm text-white/50">{dispute.listing.title}</span>
-                  ) : null}
+                  )}
                 </div>
                 <p className="mt-2 text-sm text-white/60">{dispute.reason}</p>
               </div>
             ))}
           </div>
         </section>
-      ) : null}
+      )}
     </div>
   );
 }

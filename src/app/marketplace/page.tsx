@@ -1,19 +1,13 @@
 "use client";
 
 import React, { Suspense, useEffect, useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  Filter,
-  Grid,
-  List,
-  MapPin,
-  Search,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowLeft, Filter, Grid, List, MapPin, Search, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/client-api";
 import type { PublicListingRecord } from "@/types/platform";
+import FilterChips from "@/components/ui/FilterChips";
+import { SkeletonGrid } from "@/components/ui/Skeleton";
 
 function MarketplacePageContent() {
   const searchParams = useSearchParams();
@@ -157,69 +151,127 @@ function MarketplacePageContent() {
           )}
 
           <main className="flex-1">
+            {/* Mobile category chips (visible when sidebar hidden) */}
+            {!showFilters && (
+              <FilterChips
+                options={categories}
+                selected={selectedCategory}
+                onSelect={setSelectedCategory}
+                className="mb-6"
+              />
+            )}
+
             {error ? (
-              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+              <div className="mb-6 rounded-2xl bg-[#2d1714] px-4 py-3 text-sm text-[#ff8a78]">
                 {error}
               </div>
             ) : null}
 
             {loading ? (
-              <div className="theme-panel-strong rounded-[28px] p-8 text-slate-500 dark:text-white/58">
-                Loading listings...
-              </div>
+              <SkeletonGrid count={6} />
             ) : listings.length === 0 ? (
-              <div className="theme-panel-strong rounded-[28px] p-8 text-slate-500 dark:text-white/58">
-                No listings found.
+              <div className="theme-panel rounded-[28px] p-10 text-center">
+                <p className="theme-heading font-semibold">No listings found</p>
+                <p className="theme-muted mt-1 text-sm">
+                  Try a different search or category.
+                </p>
               </div>
             ) : (
               <div
                 className={
                   viewMode === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-                    : "space-y-6"
+                    ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+                    : "space-y-4"
                 }
               >
                 {listings.map((listing) => (
-                  <Link
+                  <article
                     key={listing.id}
-                    href={`/marketplace/${listing.slug}`}
-                    className={`theme-panel-strong overflow-hidden rounded-[28px] shadow-[0_18px_60px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_24px_80px_rgba(15,23,42,0.12)] dark:shadow-[0_20px_80px_rgba(0,0,0,0.24)] dark:hover:shadow-[0_26px_90px_rgba(0,0,0,0.34)] ${
-                      viewMode === "list" ? "flex flex-col md:flex-row" : ""
+                    className={`group theme-panel overflow-hidden rounded-[28px] transition hover:shadow-[0_20px_60px_rgba(0,0,0,0.22)] ${
+                      viewMode === "list" ? "flex flex-col md:flex-row" : "flex flex-col"
                     }`}
                   >
-                    <div className={`bg-gradient-to-br from-[#ffd4c8] via-[#fff0ea] to-[#dce8ff] dark:from-[#3d251f] dark:via-[#231c1b] dark:to-[#172233] ${viewMode === "list" ? "md:w-72" : "h-48"} flex items-center justify-center`}>
-                      <span className="text-sm font-medium text-slate-700 dark:text-white/72">
-                        {listing.category}
-                      </span>
-                    </div>
-                    <div className="p-6 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h2 className="text-xl font-semibold theme-heading">
-                            {listing.title}
-                          </h2>
-                          <p className="mt-2 text-sm text-slate-600 dark:text-white/62">
-                            {listing.shortDescription || listing.description}
-                          </p>
-                        </div>
+                    {/* Clickable image + content area → detail page */}
+                    <Link
+                      href={`/marketplace/${listing.slug}`}
+                      className={`block ${viewMode === "list" ? "md:w-60 md:shrink-0" : ""}`}
+                    >
+                      <div
+                        className={`relative bg-gradient-to-br from-[#2a1f18] via-[#1c1815] to-[#141218] ${
+                          viewMode === "list" ? "h-full min-h-[140px]" : "h-44"
+                        } overflow-hidden`}
+                      >
+                        {listing.images?.[0] ? (
+                          <img
+                            src={listing.images[0]}
+                            alt={listing.title}
+                            className="h-full w-full object-cover transition group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full items-end p-4">
+                            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70 backdrop-blur-sm">
+                              {listing.category}
+                            </span>
+                          </div>
+                        )}
                         {listing.provider.hasVerifiedBadge ? (
-                          <ShieldCheck className="h-5 w-5 text-[#ff5630] shrink-0" />
+                          <div className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
+                            <ShieldCheck className="h-3.5 w-3.5 text-[#8dc9ff]" />
+                          </div>
                         ) : null}
                       </div>
+                    </Link>
 
-                      <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-500 dark:text-white/52">
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {listing.location}
-                        </span>
-                        <span>{listing.provider.companyName}</span>
-                        <span>
-                          {listing.basePrice ? `$${listing.basePrice}` : "Quote"}
-                        </span>
-                        <span>{listing.bookingMode === "instant" ? "Instant booking" : "Booking request"}</span>
+                    <div className="flex flex-1 flex-col p-5">
+                      {/* Linked title + description */}
+                      <Link href={`/marketplace/${listing.slug}`} className="block flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <h2 className="theme-heading line-clamp-2 font-semibold leading-snug">
+                            {listing.title}
+                          </h2>
+                          <span className="theme-heading shrink-0 text-base font-semibold">
+                            {listing.basePrice ? `$${listing.basePrice}` : "Quote"}
+                          </span>
+                        </div>
+
+                        <p className="theme-muted mt-1.5 line-clamp-2 text-xs leading-5">
+                          {listing.shortDescription || listing.description}
+                        </p>
+
+                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-white/50">
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5 text-[#ff7352]" />
+                            {listing.location}
+                          </span>
+                          {listing.bookingMode === "instant" ? (
+                            <span className="inline-flex items-center gap-1 text-[#fbbf24]">
+                              <Zap className="h-3.5 w-3.5" />
+                              Instant
+                            </span>
+                          ) : null}
+                          <span className="ml-auto text-white/30">
+                            {listing.provider.companyName}
+                          </span>
+                        </div>
+                      </Link>
+
+                      {/* CTA row */}
+                      <div className="mt-4 flex items-center gap-2 border-t border-white/[0.06] pt-4">
+                        <Link
+                          href={`/marketplace/${listing.slug}`}
+                          className="theme-button-secondary flex-1 rounded-full px-4 py-2.5 text-center text-xs font-semibold transition"
+                        >
+                          See details
+                        </Link>
+                        <Link
+                          href={`/marketplace/${listing.slug}#booking`}
+                          className="flex-1 rounded-full bg-[#ff5630] px-4 py-2.5 text-center text-xs font-semibold text-white transition hover:bg-[#ff7352]"
+                        >
+                          Book now
+                        </Link>
                       </div>
                     </div>
-                  </Link>
+                  </article>
                 ))}
               </div>
             )}
@@ -234,8 +286,8 @@ export default function MarketplacePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 p-8 text-gray-500">
-          Loading...
+        <div className="theme-page min-h-screen px-8 py-16">
+          <SkeletonGrid count={6} />
         </div>
       }
     >

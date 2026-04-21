@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/http";
+import { rateLimit, rateLimitResponse, AUTH_LIMIT } from "@/lib/rate-limit";
 import {
   createSession,
   getUserBySessionToken,
@@ -143,6 +144,9 @@ async function ensureDemoAccounts() {
 }
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "login", AUTH_LIMIT);
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     await ensureDemoAccounts();
 

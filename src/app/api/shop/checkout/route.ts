@@ -3,6 +3,8 @@ import { z } from "zod";
 import { apiError } from "@/lib/http";
 import { requireSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { recordCommission } from "@/lib/commission";
+import { rateLimit, rateLimitResponse, PAYMENT_LIMIT } from "@/lib/rate-limit";
 import crypto from "crypto";
 
 const checkoutSchema = z.object({
@@ -33,6 +35,9 @@ function generatePickupPin(): string {
 }
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "checkout", PAYMENT_LIMIT);
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     const { user } = await requireSessionUser();
     const payload = checkoutSchema.parse(await request.json());
@@ -49,6 +54,7 @@ export async function POST(request: NextRequest) {
                     id: true,
                     basePrice: true,
                     currency: true,
+                    category: true,
                     companyId: true,
                     company: { select: { id: true } },
                   },
@@ -99,6 +105,7 @@ export async function POST(request: NextRequest) {
       shippingAddress: string | null;
       shippingFee: number;
       pickupPin: string | null;
+      category: string | null;
     };
 
     const orderItems: OrderItemInput[] = cart.items.map((item) => {
@@ -135,6 +142,7 @@ export async function POST(request: NextRequest) {
         shippingAddress: shippingAddr ?? null,
         shippingFee,
         pickupPin,
+        category: item.product.listing.category ?? null,
       };
     });
 
@@ -174,6 +182,31 @@ export async function POST(request: NextRequest) {
         await tx.shoppingProduct.update({
           where: { id: oi.productId },
           data: { stockQuantity: { decrement: oi.quantity } },
+        });
+      }
+
+      // Record platform commission per vendor-category bucket so rates are applied correctly.
+      // Group order items by (vendorCompanyId + category) and record a commission row for each.
+      type Bucket = { grossAmount: number; category: string | null; currency: string };
+      const buckets = new Map<string, Bucket>();
+      for (const oi of orderItems) {
+        const category = oi.category ?? null;
+        const key = `${oi.vendorCompanyId}::${category ?? ""}`;
+        const existing = buckets.get(key);
+        const lineTotal = oi.unitPrice * oi.quantity;
+        if (existing) {
+          existing.grossAmount = parseFloat((existing.grossAmount + lineTotal).toFixed(2));
+        } else {
+          buckets.set(key, { grossAmount: lineTotal, category, currency: newOrder.currency });
+        }
+      }
+      for (const bucket of buckets.values()) {
+        await recordCommission(tx, {
+          transactionType: "shop_order",
+          transactionId: newOrder.id,
+          grossAmount: bucket.grossAmount,
+          currency: bucket.currency,
+          category: bucket.category,
         });
       }
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import FavoriteButton from "@/components/ui/FavoriteButton";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -29,6 +30,10 @@ const accommodationTypes = [
   "Luxury",
   "Family Friendly",
 ];
+
+function toSlug(name: string) {
+  return name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
 
 const accommodations: Accommodation[] = [
   {
@@ -381,9 +386,9 @@ export default function AccommodationPage() {
                       {accommodation.priceUnit}
                     </span>
                   </div>
-                  <button className="rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6e4d]">
+                  <Link href={`/accommodation/${toSlug(accommodation.name)}`} className="rounded-full bg-[#ff5630] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6e4d]">
                     View stay
-                  </button>
+                  </Link>
                 </div>
               </div>
             </article>

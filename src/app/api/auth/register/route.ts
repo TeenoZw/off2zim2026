@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { apiError } from "@/lib/http";
+import { rateLimit, rateLimitResponse, AUTH_LIMIT } from "@/lib/rate-limit";
 import { createSession, hashPassword, serializeUser } from "@/lib/auth";
 import { createEmailVerificationToken } from "@/lib/auth-tokens";
 import { sendEmailVerificationEmail } from "@/lib/auth-email";
@@ -24,6 +25,9 @@ const registerSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request, "register", AUTH_LIMIT);
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     const payload = registerSchema.parse(await request.json());
 

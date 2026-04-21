@@ -71,7 +71,11 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   }, []);
 
   useEffect(() => {
-    if (currentBooking && currentBooking.length > 0) {
+    // Don't touch localStorage on the initial null state — only act once the
+    // booking has been explicitly set (addToBooking) or explicitly cleared
+    // (clearBooking, which calls localStorage.removeItem itself).
+    if (currentBooking === null) return;
+    if (currentBooking.length > 0) {
       localStorage.setItem("checkout_items", JSON.stringify(currentBooking));
     } else {
       localStorage.removeItem("checkout_items");
@@ -104,13 +108,15 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({
   const removeFromBooking = useCallback((itemId: string) => {
     setCurrentBooking((prev) => {
       if (!prev) return null;
-      const filtered = prev.filter((item) => item.id !== itemId);
-      return filtered.length > 0 ? filtered : null;
+      // Return [] (not null) when the last item is removed so the persistence
+      // effect can clean up localStorage (it ignores null).
+      return prev.filter((item) => item.id !== itemId);
     });
   }, []);
 
   const clearBooking = useCallback(() => {
     setCurrentBooking(null);
+    localStorage.removeItem("checkout_items"); // effect won't run for null, so clear explicitly
     setPaymentIntent(null);
     setError(null);
   }, []);

@@ -3,6 +3,102 @@ import { PlannerItemType, TripPlannerItem, TripPlannerMeta } from "@/types/trip-
 export type PlannerSectionId = "overview" | "board";
 export type DaySegment = "morning" | "afternoon" | "evening";
 
+// ─── Logistics gap detection ──────────────────────────────────────────────────
+
+export type GapSeverity = "warning" | "info";
+
+export interface LogisticsGap {
+  /** ISO date of the day where the gap originates */
+  date: string;
+  /** Human-readable label for the day */
+  dayLabel: string;
+  severity: GapSeverity;
+  message: string;
+}
+
+/**
+ * Analyse a list of planner items and return any logistics gaps the traveller
+ * should be aware of before confirming their itinerary.
+ *
+ * Current rules:
+ * 1. Location jump without transport — consecutive days where the accommodation
+ *    or activity location changes but no transport item bridges the gap.
+ * 2. No accommodation on a night — a day has activities/dining but no
+ *    accommodation and isn't the last day of the trip.
+ * 3. Long travel day — a transport item exists but no other activities, leaving
+ *    the day otherwise empty.
+ */
+export function detectLogisticsGaps(
+  items: TripPlannerItem[],
+  meta: TripPlannerMeta
+): LogisticsGap[] {
+  const days = getPlannerDays(items, meta);
+  if (days.length < 2) return [];
+
+  const gaps: LogisticsGap[] = [];
+
+  for (let i = 0; i < days.length - 1; i++) {
+    const today = days[i];
+    const tomorrow = days[i + 1];
+
+    const todayLocations = new Set(
+      today.items
+        .filter((it) => it.type !== "transport")
+        .map((it) => it.location.trim().toLowerCase())
+    );
+    const tomorrowLocations = new Set(
+      tomorrow.items
+        .filter((it) => it.type !== "transport")
+        .map((it) => it.location.trim().toLowerCase())
+    );
+
+    // Check for location change
+    const locationsOverlap = [...todayLocations].some((loc) => tomorrowLocations.has(loc));
+    const hasLocationChange =
+      todayLocations.size > 0 &&
+      tomorrowLocations.size > 0 &&
+      !locationsOverlap;
+
+    if (hasLocationChange) {
+      // Check whether any transport item on today or tomorrow bridges the gap
+      const bridgeTransport = [...today.items, ...tomorrow.items].some(
+        (it) => it.type === "transport"
+      );
+
+      if (!bridgeTransport) {
+        const fromLoc = [...todayLocations][0];
+        const toLoc = [...tomorrowLocations][0];
+        gaps.push({
+          date: tomorrow.key,
+          dayLabel: tomorrow.shortLabel,
+          severity: "warning",
+          message: `No transport from ${capitalise(fromLoc)} to ${capitalise(toLoc)}. Add a bus, taxi, or flight to bridge this gap.`,
+        });
+      }
+    }
+
+    // No accommodation on today (and it's not the last day)
+    const hasStay = today.items.some((it) => it.type === "accommodation");
+    const hasActivities = today.items.some(
+      (it) => it.type === "activity" || it.type === "dining"
+    );
+    if (!hasStay && hasActivities && i < days.length - 2) {
+      gaps.push({
+        date: today.key,
+        dayLabel: today.shortLabel,
+        severity: "info",
+        message: `No accommodation booked for the night of ${today.shortLabel}.`,
+      });
+    }
+  }
+
+  return gaps;
+}
+
+function capitalise(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export interface PlannerDay {
   key: string;
   label: string;
