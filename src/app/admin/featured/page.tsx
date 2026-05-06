@@ -1,20 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import ActionButton from "@/components/admin/ActionButton";
+import AdminCard from "@/components/admin/AdminCard";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
+import AdminSectionHeader from "@/components/admin/AdminSectionHeader";
 import AdminShell from "@/components/admin/AdminShell";
+import AdminStatGrid from "@/components/admin/AdminStatGrid";
+import AdminTable from "@/components/admin/AdminTable";
+import StatusBadge from "@/components/admin/StatusBadge";
 import { apiFetch } from "@/lib/client-api";
 import {
-  Award,
-  Check,
-  ChevronDown,
-  ChevronUp,
+  AlertTriangle,
+  CheckCircle2,
   Plus,
   RefreshCw,
   Sparkles,
   Star,
   Trash2,
-  X,
   Zap,
 } from "lucide-react";
 
@@ -55,25 +59,24 @@ interface PromotedListing {
   featuredEntryId?: string;
 }
 
-const PATHWAY_STYLES: Record<Pathway, { label: string; color: string; icon: typeof Star }> = {
-  sponsored: { label: "Sponsored", color: "text-[#8dc9ff] bg-[#8dc9ff]/10", icon: Sparkles },
-  top_rated: { label: "Top Rated", color: "text-[#4ade80] bg-[#4ade80]/10", icon: Star },
-  editors_choice: { label: "Editor's Choice", color: "text-[#fbbf24] bg-[#fbbf24]/10", icon: Award },
+const pathwayMeta: Record<
+  Pathway,
+  { label: string; tone: "info" | "success" | "warning" }
+> = {
+  sponsored: { label: "Sponsored", tone: "info" },
+  top_rated: { label: "Top rated", tone: "success" },
+  editors_choice: { label: "Editor choice", tone: "warning" },
 };
 
-function PathwayPill({ pathway }: { pathway: Pathway }) {
-  const { label, color, icon: Icon } = PATHWAY_STYLES[pathway];
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${color}`}>
-      <Icon className="h-3 w-3" />
-      {label}
-    </span>
-  );
+function pathwayTone(pathway: Pathway) {
+  return pathwayMeta[pathway].tone;
 }
 
-// ─── Add Entry Form ────────────────────────────────────────────────────────────
+function pathwayLabel(pathway: Pathway) {
+  return pathwayMeta[pathway].label;
+}
 
-function AddEntryForm({ onCreated }: { onCreated: () => void }) {
+function AddEntryPanel({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [listingId, setListingId] = useState("");
   const [pathway, setPathway] = useState<Pathway>("sponsored");
@@ -84,12 +87,27 @@ function AddEntryForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  const reset = () => {
+    setListingId("");
+    setPathway("sponsored");
+    setJustification("");
+    setStartDate("");
+    setEndDate("");
+    setSortOrder(0);
+    setError("");
+  };
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     if (!listingId.trim() || !startDate || !endDate) {
       setError("Listing ID, start date, and end date are required.");
       return;
     }
+    if (pathway === "editors_choice" && !justification.trim()) {
+      setError("Add a reason for editor choice placements.");
+      return;
+    }
+
     setSaving(true);
     setError("");
     try {
@@ -104,12 +122,8 @@ function AddEntryForm({ onCreated }: { onCreated: () => void }) {
           sortOrder,
         }),
       });
+      reset();
       setOpen(false);
-      setListingId("");
-      setJustification("");
-      setStartDate("");
-      setEndDate("");
-      setSortOrder(0);
       onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to create entry.");
@@ -118,148 +132,159 @@ function AddEntryForm({ onCreated }: { onCreated: () => void }) {
     }
   }
 
-  if (!open) {
-    return (
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-full bg-[#ff5630] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#ff4520]"
-      >
-        <Plus className="h-4 w-4" />
-        Add featured entry
-      </button>
-    );
-  }
-
   return (
-    <div className="rounded-[24px] border border-white/10 bg-[#111111] p-6">
-      <div className="mb-5 flex items-center justify-between">
-        <h3 className="font-semibold text-white">New featured entry</h3>
-        <button onClick={() => setOpen(false)} className="text-white/40 hover:text-white/70">
-          <X className="h-4 w-4" />
-        </button>
+    <section className="rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#101010]">
+      <div className="px-6 py-5">
+        <AdminSectionHeader
+          title="Add featured entry"
+          description="Pin a listing into sponsored, top rated, or editor choice placements."
+          action={
+            <ActionButton
+              type="button"
+              variant={open ? "secondary" : "primary"}
+              onClick={() => {
+                setOpen((current) => !current);
+                if (open) reset();
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              {open ? "Close form" : "New entry"}
+            </ActionButton>
+          }
+        />
       </div>
 
-      <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
-          <label className="mb-1.5 block text-xs text-white/40">Listing ID</label>
-          <input
-            value={listingId}
-            onChange={(e) => setListingId(e.target.value)}
-            placeholder="cuid..."
-            className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white placeholder:text-white/25"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs text-white/40">Pathway</label>
-          <select
-            value={pathway}
-            onChange={(e) => setPathway(e.target.value as Pathway)}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-          >
-            <option value="sponsored">Sponsored</option>
-            <option value="top_rated">Top Rated</option>
-            <option value="editors_choice">Editor's Choice</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs text-white/40">Sort order</label>
-          <input
-            type="number"
-            min={0}
-            value={sortOrder}
-            onChange={(e) => setSortOrder(parseInt(e.target.value, 10) || 0)}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs text-white/40">Start date</label>
-          <input
-            type="datetime-local"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs text-white/40">End date</label>
-          <input
-            type="datetime-local"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-          />
-        </div>
-
-        {pathway === "editors_choice" && (
-          <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-xs text-white/40">
-              Justification <span className="text-[#ff5630]">*</span>
-            </label>
-            <textarea
-              value={justification}
-              onChange={(e) => setJustification(e.target.value)}
-              rows={2}
-              maxLength={500}
-              placeholder="Why is this listing an Editor's Choice?"
-              className="w-full resize-none rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white placeholder:text-white/25"
+      {open ? (
+        <form onSubmit={submit} className="grid gap-4 border-t border-slate-200 px-6 py-6 dark:border-white/10 sm:grid-cols-2">
+          <label className="sm:col-span-2">
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+              Listing ID
+            </span>
+            <input
+              value={listingId}
+              onChange={(event) => setListingId(event.target.value)}
+              placeholder="Paste the listing ID"
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white dark:placeholder:text-white/25"
             />
+          </label>
+
+          <label>
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+              Placement type
+            </span>
+            <select
+              value={pathway}
+              onChange={(event) => setPathway(event.target.value as Pathway)}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+            >
+              <option value="sponsored">Sponsored</option>
+              <option value="top_rated">Top rated</option>
+              <option value="editors_choice">Editor choice</option>
+            </select>
+          </label>
+
+          <label>
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+              Sort order
+            </span>
+            <input
+              type="number"
+              min={0}
+              value={sortOrder}
+              onChange={(event) => setSortOrder(parseInt(event.target.value, 10) || 0)}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+            />
+          </label>
+
+          <label>
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+              Start date
+            </span>
+            <input
+              type="datetime-local"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+            />
+          </label>
+
+          <label>
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+              End date
+            </span>
+            <input
+              type="datetime-local"
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+            />
+          </label>
+
+          {pathway === "editors_choice" ? (
+            <label className="sm:col-span-2">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+                Reason
+              </span>
+              <textarea
+                value={justification}
+                onChange={(event) => setJustification(event.target.value)}
+                rows={3}
+                placeholder="Explain why this listing should be highlighted."
+                className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white dark:placeholder:text-white/25"
+              />
+            </label>
+          ) : null}
+
+          {error ? (
+            <div className="sm:col-span-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
+              {error}
+            </div>
+          ) : null}
+
+          <div className="sm:col-span-2 flex flex-wrap justify-end gap-3">
+            <ActionButton type="button" variant="secondary" onClick={() => {
+              reset();
+              setOpen(false);
+            }}>
+              Cancel
+            </ActionButton>
+            <ActionButton type="submit" variant="primary" disabled={saving}>
+              {saving ? "Saving..." : "Create entry"}
+            </ActionButton>
           </div>
-        )}
-
-        {error && (
-          <p className="sm:col-span-2 text-sm text-[#ff5630]">{error}</p>
-        )}
-
-        <div className="sm:col-span-2 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/60 hover:text-white"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 rounded-full bg-[#ff5630] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {saving ? "Saving…" : (<><Check className="h-4 w-4" /> Create entry</>)}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      ) : null}
+    </section>
   );
 }
 
-// ─── Auto-qualify panel ────────────────────────────────────────────────────────
-
 function AutoQualifyPanel({ onDone }: { onDone: () => void }) {
-  const [open, setOpen] = useState(false);
   const [topN, setTopN] = useState(10);
   const [windowDays, setWindowDays] = useState(30);
   const [minBookings, setMinBookings] = useState(3);
-  const [minRating, setMinRating] = useState(4.0);
+  const [minRating, setMinRating] = useState(4);
   const [replace, setReplace] = useState(false);
   const [running, setRunning] = useState(false);
-  const [result, setResult] = useState<{ promoted: PromotedListing[]; skipped: number; message: string } | null>(null);
   const [error, setError] = useState("");
+  const [result, setResult] = useState<{
+    promoted: PromotedListing[];
+    skipped: number;
+    message: string;
+  } | null>(null);
 
   async function run() {
     setRunning(true);
     setError("");
     setResult(null);
     try {
-      const data = await apiFetch<{ promoted: PromotedListing[]; skipped: number; message: string }>(
-        "/api/admin/featured/auto-qualify",
-        {
-          method: "POST",
-          body: JSON.stringify({ topN, windowDays, minBookings, minRating, replace }),
-        }
-      );
+      const data = await apiFetch<{
+        promoted: PromotedListing[];
+        skipped: number;
+        message: string;
+      }>("/api/admin/featured/auto-qualify", {
+        method: "POST",
+        body: JSON.stringify({ topN, windowDays, minBookings, minRating, replace }),
+      });
       setResult(data);
       onDone();
     } catch (err) {
@@ -270,144 +295,141 @@ function AutoQualifyPanel({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-[#111111] p-6">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between text-left"
-      >
-        <div className="flex items-center gap-2">
-          <Zap className="h-4 w-4 text-[#fbbf24]" />
-          <span className="font-semibold text-white">Auto-qualify top_rated</span>
+    <section className="rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#101010]">
+      <div className="px-6 py-5">
+        <AdminSectionHeader
+          title="Auto-qualify top rated listings"
+          description="Score eligible listings by rating and booking volume, then promote the highest ranked results."
+          action={
+            <ActionButton type="button" variant="primary" onClick={run} disabled={running}>
+              {running ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+              {running ? "Running..." : "Run auto-qualify"}
+            </ActionButton>
+          }
+        />
+      </div>
+
+      <div className="grid gap-4 border-t border-slate-200 px-6 py-6 dark:border-white/10 sm:grid-cols-2 xl:grid-cols-4">
+        <label>
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+            Top listings
+          </span>
+          <input
+            type="number"
+            min={1}
+            max={50}
+            value={topN}
+            onChange={(event) => setTopN(parseInt(event.target.value, 10) || 10)}
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+          />
+        </label>
+
+        <label>
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+            Window (days)
+          </span>
+          <input
+            type="number"
+            min={1}
+            max={365}
+            value={windowDays}
+            onChange={(event) => setWindowDays(parseInt(event.target.value, 10) || 30)}
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+          />
+        </label>
+
+        <label>
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+            Min bookings
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={minBookings}
+            onChange={(event) => setMinBookings(parseInt(event.target.value, 10) || 0)}
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+          />
+        </label>
+
+        <label>
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.16em] text-slate-500 dark:text-white/40">
+            Min rating
+          </span>
+          <input
+            type="number"
+            min={0}
+            max={5}
+            step={0.1}
+            value={minRating}
+            onChange={(event) => setMinRating(parseFloat(event.target.value) || 4)}
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 dark:border-white/10 dark:bg-[#0b0b0b] dark:text-white"
+          />
+        </label>
+
+        <label className="sm:col-span-2 xl:col-span-4 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/70">
+          <input
+            type="checkbox"
+            checked={replace}
+            onChange={(event) => setReplace(event.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 accent-[#ff5630]"
+          />
+          Deactivate existing top rated entries before promoting new ones
+        </label>
+      </div>
+
+      {error ? (
+        <div className="border-t border-slate-200 px-6 py-4 text-sm text-rose-700 dark:border-white/10 dark:text-rose-300">
+          {error}
         </div>
-        {open ? (
-          <ChevronUp className="h-4 w-4 text-white/40" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-white/40" />
-        )}
-      </button>
+      ) : null}
 
-      {open && (
-        <div className="mt-5 space-y-4">
-          <p className="text-xs text-white/40">
-            Scores all eligible listings (60% avg rating + 40% booking volume) and promotes the
-            top N into the <strong className="text-white/60">top_rated</strong> pathway.
-          </p>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="mb-1.5 block text-xs text-white/40">Top N listings</span>
-              <input
-                type="number"
-                min={1}
-                max={50}
-                value={topN}
-                onChange={(e) => setTopN(parseInt(e.target.value, 10) || 10)}
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 block text-xs text-white/40">Feature window (days)</span>
-              <input
-                type="number"
-                min={1}
-                max={365}
-                value={windowDays}
-                onChange={(e) => setWindowDays(parseInt(e.target.value, 10) || 30)}
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 block text-xs text-white/40">Min completed bookings</span>
-              <input
-                type="number"
-                min={0}
-                value={minBookings}
-                onChange={(e) => setMinBookings(parseInt(e.target.value, 10) || 0)}
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 block text-xs text-white/40">Min avg rating</span>
-              <input
-                type="number"
-                min={0}
-                max={5}
-                step={0.1}
-                value={minRating}
-                onChange={(e) => setMinRating(parseFloat(e.target.value) || 4.0)}
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm text-white"
-              />
-            </label>
-          </div>
-
-          <label className="flex cursor-pointer items-center gap-2.5">
-            <input
-              type="checkbox"
-              checked={replace}
-              onChange={(e) => setReplace(e.target.checked)}
-              className="h-4 w-4 rounded border-white/20 accent-[#ff5630]"
-            />
-            <span className="text-sm text-white/60">
-              Deactivate existing top_rated entries before promoting
+      {result ? (
+        <div className="border-t border-slate-200 px-6 py-6 dark:border-white/10">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <StatusBadge tone="success">{result.message}</StatusBadge>
+            <span className="text-sm text-slate-500 dark:text-white/45">
+              Promoted {result.promoted.length} listing{result.promoted.length === 1 ? "" : "s"}.
+              Skipped {result.skipped}.
             </span>
-          </label>
-
-          {error && <p className="text-sm text-[#ff5630]">{error}</p>}
-
-          {result && (
-            <div className="rounded-xl border border-[#4ade80]/20 bg-[#4ade80]/5 p-4">
-              <p className="mb-3 text-sm font-medium text-[#4ade80]">{result.message}</p>
-              {result.promoted.length > 0 && (
-                <table className="w-full text-xs text-white/60">
-                  <thead>
-                    <tr className="text-left text-white/30">
-                      <th className="pb-2">Listing</th>
-                      <th className="pb-2">Bookings</th>
-                      <th className="pb-2">Avg rating</th>
-                      <th className="pb-2">Score</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.promoted.map((p) => (
-                      <tr key={p.listingId} className="border-t border-white/5">
-                        <td className="py-1.5 pr-4">
-                          <span className="text-white/80">{p.title}</span>
-                          <br />
-                          <span className="text-white/30">{p.companyName}</span>
-                        </td>
-                        <td className="py-1.5 pr-4">{p.completedBookings}</td>
-                        <td className="py-1.5 pr-4">{p.avgRating.toFixed(2)}</td>
-                        <td className="py-1.5">{p.score.toFixed(1)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          )}
-
-          <button
-            onClick={run}
-            disabled={running}
-            className="flex items-center gap-2 rounded-full bg-[#1a2e1a] px-5 py-2.5 text-sm font-semibold text-[#4ade80] ring-1 ring-[#4ade80]/20 transition hover:bg-[#223322] disabled:opacity-50"
-          >
-            {running ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
-            ) : (
-              <Zap className="h-4 w-4" />
-            )}
-            {running ? "Running…" : "Run auto-qualify"}
-          </button>
+          </div>
+          <AdminTable
+            rows={result.promoted}
+            rowKey={(row) => row.listingId}
+            columns={[
+              {
+                key: "listing",
+                header: "Listing",
+                cell: (row: PromotedListing) => (
+                  <div>
+                    <div className="font-medium text-slate-950 dark:text-white">{row.title}</div>
+                    <div className="mt-1 text-xs text-slate-500 dark:text-white/45">
+                      {row.companyName}
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: "bookings",
+                header: "Bookings",
+                cell: (row: PromotedListing) => row.completedBookings,
+              },
+              {
+                key: "rating",
+                header: "Avg rating",
+                cell: (row: PromotedListing) => row.avgRating.toFixed(2),
+              },
+              {
+                key: "score",
+                header: "Score",
+                cell: (row: PromotedListing) => row.score.toFixed(1),
+              },
+            ]}
+          />
         </div>
-      )}
-    </div>
+      ) : null}
+    </section>
   );
 }
-
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function AdminFeaturedPage() {
   const [entries, setEntries] = useState<FeaturedEntry[]>([]);
@@ -424,8 +446,9 @@ export default function AdminFeaturedPage() {
         `/api/admin/featured?active=${showAll ? "false" : "true"}`
       );
       setEntries(data.entries);
+      setError("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load entries.");
+      setError(err instanceof Error ? err.message : "Unable to load featured entries.");
     } finally {
       setLoading(false);
     }
@@ -452,11 +475,12 @@ export default function AdminFeaturedPage() {
   }
 
   async function deleteEntry(id: string) {
-    if (!confirm("Remove this featured entry?")) return;
+    if (!window.confirm("Remove this featured entry?")) return;
     setDeletingId(id);
     try {
       await apiFetch(`/api/admin/featured/${id}`, { method: "DELETE" });
-      setEntries((prev) => prev.filter((e) => e.id !== id));
+      setEntries((current) => current.filter((entry) => entry.id !== id));
+      setError("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to delete entry.");
     } finally {
@@ -464,138 +488,184 @@ export default function AdminFeaturedPage() {
     }
   }
 
-  const grouped = entries.reduce<Record<Pathway, FeaturedEntry[]>>(
-    (acc, entry) => {
-      if (!acc[entry.pathway]) acc[entry.pathway] = [];
-      acc[entry.pathway].push(entry);
-      return acc;
-    },
-    { sponsored: [], top_rated: [], editors_choice: [] }
+  const stats = useMemo(
+    () => ({
+      total: entries.length,
+      active: entries.filter((entry) => entry.isActive).length,
+      sponsored: entries.filter((entry) => entry.pathway === "sponsored").length,
+      expiringSoon: entries.filter((entry) => {
+        const end = new Date(entry.endDate).getTime();
+        const now = Date.now();
+        const sevenDays = 1000 * 60 * 60 * 24 * 7;
+        return entry.isActive && end - now <= sevenDays && end >= now;
+      }).length,
+    }),
+    [entries]
   );
 
   return (
-    <ProtectedRoute requiredRole="admin">
+    <ProtectedRoute requiredRole="admin" surface="admin">
       <AdminShell
         activePath="/admin/featured"
-        title="Featured Section"
-        description="Manage sponsored, top-rated, and editor's choice listings."
+        title="Featured placements"
+        description="Manage sponsored placements, top rated slots, and editor choice entries."
       >
-        <div className="mx-auto max-w-6xl space-y-8">
-          {/* Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-white/50">
-                <input
-                  type="checkbox"
-                  checked={showAll}
-                  onChange={(e) => setShowAll(e.target.checked)}
-                  className="h-4 w-4 rounded accent-[#ff5630]"
-                />
-                Show inactive / expired
-              </label>
-            </div>
-            <AddEntryForm onCreated={loadEntries} />
+        {error ? (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
+            {error}
           </div>
+        ) : null}
 
-          {/* Auto-qualify */}
-          <AutoQualifyPanel onDone={loadEntries} />
+        <AdminStatGrid>
+          <AdminCard label="Total placements" value={loading ? "—" : stats.total} icon={Star} />
+          <AdminCard
+            label="Active now"
+            value={loading ? "—" : stats.active}
+            icon={CheckCircle2}
+            tone="success"
+          />
+          <AdminCard
+            label="Sponsored entries"
+            value={loading ? "—" : stats.sponsored}
+            icon={Sparkles}
+            tone="info"
+          />
+          <AdminCard
+            label="Expiring in 7 days"
+            value={loading ? "—" : stats.expiringSoon}
+            icon={AlertTriangle}
+            tone="warning"
+          />
+        </AdminStatGrid>
 
-          {error && (
-            <div className="rounded-[20px] border border-[#ff5630]/30 bg-[#2d1714] px-4 py-3 text-sm text-[#ffb09c]">
-              {error}
-            </div>
-          )}
-
-          {/* Entries by pathway */}
-          {(["sponsored", "top_rated", "editors_choice"] as Pathway[]).map((pathway) => {
-            const pathEntries = grouped[pathway];
-            const { label } = PATHWAY_STYLES[pathway];
-
-            return (
-              <section key={pathway} className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <PathwayPill pathway={pathway} />
-                  <span className="text-sm text-white/35">{pathEntries.length} entr{pathEntries.length === 1 ? "y" : "ies"}</span>
-                </div>
-
-                {loading ? (
-                  <div className="rounded-[20px] border border-white/10 bg-[#111111] p-5 text-sm text-white/40">
-                    Loading {label.toLowerCase()} entries…
-                  </div>
-                ) : pathEntries.length === 0 ? (
-                  <div className="rounded-[20px] border border-white/10 bg-[#111111] p-5 text-sm text-white/30">
-                    No {label.toLowerCase()} entries.
-                  </div>
+        <section className="rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#101010]">
+          <div className="px-6 py-5">
+            <AdminSectionHeader
+              title="Placement queue"
+              description="Review all featured entries, activation windows, and pathway assignments."
+              action={
+                <label className="inline-flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/70">
+                  <input
+                    type="checkbox"
+                    checked={showAll}
+                    onChange={(event) => setShowAll(event.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 accent-[#ff5630]"
+                  />
+                  Show inactive and expired
+                </label>
+              }
+            />
+          </div>
+          <div className="px-6 pb-6">
+            <AdminTable
+              rows={entries}
+              rowKey={(row) => row.id}
+              emptyState={
+                loading ? (
+                  "Loading featured entries..."
                 ) : (
-                  <div className="space-y-3">
-                    {pathEntries.map((entry) => (
-                      <div
-                        key={entry.id}
-                        className={`rounded-[20px] border bg-[#111111] p-4 transition ${
-                          entry.isActive
-                            ? "border-white/10"
-                            : "border-white/5 opacity-50"
-                        }`}
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-medium text-white/85">
-                                {entry.listing.title}
-                              </span>
-                              {!entry.isActive && (
-                                <span className="rounded-full bg-white/8 px-2 py-0.5 text-xs text-white/30">
-                                  Inactive
-                                </span>
-                              )}
-                            </div>
-                            <p className="mt-0.5 text-xs text-white/35">
-                              {entry.listing.company.companyName} · {entry.listing.location}
-                            </p>
-                            <p className="mt-1 text-xs text-white/25">
-                              {new Date(entry.startDate).toLocaleDateString()} –{" "}
-                              {new Date(entry.endDate).toLocaleDateString()} · sort {entry.sortOrder}
-                            </p>
-                            {entry.justification && (
-                              <p className="mt-1 text-xs italic text-white/35">
-                                "{entry.justification}"
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              disabled={togglingId === entry.id}
-                              onClick={() => toggleActive(entry)}
-                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
-                                entry.isActive
-                                  ? "bg-white/8 text-white/50 hover:bg-white/12"
-                                  : "bg-[#4ade80]/10 text-[#4ade80] hover:bg-[#4ade80]/20"
-                              }`}
-                            >
-                              {togglingId === entry.id
-                                ? "…"
-                                : entry.isActive
-                                ? "Deactivate"
-                                : "Activate"}
-                            </button>
-
-                            <button
-                              disabled={deletingId === entry.id}
-                              onClick={() => deleteEntry(entry.id)}
-                              className="rounded-full border border-white/8 p-1.5 text-white/30 transition hover:border-[#ff5630]/30 hover:text-[#ff5630] disabled:opacity-50"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </div>
+                  <AdminEmptyState
+                    title="No featured entries"
+                    body="Create a placement or run auto-qualify to populate this queue."
+                  />
+                )
+              }
+              columns={[
+                {
+                  key: "listing",
+                  header: "Listing",
+                  cell: (entry: FeaturedEntry) => (
+                    <div>
+                      <div className="font-medium text-slate-950 dark:text-white">
+                        {entry.listing.title}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </section>
-            );
-          })}
+                      <div className="mt-1 text-xs text-slate-500 dark:text-white/45">
+                        {entry.listing.company.companyName} · {entry.listing.location}
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  key: "pathway",
+                  header: "Pathway",
+                  cell: (entry: FeaturedEntry) => (
+                    <StatusBadge tone={pathwayTone(entry.pathway)}>
+                      {pathwayLabel(entry.pathway)}
+                    </StatusBadge>
+                  ),
+                },
+                {
+                  key: "window",
+                  header: "Active window",
+                  cell: (entry: FeaturedEntry) => (
+                    <div className="text-sm">
+                      <div>{new Date(entry.startDate).toLocaleDateString()}</div>
+                      <div className="mt-1 text-xs text-slate-500 dark:text-white/45">
+                        to {new Date(entry.endDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  key: "sort",
+                  header: "Priority",
+                  cell: (entry: FeaturedEntry) => entry.sortOrder,
+                },
+                {
+                  key: "status",
+                  header: "Status",
+                  cell: (entry: FeaturedEntry) => (
+                    <div className="space-y-2">
+                      <StatusBadge tone={entry.isActive ? "success" : "neutral"}>
+                        {entry.isActive ? "Active" : "Inactive"}
+                      </StatusBadge>
+                      {entry.justification ? (
+                        <div className="max-w-xs text-xs text-slate-500 dark:text-white/45">
+                          {entry.justification}
+                        </div>
+                      ) : null}
+                    </div>
+                  ),
+                },
+                {
+                  key: "actions",
+                  header: "Actions",
+                  cell: (entry: FeaturedEntry) => (
+                    <div className="flex flex-wrap gap-2">
+                      <ActionButton
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        disabled={togglingId === entry.id}
+                        onClick={() => toggleActive(entry)}
+                      >
+                        {togglingId === entry.id
+                          ? "Updating..."
+                          : entry.isActive
+                            ? "Deactivate"
+                            : "Activate"}
+                      </ActionButton>
+                      <ActionButton
+                        type="button"
+                        size="sm"
+                        variant="danger"
+                        disabled={deletingId === entry.id}
+                        onClick={() => deleteEntry(entry.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {deletingId === entry.id ? "Removing..." : "Remove"}
+                      </ActionButton>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+          </div>
+        </section>
+
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <AddEntryPanel onCreated={loadEntries} />
+          <AutoQualifyPanel onDone={loadEntries} />
         </div>
       </AdminShell>
     </ProtectedRoute>
