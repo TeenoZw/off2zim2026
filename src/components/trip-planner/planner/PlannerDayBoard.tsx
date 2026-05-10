@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   DndContext,
   closestCenter,
@@ -20,8 +20,6 @@ import {
   BedDouble,
   CalendarDays,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Clock3,
   Copy,
   Download,

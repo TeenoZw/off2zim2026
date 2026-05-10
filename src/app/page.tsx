@@ -18,8 +18,8 @@ import { getSurfaceHref, getSurfaceHome, resolveAppSurface } from "@/lib/app-sur
 
 const hero = {
   eyebrow: "Explore | Experience | Enjoy",
-  title: "Off2Zim brings Zimbabwe together in one beautifully simple travel platform.",
-  body: "Discover destinations, plan the route, ask locals, and move through the trip with more clarity.",
+  title: "Discover Zimbabwe's destinations, stays, activities, events, and local travel help in one place.",
+  body: "Find places to visit, plan your route, ask locals for advice, and book with confidence.",
   image: "/images/slide1.jpg",
   location: "Eastern Highlands",
 };
@@ -27,7 +27,7 @@ const hero = {
 const platformMoments = [
   {
     title: "Travel guide",
-    body: "A destination-first way to understand where to go before you commit to a route.",
+    body: "Explore destinations across Zimbabwe and see what each place offers before you plan.",
     href: "/travel-guide",
     icon: Compass,
   },
@@ -38,9 +38,9 @@ const platformMoments = [
     icon: CalendarDays,
   },
   {
-    title: "Ask a Local",
-    body: "Get practical local guidance when you need sharper context than search results.",
-    href: "/community-guides",
+    title: "Destination guidance",
+    body: "Choose a destination, then explore local advice, stays, dining, and other services in that area.",
+    href: "/travel-guide",
     icon: MessageCircle,
   },
   {
@@ -55,9 +55,9 @@ const serviceAtlas = [
   { label: "Destinations", detail: "Cities, parks, heritage sites, lakes, and scenic routes.", icon: Compass },
   { label: "Transport", detail: "Flights, transfers, buses, and movement planning.", icon: Bus },
   { label: "Events", detail: "Tickets, festivals, and moments worth building around.", icon: Ticket },
-  { label: "Dining", detail: "Restaurants and local food experiences for the route.", icon: UtensilsCrossed },
+  { label: "Destination services", detail: "Stays, dining, and local guidance unlock once a place is selected.", icon: UtensilsCrossed },
   { label: "Flights", detail: "Air travel options for tighter timelines and longer journeys.", icon: Plane },
-  { label: "Guides", detail: "Community insight and guide-led context where it matters.", icon: MessageCircle },
+  { label: "Trip planner", detail: "Keep the route moving while destinations and global transport stay connected.", icon: CalendarDays },
 ];
 
 const destinationFrames = [
@@ -81,15 +81,15 @@ const destinationFrames = [
 const trustPoints = [
   "Destination-led discovery instead of scattered searching",
   "Planner and guide tools built into the same platform",
-  "One account for travelers, a separate path for providers",
+  "One account for travelers and a separate workspace for providers",
 ];
 
 const quickRoutes = [
-  { label: "Travel Guide", href: "/travel-guide" },
+  { label: "Destinations", href: "/travel-guide" },
   { label: "Trip Planner", href: "/trip-planner" },
-  { label: "Guides", href: "/community-guides" },
+  { label: "Flights", href: "/transport/flights" },
   { label: "Events", href: "/events" },
-  { label: "Enquiries", href: "/contact" },
+  { label: "Travel help", href: "/contact" },
 ];
 
 export default async function HomePage() {
@@ -136,20 +136,20 @@ export default async function HomePage() {
                   href={getSurfaceHref("explorer", "/login")}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6c4d]"
                 >
-                  Client login
+                  Traveler login
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href={getSurfaceHref("provider", "/register")}
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-white/14 bg-white/8 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/12"
                 >
-                  Service provider registration
+                  Register your business
                 </Link>
                 <Link
                   href="/contact"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-white/14 bg-black/20 px-6 py-3 text-sm font-semibold text-white transition hover:bg-black/28"
                 >
-                  Make an enquiry
+                  Request travel help
                 </Link>
               </div>
             </div>
@@ -172,7 +172,7 @@ export default async function HomePage() {
                   <WeatherBadge location={hero.location} className="text-white" compact />
                 </div>
                 <div className="mt-3 text-sm leading-6 text-white/72">
-                  Live weather helps travelers read the destination before they move.
+                  Live weather helps you plan with the latest local conditions.
                 </div>
               </div>
             </div>
@@ -199,7 +199,8 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="What the platform does"
-          title="Off2Zim helps travelers understand the trip before the trip starts"
+          title="Off2Zim helps travelers explore, plan, and book Zimbabwe with confidence"
+          description="Browse destinations first, then move into planning, events, and local services for the places you choose."
         />
 
         <div className="grid gap-4 lg:grid-cols-2">
@@ -210,7 +211,7 @@ export default async function HomePage() {
               <Link
                 key={item.title}
                 href={item.href}
-                className="theme-panel group rounded-[32px] p-6 transition hover:-translate-y-0.5"
+                className="theme-card-soft group p-6 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/8">
@@ -227,47 +228,46 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="theme-panel rounded-[36px] p-6 md:p-8">
-          <SectionHeader
-            eyebrow="Across the journey"
-            title="A broader travel surface, not just one booking step"
-          />
+        <SectionHeader
+          eyebrow="Across the journey"
+          title="Plan, book, and explore Zimbabwe from one platform"
+          description="Use global tools like flights, transport, events, and trip planning anytime, then open destination-specific services when you choose where to go."
+        />
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {serviceAtlas.map((item) => {
-              const Icon = item.icon;
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {serviceAtlas.map((item) => {
+            const Icon = item.icon;
 
-              return (
-                <div
-                  key={item.label}
-                  className="theme-panel-soft rounded-[28px] p-5"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/[0.07]">
-                    <Icon className="h-5 w-5 text-[#ff5630]" />
-                  </div>
-                  <h3 className="theme-heading mt-4 text-lg font-semibold">{item.label}</h3>
-                  <p className="theme-muted mt-2 text-sm leading-6">{item.detail}</p>
+            return (
+              <div
+                key={item.label}
+                className="theme-card-soft p-5"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/[0.07]">
+                  <Icon className="h-5 w-5 text-[#ff5630]" />
                 </div>
-              );
-            })}
-          </div>
+                <h3 className="theme-heading mt-4 text-lg font-semibold">{item.label}</h3>
+                <p className="theme-muted mt-2 text-sm leading-6">{item.detail}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Zimbabwe at a glance"
-          title="The platform should feel like the destination before it feels like a transaction"
+          title="Three destinations that show the full range of what Zimbabwe offers"
         />
 
-        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr_0.9fr]">
-          {destinationFrames.map((destination, index) => (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {destinationFrames.map((destination) => (
             <article
               key={destination.title}
-              className={`theme-card overflow-hidden rounded-[34px] ${index === 0 ? "lg:row-span-2" : ""}`}
+              className="theme-card overflow-hidden rounded-[34px]"
             >
               <div
-                className={`${index === 0 ? "h-[30rem]" : "h-64"} bg-cover bg-center`}
+                className="h-64 bg-cover bg-center"
                 style={{
                   backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.62)), url('${destination.image}')`,
                 }}
@@ -282,70 +282,76 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pb-24">
-        <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="theme-panel-strong rounded-[36px] p-6 md:p-8">
-            <p className="theme-label text-sm uppercase tracking-[0.28em]">Built with clarity</p>
-            <div className="mt-5 space-y-4">
-              {trustPoints.map((point) => (
-                <div key={point} className="theme-panel-soft rounded-[24px] px-4 py-4 text-sm leading-6">
-                  {point}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="theme-panel rounded-[36px] p-6 md:p-8">
-            <SectionHeader
-              eyebrow="Start with the right door"
-              title="Choose the next step that matches why you came to Off2Zim"
-            />
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <Link
-                href={getSurfaceHref("explorer", "/login")}
-                className="theme-panel-soft rounded-[28px] p-5 transition hover:-translate-y-0.5"
-              >
-                <h3 className="theme-heading text-xl font-semibold">Client login</h3>
-                <p className="theme-muted mt-2 text-sm leading-6">
-                  Return to saved trips, planner activity, and account tools.
-                </p>
-              </Link>
-
-              <Link
-                href="/trip-planner"
-                className="theme-panel-soft rounded-[28px] p-5 transition hover:-translate-y-0.5"
-              >
-                <h3 className="theme-heading text-xl font-semibold">Trip planner</h3>
-                <p className="theme-muted mt-2 text-sm leading-6">
-                  Build routes, organize days, and shape the travel story.
-                </p>
-              </Link>
-
-              <Link
-                href="/community-guides"
-                className="theme-panel-soft rounded-[28px] p-5 transition hover:-translate-y-0.5"
-              >
-                <h3 className="theme-heading text-xl font-semibold">Guides</h3>
-                <p className="theme-muted mt-2 text-sm leading-6">
-                  Ask locals and explore guide-led context before committing.
-                </p>
-              </Link>
+        <div className="theme-panel rounded-[32px] p-6 md:p-8">
+          <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+            <div>
+              <p className="theme-label text-sm uppercase tracking-[0.28em]">Built with clarity</p>
+              <h2 className="theme-heading mt-3 text-2xl font-semibold">
+                A simpler way to plan your trip as the details come together
+              </h2>
+              <div className="mt-5 space-y-3">
+                {trustPoints.map((point) => (
+                  <div key={point} className="border-b border-black/8 pb-3 text-sm leading-6 text-slate-700 dark:border-white/8 dark:text-white/70">
+                    {point}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6c4d]"
-              >
-                Make an enquiry
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href={getSurfaceHref("provider", "/register")}
-                className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
-              >
-                Service provider registration
-              </Link>
+            <div>
+              <SectionHeader
+                eyebrow="Start with the right door"
+                title="Choose the next step that matches why you came to Off2Zim"
+                description="Explore the public platform first, or go straight to the account area that fits what you need."
+              />
+
+              <div className="grid gap-3 md:grid-cols-3">
+                <Link
+                  href={getSurfaceHref("explorer", "/login")}
+                  className="theme-card-soft p-5 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
+                >
+                  <h3 className="theme-heading text-xl font-semibold">Traveler login</h3>
+                  <p className="theme-muted mt-2 text-sm leading-6">
+                    Return to saved places, trip plans, bookings, and account details.
+                  </p>
+                </Link>
+
+                <Link
+                  href="/trip-planner"
+                  className="theme-card-soft p-5 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
+                >
+                  <h3 className="theme-heading text-xl font-semibold">Trip planner</h3>
+                  <p className="theme-muted mt-2 text-sm leading-6">
+                    Build your route, organize each day, and keep your plans in one place.
+                  </p>
+                </Link>
+
+                <Link
+                  href="/community-guides"
+                  className="theme-card-soft p-5 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
+                >
+                  <h3 className="theme-heading text-xl font-semibold">Guides</h3>
+                  <p className="theme-muted mt-2 text-sm leading-6">
+                    Ask locals for practical advice and connect with guides before you travel.
+                  </p>
+                </Link>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6c4d]"
+                >
+                  Request travel help
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href={getSurfaceHref("provider", "/register")}
+                  className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
+                >
+                  Register your business
+                </Link>
+              </div>
             </div>
           </div>
         </div>

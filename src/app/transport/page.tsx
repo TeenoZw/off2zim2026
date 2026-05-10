@@ -62,27 +62,27 @@ export default function TransportPage() {
                 Transport
               </div>
               <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">
-                Move through Zimbabwe with a route that still feels calm
+                Plan transport across Zimbabwe with clear, practical options
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
-                Compare routes, protect your timing, and keep every leg aligned with your trip.
+                Compare routes, save time, and choose the transport that fits your itinerary.
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="theme-card-soft rounded-[24px] p-4">
                   <ShieldCheck className="h-6 w-6 text-[#8cf0a1]" />
                   <div className="theme-heading mt-3 text-base font-semibold">Trusted providers</div>
-                  <div className="theme-muted mt-1 text-sm">Verified operators and route-aware choices.</div>
+                  <div className="theme-muted mt-1 text-sm">Verified operators for safer, more reliable travel.</div>
                 </div>
                 <div className="theme-card-soft rounded-[24px] p-4">
                   <TimerReset className="h-6 w-6 text-[#5aa7ff]" />
                   <div className="theme-heading mt-3 text-base font-semibold">Time visibility</div>
-                  <div className="theme-muted mt-1 text-sm">See what saves time and what stretches a day.</div>
+                  <div className="theme-muted mt-1 text-sm">See which options save time and which ones take longer.</div>
                 </div>
                 <div className="theme-card-soft rounded-[24px] p-4">
                   <Route className="h-6 w-6 text-[#ffca74]" />
                   <div className="theme-heading mt-3 text-base font-semibold">Trip-linked planning</div>
-                  <div className="theme-muted mt-1 text-sm">Transport that fits the actual itinerary window.</div>
+                  <div className="theme-muted mt-1 text-sm">Choose transport that fits the pace and timing of your trip.</div>
                 </div>
               </div>
             </div>
@@ -105,7 +105,7 @@ export default function TransportPage() {
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Modes"
-          title="Choose the transport layer that fits the route"
+          title="Choose the transport option that fits your route"
         />
         <div className="grid gap-5 md:grid-cols-2">
           {transportTypes.map((transport) => {
@@ -132,7 +132,7 @@ export default function TransportPage() {
                       ))}
                     </div>
                     <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#ff5630]">
-                      Explore this transport mode
+                      View transport options
                       <ArrowRight className="h-4 w-4" />
                     </div>
                   </div>

@@ -127,8 +127,7 @@ function AskQuestionModal({ onClose }: { onClose: () => void }) {
             </div>
             <h3 className="theme-heading mt-4 text-lg font-semibold">Question submitted!</h3>
             <p className="theme-muted mt-2 text-sm">
-              Your question has been posted to the forum. Local guides and community
-              members will respond shortly.
+              Your question is now live in the forum. Local guides and fellow travelers will reply soon.
             </p>
             <button
               onClick={onClose}
@@ -159,8 +158,7 @@ function AskQuestionModal({ onClose }: { onClose: () => void }) {
               />
             </div>
             <p className="theme-subtle text-xs">
-              Questions are answered by verified Community Guides and fellow travelers.
-              Typically within 2–3 hours.
+              Questions are answered by verified Community Guides and fellow travelers, usually within 2 to 3 hours.
             </p>
             <div className="flex flex-col gap-2.5">
               <button
@@ -191,7 +189,6 @@ function GuideProfileModal({ guide, onClose }: { guide: Guide; onClose: () => vo
   const [people, setPeople] = useState(1);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
-  const [step, setStep] = useState<"profile" | "booked">("profile");
 
   const total = guide.pricePerSession * people;
 
@@ -369,7 +366,7 @@ export default function CommunityGuidesPage() {
                 Ask locals. Book with confidence.
               </h1>
               <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                Get trusted local insight, practical answers, and Guide+ support in one place.
+                Get practical local advice, trusted answers, and Guide+ support in one place.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -431,7 +428,7 @@ export default function CommunityGuidesPage() {
           <div className="theme-panel rounded-[36px] p-6 md:p-8">
             <p className="theme-label text-sm uppercase tracking-[0.28em]">Two ways to get help</p>
             <h2 className="theme-heading mt-2 text-3xl font-semibold">
-              Community wisdom or personal guidance
+              Free advice or one-on-one help
             </h2>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="theme-card-soft p-5">
@@ -440,8 +437,7 @@ export default function CommunityGuidesPage() {
                 </div>
                 <h3 className="theme-heading mt-4 text-xl font-semibold">Forum</h3>
                 <p className="theme-muted mt-2 text-sm leading-6">
-                  Post a question and get answers from verified locals and fellow
-                  travelers who know the destination first-hand.
+                  Post a question and get answers from verified locals and fellow travelers who know the destination first-hand.
                 </p>
               </div>
               <div className="rounded-[28px] border border-[#ff5630]/20 bg-[#1a120f] p-5">
@@ -450,8 +446,7 @@ export default function CommunityGuidesPage() {
                 </div>
                 <h3 className="mt-4 text-xl font-semibold text-white">Guide+</h3>
                 <p className="mt-2 text-sm leading-6 text-white/60">
-                  Personalized planning, video consultations, and guided experiences
-                  for travelers who want more context and confidence.
+                  Personalized planning, video consultations, and guided experiences for travelers who want more direct support.
                 </p>
               </div>
             </div>
@@ -460,23 +455,23 @@ export default function CommunityGuidesPage() {
           <div className="theme-panel rounded-[36px] p-6 md:p-8">
             <p className="theme-label text-sm uppercase tracking-[0.28em]">Trust model</p>
             <h2 className="theme-heading mt-2 text-3xl font-semibold">
-              Why Community Guides matter
+              Why local guides add value
             </h2>
             <div className="mt-6 space-y-4">
               <TrustRow
                 icon={<BadgeCheck className="h-4 w-4 text-[#5aa7ff]" />}
                 title="Verified expertise"
-                body="Guides are vetted and highlighted, which reduces uncertainty for travelers."
+                body="Guides are reviewed before being featured, which gives travelers more confidence."
               />
               <TrustRow
                 icon={<ShieldCheck className="h-4 w-4 text-[#7ddf8c]" />}
-                title="Safer discovery"
-                body="Advice becomes part of the trust system, not just content hidden in a blog."
+                title="More reliable travel advice"
+                body="Advice becomes part of the platform experience, not something buried in scattered blog posts."
               />
               <TrustRow
                 icon={<Video className="h-4 w-4 text-[#ffc247]" />}
-                title="Higher-value support"
-                body="Guide+ services create a clear monetizable layer beyond listings and bookings."
+                title="Paid help when needed"
+                body="Guide+ gives travelers a clear way to book extra planning help, consultations, and local support."
               />
             </div>
           </div>

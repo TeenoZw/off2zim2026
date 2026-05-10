@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import { MessageCircle, Pin, Search } from "lucide-react";
 import { apiFetch } from "@/lib/client-api";
 import { useAuth } from "@/contexts/AuthContext";
 import AskQuestionModal from "@/components/forum/AskQuestionModal";
+import {
+  getDestinationById,
+  type ExplorerDestinationSummary,
+} from "@/lib/destination-explorer";
 
 interface ForumQuestion {
   id: string;
@@ -26,8 +32,11 @@ interface ForumQuestion {
 }
 
 export default function AskALocalPage() {
+  const searchParams = useSearchParams();
+  const destinationId = searchParams?.get("destination");
   const { user } = useAuth();
   const [questions, setQuestions] = useState<ForumQuestion[]>([]);
+  const [selectedDestination, setSelectedDestination] = useState<ExplorerDestinationSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,6 +48,7 @@ export default function AskALocalPage() {
     const params = new URLSearchParams({ limit: "20" });
     if (q) params.set("q", q);
     if (cursor) params.set("cursor", cursor);
+    if (destinationId) params.set("destinationId", destinationId);
 
     const payload = await apiFetch<{ questions: ForumQuestion[]; nextCursor: string | null }>(
       `/api/forum/questions?${params}`
@@ -47,6 +57,15 @@ export default function AskALocalPage() {
   };
 
   useEffect(() => {
+    apiFetch<{ destinations: ExplorerDestinationSummary[] }>("/api/destinations")
+      .then((payload) => {
+        setSelectedDestination(getDestinationById(payload.destinations, destinationId));
+      })
+      .catch(() => {});
+  }, [destinationId]);
+
+  useEffect(() => {
+    setLoading(true);
     fetchQuestions()
       .then((payload) => {
         setQuestions(payload.questions);
@@ -54,7 +73,7 @@ export default function AskALocalPage() {
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Unable to load questions."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [destinationId]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,17 +107,29 @@ export default function AskALocalPage() {
 
   return (
     <div className="theme-page min-h-screen">
+      <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+        <AppServiceStrip
+          activeLabel="Ask a Local"
+          destinationId={selectedDestination?.id ?? destinationId}
+          destinationName={selectedDestination?.name}
+        />
+      </section>
+
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#8dc9ff]/25 bg-[#13283a] px-4 py-2 text-sm font-medium text-[#8dc9ff]">
               <MessageCircle className="h-4 w-4" />
-              Ask a Local
+              {selectedDestination ? `${selectedDestination.name} local guidance` : "Ask a Local"}
             </div>
-            <h1 className="theme-heading mt-4 text-4xl font-semibold">Travel questions</h1>
+            <h1 className="theme-heading mt-4 text-4xl font-semibold">
+              {selectedDestination ? `Ask about ${selectedDestination.name}` : "Travel questions"}
+            </h1>
             <p className="theme-muted mt-2 text-sm leading-6">
-              Ask anything about traveling in Zimbabwe. Community Guides give highlighted answers.
+              {selectedDestination
+                ? `Ask questions, get local tips, and read guide answers for ${selectedDestination.name}.`
+                : "Ask anything about traveling in Zimbabwe and get answers from local guides and fellow travelers."}
             </p>
           </div>
           {user ? (
@@ -113,7 +144,7 @@ export default function AskALocalPage() {
               href="/login?redirect=/ask-a-local"
               className="shrink-0 rounded-full bg-[#ff5630] px-5 py-2.5 text-sm font-semibold text-white"
             >
-              Sign in to ask
+              Traveler login to ask
             </Link>
           )}
         </div>
@@ -125,7 +156,11 @@ export default function AskALocalPage() {
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search questions..."
+              placeholder={
+                selectedDestination
+                  ? `Search questions about ${selectedDestination.name}...`
+                  : "Search questions..."
+              }
               className="theme-input h-12 w-full rounded-2xl pl-11 pr-4 text-sm"
             />
           </div>
@@ -241,6 +276,8 @@ export default function AskALocalPage() {
         <AskQuestionModal
           onClose={() => setShowAsk(false)}
           onPosted={onQuestionPosted}
+          destinationId={selectedDestination?.id ?? destinationId}
+          destinationName={selectedDestination?.name}
         />
       ) : null}
     </div>

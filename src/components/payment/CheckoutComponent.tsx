@@ -114,7 +114,7 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
                       {item.description && (
                         <p className="theme-muted text-xs mt-0.5 line-clamp-2 leading-5">{item.description}</p>
                       )}
-                      {item.metadata?.location && (
+                      {typeof item.metadata?.location === "string" && (
                         <p className="theme-subtle text-xs mt-1">{item.metadata.location}</p>
                       )}
                     </div>
@@ -220,9 +220,13 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
                     <label className="block text-xs theme-subtle mb-1">Reservation time</label>
                     <div className="flex flex-wrap gap-2">
                       {(Array.isArray(item.metadata.allTimes)
-                        ? item.metadata.allTimes
-                        : [item.metadata.reservationTime]
-                      ).map((t: string, ti: number) => (
+                        ? item.metadata.allTimes.filter(
+                            (time): time is string => typeof time === "string"
+                          )
+                        : [item.metadata.reservationTime].filter(
+                            (time): time is string => typeof time === "string"
+                          )
+                      ).map((t, ti) => (
                         <button
                           key={`${t}-${ti}`}
                           onClick={() => updateItem(item.id, { metadata: { ...item.metadata, reservationTime: t } })}
@@ -245,7 +249,11 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
                     <label className="block text-xs theme-subtle mb-1">Dietary needs / notes</label>
                     <input
                       type="text"
-                      value={item.metadata?.dietaryNotes ?? ""}
+                      value={
+                        typeof item.metadata?.dietaryNotes === "string"
+                          ? item.metadata.dietaryNotes
+                          : ""
+                      }
                       onChange={(e) => updateItem(item.id, { metadata: { ...item.metadata, dietaryNotes: e.target.value || null } })}
                       placeholder="e.g. vegetarian, nut allergy, high chair…"
                       className="theme-input w-full rounded-[12px] px-3 py-2 text-xs"
@@ -254,10 +262,16 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
                 )}
 
                 {/* Special notes for Guide+ bookings */}
-                {item.category === "guide-plus" && item.metadata?.guideName && (
+                {item.category === "guide-plus" &&
+                  typeof item.metadata?.guideName === "string" && (
                   <div className="mt-3 rounded-[14px] bg-white/[0.04] border border-white/[0.06] px-3 py-2.5 text-xs theme-muted">
-                    Guide: {item.metadata.guideName} · {item.metadata.service}
-                    {item.metadata.location ? ` · ${item.metadata.location}` : ""}
+                    Guide: {item.metadata.guideName}
+                    {typeof item.metadata.service === "string"
+                      ? ` · ${item.metadata.service}`
+                      : ""}
+                    {typeof item.metadata.location === "string"
+                      ? ` · ${item.metadata.location}`
+                      : ""}
                   </div>
                 )}
               </div>

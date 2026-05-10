@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { mergeWithCuratedDestinations } from '@/lib/destination-explorer';
 
 type FavoriteRecord = {
   itemId: string;
@@ -49,7 +50,7 @@ export function buildMobileProfile(user: {
   preferences: string | null;
 }) {
   const preferences = parseUserPreferences(user.preferences);
-  const extras = getProfileExtras(preferences) as Record<string, any>;
+  const extras = getProfileExtras(preferences) as Record<string, unknown>;
   const fullName =
     (typeof extras.full_name === 'string' && extras.full_name.trim()) ||
     [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
@@ -152,7 +153,7 @@ export async function getMobileDestinations() {
     });
 
     if (storedDestinations.length > 0) {
-      return storedDestinations.map(destination => {
+      return mergeWithCuratedDestinations(storedDestinations.map(destination => {
         const images = safeJsonParse<string[]>(destination.images, []);
         return {
           id: destination.slug || destination.id,
@@ -175,7 +176,7 @@ export async function getMobileDestinations() {
           rating: destination.rating,
           weather: destination.weather,
         };
-      });
+      }));
     }
 
     const [hotels, activities, restaurants, events] = await Promise.all([
@@ -241,7 +242,7 @@ export async function getMobileDestinations() {
       addLocation(event.location, event.description, safeJsonParse(event.images, []), 'activity')
     );
 
-    return Array.from(locations.entries()).map(([name, data]) => ({
+    return mergeWithCuratedDestinations(Array.from(locations.entries()).map(([name, data]) => ({
       id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       name,
       description: data.description,
@@ -253,9 +254,9 @@ export async function getMobileDestinations() {
       created_at: new Date().toISOString(),
       stays_count: data.stays,
       activities_count: data.activities,
-    }));
+    })));
   } catch (error) {
-    return handleMobileDataFallback('destinations', error, []);
+    return handleMobileDataFallback('destinations', error, mergeWithCuratedDestinations([]));
   }
 }
 

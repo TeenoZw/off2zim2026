@@ -5,7 +5,7 @@ import TripPlannerBuilder from "../../components/trip-planner/TripPlannerBuilder
 export const metadata = {
   title: "Planner Studio - Off2Zim | Build Your Zimbabwe Itinerary",
   description:
-    "Use the Off2Zim planner studio to build, organize, and export a polished Zimbabwe itinerary in one focused workspace.",
+    "Use the Off2Zim planner to build, organize, and export a Zimbabwe itinerary in one place.",
 };
 
 export default function TripPlannerPage() {
@@ -16,15 +16,13 @@ export default function TripPlannerPage() {
           <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
             <div className="p-6 md:p-8 lg:p-10">
               <div className="theme-chip inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]">
-                Planner Studio
+                Trip planner
               </div>
               <h1 className="theme-heading mt-4 max-w-2xl text-4xl font-bold leading-tight md:text-5xl">
                 Build your Zimbabwe itinerary, day by day
               </h1>
               <p className="theme-muted mt-4 max-w-xl text-sm leading-7 md:text-base">
-                Add stays, experiences, transport, and dining into a single
-                timeline. Drag to reorder, track your budget, then book everything
-                in one checkout — or export a branded PDF to share.
+                Add stays, activities, transport, and dining into one timeline. Reorder your plans, track your budget, book in one checkout, or export a PDF to share.
               </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 <div className="theme-panel-soft rounded-[20px] px-4 py-3">
