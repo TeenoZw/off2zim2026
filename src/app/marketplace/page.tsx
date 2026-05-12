@@ -7,7 +7,16 @@ import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/client-api";
 import type { PublicListingRecord } from "@/types/platform";
 import FilterChips from "@/components/ui/FilterChips";
+import ServiceSubtypeChips from "@/components/ui/ServiceSubtypeChips";
 import { SkeletonGrid } from "@/components/ui/Skeleton";
+import {
+  getServiceGroup,
+  getSubtypesForGroup,
+  inferServiceGroup,
+  inferServiceSubtype,
+  serviceGroups,
+  type ServiceGroupId,
+} from "@/lib/taxonomy";
 
 function MarketplacePageContent() {
   const searchParams = useSearchParams();
@@ -15,6 +24,11 @@ function MarketplacePageContent() {
   const [selectedCategory, setSelectedCategory] = useState(
     searchParams?.get("category") || "all"
   );
+  const [selectedServiceGroup, setSelectedServiceGroup] = useState(
+    searchParams?.get("serviceGroup") || "all"
+  );
+  const [selectedSubtype, setSelectedSubtype] = useState(searchParams?.get("subtype") || "all");
+  const [destinationFilter] = useState(searchParams?.get("destination") || "");
   const [listingType] = useState(searchParams?.get("listingType") || "all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
@@ -26,7 +40,7 @@ function MarketplacePageContent() {
     const loadListings = async () => {
       try {
         const payload = await apiFetch<{ listings: PublicListingRecord[] }>(
-          `/api/listings?search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(selectedCategory)}&listingType=${encodeURIComponent(listingType)}`
+          `/api/listings?search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(selectedCategory)}&listingType=${encodeURIComponent(listingType)}&serviceGroup=${encodeURIComponent(selectedServiceGroup)}&subtype=${encodeURIComponent(selectedSubtype)}&destination=${encodeURIComponent(destinationFilter)}`
         );
         setListings(payload.listings);
         setError("");
@@ -39,7 +53,7 @@ function MarketplacePageContent() {
 
     const timeout = window.setTimeout(loadListings, 200);
     return () => window.clearTimeout(timeout);
-  }, [searchQuery, selectedCategory]);
+  }, [destinationFilter, listingType, searchQuery, selectedCategory, selectedServiceGroup, selectedSubtype]);
 
   const categories = useMemo(() => {
     const counts = new Map<string, number>();
@@ -56,6 +70,14 @@ function MarketplacePageContent() {
       })),
     ];
   }, [listings]);
+  const activeGroup =
+    selectedServiceGroup !== "all"
+      ? getServiceGroup(selectedServiceGroup as ServiceGroupId)
+      : null;
+  const subtypeOptions = activeGroup ? getSubtypesForGroup(activeGroup.id) : [];
+  const listingSummary = destinationFilter
+    ? `Showing destination-linked listings for ${destinationFilter.replace(/-/g, " ")}.`
+    : "Shop trusted stays, experiences, services, and travel essentials.";
 
   return (
     <div className="theme-page min-h-screen">
@@ -71,7 +93,7 @@ function MarketplacePageContent() {
             <div>
               <h1 className="text-3xl font-bold theme-heading">Marketplace</h1>
               <p className="mt-1 text-sm text-slate-600 dark:text-white/60">
-                Shop trusted stays, experiences, services, and travel essentials.
+                {listingSummary}
               </p>
             </div>
           </div>
@@ -120,6 +142,28 @@ function MarketplacePageContent() {
                 </button>
               </div>
             </div>
+          </div>
+          <div className="mt-5 space-y-3">
+            <FilterChips
+              options={[
+                { id: "all", label: "All services" },
+                ...serviceGroups.map((group) => ({ id: group.id, label: group.label })),
+              ]}
+              selected={selectedServiceGroup}
+              onSelect={(groupId) => {
+                setSelectedServiceGroup(groupId);
+                setSelectedSubtype("all");
+                setSelectedCategory("all");
+              }}
+            />
+            {activeGroup ? (
+              <ServiceSubtypeChips
+                subtypes={subtypeOptions}
+                activeSubtype={selectedSubtype}
+                onSelect={setSelectedSubtype}
+                allLabel={`All ${activeGroup.label.toLowerCase()}`}
+              />
+            ) : null}
           </div>
         </div>
       </div>
@@ -210,7 +254,7 @@ function MarketplacePageContent() {
                         ) : (
                           <div className="flex h-full items-end p-4">
                             <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70 backdrop-blur-sm">
-                              {listing.category}
+                              {inferServiceGroup(listing).label}
                             </span>
                           </div>
                         )}
@@ -250,7 +294,7 @@ function MarketplacePageContent() {
                             </span>
                           ) : null}
                           <span className="ml-auto text-white/30">
-                            {listing.provider.companyName}
+                            {inferServiceSubtype(listing)?.label || listing.provider.companyName}
                           </span>
                         </div>
                       </Link>

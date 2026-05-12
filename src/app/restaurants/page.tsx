@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import SectionHeader from "@/components/ui/SectionHeader";
+import ServiceSubtypeChips from "@/components/ui/ServiceSubtypeChips";
 import { apiFetch } from "@/lib/client-api";
 import {
   getDestinationById,
   type ExplorerDestinationSummary,
 } from "@/lib/destination-explorer";
+import { getSubtypesForGroup, normalizeTaxonomyValue } from "@/lib/taxonomy";
 import { MapPin, Search, Star, UtensilsCrossed } from "lucide-react";
 
 interface DestinationContextResponse {
@@ -35,6 +37,7 @@ export default function RestaurantsPage() {
   const [selectedDestination, setSelectedDestination] = useState<ExplorerDestinationSummary | null>(null);
   const [restaurants, setRestaurants] = useState<DestinationContextResponse["scoped"]["restaurants"]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeSubtype, setActiveSubtype] = useState(searchParams?.get("subtype") || "all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -67,15 +70,19 @@ export default function RestaurantsPage() {
 
   const filteredRestaurants = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return restaurants;
 
     return restaurants.filter((restaurant) =>
-      [restaurant.name, restaurant.description, restaurant.cuisine, restaurant.location, restaurant.priceRange]
-        .join(" ")
-        .toLowerCase()
-        .includes(query)
+      (activeSubtype === "all" ||
+        [restaurant.name, restaurant.description, restaurant.cuisine, restaurant.location, restaurant.priceRange]
+          .map((value) => normalizeTaxonomyValue(value))
+          .some((value) => value.includes(activeSubtype))) &&
+      (!query ||
+        [restaurant.name, restaurant.description, restaurant.cuisine, restaurant.location, restaurant.priceRange]
+          .join(" ")
+          .toLowerCase()
+          .includes(query))
     );
-  }, [restaurants, searchTerm]);
+  }, [activeSubtype, restaurants, searchTerm]);
 
   return (
     <div className="theme-page pb-20">
@@ -135,6 +142,13 @@ export default function RestaurantsPage() {
                   Back to destination hub
                 </Link>
               </div>
+              <ServiceSubtypeChips
+                subtypes={getSubtypesForGroup("dining")}
+                activeSubtype={activeSubtype}
+                onSelect={setActiveSubtype}
+                allLabel="All dining"
+                className="mt-4"
+              />
             </div>
           </section>
 

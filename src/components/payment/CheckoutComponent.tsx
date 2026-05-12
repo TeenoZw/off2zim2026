@@ -96,6 +96,7 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
           {items.map((item) => {
             const isAccommodation = item.type === "accommodation";
             const isTripPackage = item.type === "trip_package";
+            const isFixedPlannerItem = item.metadata?.pricingModel === "fixed";
             const nights = isAccommodation ? nightsBetween(item.checkIn, item.checkOut) : 1;
             const lineTotal = item.price * item.quantity * nights;
 
@@ -179,7 +180,13 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
                   {/* Guests */}
                   <div className={isAccommodation ? "sm:col-span-1" : ""}>
                     <label className="block text-xs theme-subtle mb-1">
-                      {isAccommodation ? "Guests" : item.category === "dining" ? "Party size" : "Travelers"}
+                      {isAccommodation
+                        ? "Rooms"
+                        : isFixedPlannerItem
+                          ? "Quantity"
+                          : item.category === "dining"
+                            ? "Party size"
+                            : "Travelers"}
                     </label>
                     <div className="flex items-center gap-2">
                       <button
@@ -198,7 +205,9 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
                       </button>
                       <span className="theme-subtle text-xs ml-1 flex items-center gap-1">
                         <Users className="h-3.5 w-3.5" />
-                        {item.quantity === 1 ? "person" : "people"}
+                        {isFixedPlannerItem
+                          ? item.quantity === 1 ? "item" : "items"
+                          : item.quantity === 1 ? "person" : "people"}
                       </span>
                     </div>
                   </div>
@@ -207,9 +216,20 @@ export default function CheckoutComponent({ items: initialItems, onSuccess, onCa
                   <div className="flex items-end">
                     <p className="theme-subtle text-xs">
                       ${item.price.toFixed(2)}{" "}
-                      {isAccommodation ? "/ night" : isTripPackage ? "/ person (package)" : "/ person"}
+                      {isAccommodation
+                        ? "/ night"
+                        : isTripPackage
+                          ? "/ person (package)"
+                          : isFixedPlannerItem
+                            ? "fixed"
+                            : "/ person"}
                       {isAccommodation && nights > 1 ? ` × ${nights} nights` : ""}
-                      {item.quantity > 1 ? ` × ${item.quantity} ${item.quantity === 1 ? "person" : "people"}` : ""}
+                      {item.quantity > 1
+                        ? ` × ${item.quantity} ${isFixedPlannerItem ? "items" : "people"}`
+                        : ""}
+                      {typeof item.metadata?.pricingLabel === "string"
+                        ? ` · ${item.metadata.pricingLabel}`
+                        : ""}
                     </p>
                   </div>
                 </div>

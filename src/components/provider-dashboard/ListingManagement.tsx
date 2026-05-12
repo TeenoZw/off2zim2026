@@ -21,11 +21,12 @@ import {
   listingRequiresDestination,
 } from "@/lib/listing-destination-rules";
 import type { ExplorerDestinationSummary } from "@/lib/destination-explorer";
+import { inferServiceGroup, serviceGroups } from "@/lib/taxonomy";
 
 const initialForm = {
   title: "",
   category: "Experience",
-  listingType: "experience",
+  listingType: "game-drive",
   description: "",
   shortDescription: "",
   location: "",
@@ -77,6 +78,11 @@ function ListingCard({
   const availableSlots = listing.availability.filter(
     (slot) => slot.status === "available"
   ).length;
+  const listingGroup = inferServiceGroup(listing);
+  const serviceSubtype =
+    typeof listing.metadata.serviceSubtype === "string"
+      ? listing.metadata.serviceSubtype
+      : listing.listingType;
 
   const handleSaveAvailability = async () => {
     setSavingAvailability(true);
@@ -115,7 +121,8 @@ function ListingCard({
             </span>
           </div>
           <div className="theme-muted mt-3 flex flex-wrap gap-3 text-sm">
-            <span>{listing.category}</span>
+            <span>{listingGroup.label}</span>
+            <span>{String(serviceSubtype).replace(/-/g, " ")}</span>
             {listing.requiresDestination ? (
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -440,6 +447,10 @@ export default function ListingManagement() {
       (destination) => destination.id === form.destinationId
     );
     const requiresDestination = listingRequiresDestination(form.category);
+    const serviceGroup = inferServiceGroup({
+      category: form.category,
+      listingType: form.listingType,
+    });
 
     if (requiresDestination && !selectedDestination) {
       setError("Choose the destination this listing belongs to.");
@@ -466,8 +477,13 @@ export default function ListingManagement() {
                   destinationId: selectedDestination.id,
                   destinationName: selectedDestination.name,
                   destinationLocation: selectedDestination.location,
+                  serviceGroup: serviceGroup.id,
+                  serviceSubtype: form.listingType,
                 }
-              : {},
+              : {
+                  serviceGroup: serviceGroup.id,
+                  serviceSubtype: form.listingType,
+                },
             availability: [],
           }),
         }
@@ -483,6 +499,14 @@ export default function ListingManagement() {
       setSaving(false);
     }
   };
+  const selectedServiceGroup = inferServiceGroup({
+    category: form.category,
+    listingType: form.listingType,
+  });
+  const selectedSubtypes = selectedServiceGroup.subtypes;
+  const shouldShowDestinationSelect =
+    serviceGroups.some((group) => group.providerCategory === form.category) ||
+    listingRequiresDestination(form.category);
 
   const toggleVisibility = async (listing: ProviderListingRecord) => {
     try {
@@ -584,7 +608,7 @@ export default function ListingManagement() {
               placeholder="Location"
               required={!listingRequiresDestination(form.category)}
             />
-            {listingRequiresDestination(form.category) ? (
+            {shouldShowDestinationSelect ? (
               <select
                 value={form.destinationId}
                 onChange={(event) => {
@@ -598,9 +622,13 @@ export default function ListingManagement() {
                   }));
                 }}
                 className="theme-input rounded-2xl px-4 py-3 text-sm"
-                required
+                required={listingRequiresDestination(form.category)}
               >
-                <option value="">Choose destination</option>
+                <option value="">
+                  {listingRequiresDestination(form.category)
+                    ? "Choose destination"
+                    : "Optional destination"}
+                </option>
                 {destinations.map((destination) => (
                   <option key={destination.id} value={destination.id}>
                     {destination.name}
@@ -611,21 +639,43 @@ export default function ListingManagement() {
             <select
               value={form.category}
               onChange={(event) =>
+                setForm((current) => {
+                  const group = serviceGroups.find(
+                    (item) => item.providerCategory === event.target.value
+                  );
+
+                  return {
+                    ...current,
+                    category: event.target.value,
+                    listingType: group?.subtypes[0]?.id || current.listingType,
+                    destinationId: listingRequiresDestination(event.target.value)
+                      ? current.destinationId
+                      : current.destinationId,
+                  };
+                })
+              }
+              className="theme-input rounded-2xl px-4 py-3 text-sm"
+            >
+              {serviceGroups.map((group) => (
+                <option key={group.id}>{group.providerCategory}</option>
+              ))}
+              <option>Shopping Product</option>
+            </select>
+            <select
+              value={form.listingType}
+              onChange={(event) =>
                 setForm((current) => ({
                   ...current,
-                  category: event.target.value,
-                  destinationId: listingRequiresDestination(event.target.value)
-                    ? current.destinationId
-                    : "",
+                  listingType: event.target.value,
                 }))
               }
               className="theme-input rounded-2xl px-4 py-3 text-sm"
             >
-              <option>Accommodation</option>
-              <option>Experience</option>
-              <option>Shopping Product</option>
-              <option>Transport</option>
-              <option>Dining</option>
+              {selectedSubtypes.map((subtype) => (
+                <option key={subtype.id} value={subtype.id}>
+                  {subtype.label}
+                </option>
+              ))}
             </select>
             <select
               value={form.bookingMode}

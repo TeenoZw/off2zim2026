@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import SectionHeader from "@/components/ui/SectionHeader";
+import ServiceSubtypeChips from "@/components/ui/ServiceSubtypeChips";
 import { apiFetch } from "@/lib/client-api";
 import {
   getDestinationById,
   type ExplorerDestinationSummary,
 } from "@/lib/destination-explorer";
+import { getSubtypesForGroup, normalizeTaxonomyValue } from "@/lib/taxonomy";
 import { BedDouble, MapPin, Search, Star } from "lucide-react";
 
 interface DestinationContextResponse {
@@ -36,6 +38,7 @@ export default function AccommodationPage() {
   const [selectedDestination, setSelectedDestination] = useState<ExplorerDestinationSummary | null>(null);
   const [stays, setStays] = useState<DestinationContextResponse["scoped"]["stays"]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeSubtype, setActiveSubtype] = useState(searchParams?.get("subtype") || "all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -68,15 +71,19 @@ export default function AccommodationPage() {
 
   const filteredStays = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return stays;
 
     return stays.filter((stay) =>
-      [stay.name, stay.description, stay.location, stay.full_location, ...(stay.amenities || [])]
-        .join(" ")
-        .toLowerCase()
-        .includes(query)
+      (activeSubtype === "all" ||
+        [stay.name, stay.description, stay.location, stay.full_location, ...(stay.amenities || [])]
+          .map((value) => normalizeTaxonomyValue(value))
+          .some((value) => value.includes(activeSubtype))) &&
+      (!query ||
+        [stay.name, stay.description, stay.location, stay.full_location, ...(stay.amenities || [])]
+          .join(" ")
+          .toLowerCase()
+          .includes(query))
     );
-  }, [searchTerm, stays]);
+  }, [activeSubtype, searchTerm, stays]);
 
   return (
     <div className="theme-page pb-20">
@@ -143,6 +150,13 @@ export default function AccommodationPage() {
                   Back to destination hub
                 </Link>
               </div>
+              <ServiceSubtypeChips
+                subtypes={getSubtypesForGroup("stays")}
+                activeSubtype={activeSubtype}
+                onSelect={setActiveSubtype}
+                allLabel="All stays"
+                className="mt-4"
+              />
             </div>
           </section>
 

@@ -11,6 +11,7 @@ import {
   type ExplorerDestinationSummary,
   enrichDestination,
 } from "@/lib/destination-explorer";
+import { destinationBrowseModes, serviceGroups } from "@/lib/taxonomy";
 import {
   ArrowRight,
   Banknote,
@@ -149,6 +150,19 @@ export default function TravelGuidePage() {
   }, [destinations, searchTerm]);
 
   const featuredCount = destinations.filter((destination) => destination.featured).length;
+  const browseFacets = useMemo(() => {
+    const regions = Array.from(
+      new Set(destinations.map((destination) => destination.region).filter(Boolean))
+    ).slice(0, 6);
+    const provinces = Array.from(
+      new Set(destinations.map((destination) => destination.location).filter(Boolean))
+    ).slice(0, 6);
+    const activities = Array.from(
+      new Set(destinations.flatMap((destination) => destination.highlights || []))
+    ).slice(0, 8);
+
+    return { regions, provinces, activities };
+  }, [destinations]);
 
   return (
     <div className="theme-page pb-20">
@@ -270,6 +284,53 @@ export default function TravelGuidePage() {
         <AppServiceStrip activeLabel="Destinations" />
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="theme-panel rounded-[32px] p-6 md:p-7">
+          <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+            <div>
+              <p className="theme-label text-xs uppercase tracking-[0.24em]">Explore your way</p>
+              <h2 className="theme-heading mt-3 text-2xl font-semibold">
+                Browse destinations by region, province, city, or activity
+              </h2>
+              <p className="theme-muted mt-3 text-sm leading-6">
+                Off2Zim starts with where you want to go. You can then open a destination to see
+                the stays, transport, dining, activities, and events connected to that place.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {destinationBrowseModes.map((mode) => (
+                <div key={mode.id} className="theme-panel-soft rounded-[22px] p-4">
+                  <h3 className="theme-heading text-base font-semibold">{mode.label}</h3>
+                  <p className="theme-muted mt-2 text-sm leading-6">{mode.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            <FacetGroup label="Regions" values={browseFacets.regions} onChoose={setSearchTerm} />
+            <FacetGroup label="Provinces and cities" values={browseFacets.provinces} onChoose={setSearchTerm} />
+            <FacetGroup label="Activities and highlights" values={browseFacets.activities} onChoose={setSearchTerm} />
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            {serviceGroups.map((group) => (
+              <Link
+                key={group.id}
+                href={group.globalBrowse ? getServiceHref(group.id) : "#destinations"}
+                onClick={() => {
+                  if (!group.globalBrowse) setSearchTerm(group.label);
+                }}
+                className="theme-chip rounded-full px-3 py-2 text-xs font-semibold"
+              >
+                {group.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="destinations" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Choose the place"
@@ -351,6 +412,18 @@ export default function TravelGuidePage() {
                       </span>
                     ))}
                   </div>
+                  <div className="theme-panel-soft mt-4 grid grid-cols-3 gap-2 rounded-[18px] p-3 text-center">
+                    <DestinationCount label="Stays" value={destination.stays_count} />
+                    <DestinationCount label="Things" value={destination.activities_count} />
+                    <DestinationCount
+                      label="More"
+                      value={
+                        (destination.transport_count || 0) +
+                        (destination.dining_count || 0) +
+                        (destination.events_count || 0)
+                      }
+                    />
+                  </div>
                   <Link
                     href={`/travel-guide/${destination.id}`}
                     className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#ff5630] px-4 py-2.5 text-sm font-semibold text-white"
@@ -390,6 +463,61 @@ export default function TravelGuidePage() {
           })}
         </div>
       </section>
+    </div>
+  );
+}
+
+function DestinationCount({
+  label,
+  value,
+}: {
+  label: string;
+  value?: number;
+}) {
+  return (
+    <div>
+      <div className="theme-heading text-base font-semibold">{value || 0}</div>
+      <div className="theme-subtle text-[10px] uppercase tracking-[0.18em]">{label}</div>
+    </div>
+  );
+}
+
+function getServiceHref(groupId: string) {
+  if (groupId === "stays") return "/accommodation";
+  if (groupId === "dining") return "/restaurants";
+  return `/${groupId}`;
+}
+
+function FacetGroup({
+  label,
+  values,
+  onChoose,
+}: {
+  label: string;
+  values: Array<string | null | undefined>;
+  onChoose: (value: string) => void;
+}) {
+  const cleanValues = values.filter(Boolean) as string[];
+
+  if (cleanValues.length === 0) {
+    return null;
+  }
+
+  return (
+    <div>
+      <p className="theme-subtle text-xs uppercase tracking-[0.22em]">{label}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {cleanValues.map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => onChoose(value)}
+            className="rounded-full border border-black/10 px-3 py-1.5 text-xs theme-muted transition hover:border-[#ff5630] hover:text-[#ff5630] dark:border-white/10"
+          >
+            {value}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

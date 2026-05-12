@@ -1,9 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import SectionHeader from "@/components/ui/SectionHeader";
+import ServiceSubtypeChips from "@/components/ui/ServiceSubtypeChips";
+import {
+  getSubtypesForGroup,
+  inferServiceSubtype,
+  normalizeTaxonomyValue,
+} from "@/lib/taxonomy";
 import {
   CalendarDaysIcon,
   ClockIcon,
@@ -147,10 +153,19 @@ function formatDate(dateString: string) {
 
 export default function EventsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { addToBooking } = usePayment();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [activeLocation, setActiveLocation] = useState("All");
+  const [activeSubtype, setActiveSubtype] = useState(searchParams?.get("subtype") || "all");
+  const destinationParam = searchParams?.get("destination");
+  const initialLocation = destinationParam
+    ? destinationParam
+        .split("-")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ")
+    : "All";
+  const [activeLocation, setActiveLocation] = useState(initialLocation);
 
   const categories = ["All", ...Array.from(new Set(events.map((event) => event.category)))];
   const locations = ["All", ...Array.from(new Set(events.map((event) => event.location)))];
@@ -159,15 +174,27 @@ export default function EventsPage() {
     const term = search.trim().toLowerCase();
     return events.filter((event) => {
       const matchesCategory = activeCategory === "All" || event.category === activeCategory;
-      const matchesLocation = activeLocation === "All" || event.location === activeLocation;
+      const matchesSubtype =
+        activeSubtype === "all" ||
+        inferServiceSubtype({
+          category: "Event",
+          listingType: event.category,
+          title: event.title,
+          metadata: { serviceGroup: "events", serviceSubtype: event.category },
+        })?.id === activeSubtype ||
+        normalizeTaxonomyValue(event.category) === activeSubtype;
+      const matchesLocation =
+        activeLocation === "All" ||
+        normalizeTaxonomyValue(event.location).includes(normalizeTaxonomyValue(activeLocation)) ||
+        normalizeTaxonomyValue(activeLocation).includes(normalizeTaxonomyValue(event.location));
       const matchesSearch =
         !term ||
         event.title.toLowerCase().includes(term) ||
         event.description.toLowerCase().includes(term) ||
         event.location.toLowerCase().includes(term);
-      return matchesCategory && matchesLocation && matchesSearch;
+      return matchesCategory && matchesSubtype && matchesLocation && matchesSearch;
     });
-  }, [activeCategory, activeLocation, search]);
+  }, [activeCategory, activeLocation, activeSubtype, search]);
 
   const featured = filteredEvents.filter((event) => event.featured);
 
@@ -248,6 +275,13 @@ export default function EventsPage() {
                   ))}
                 </select>
               </div>
+              <ServiceSubtypeChips
+                subtypes={getSubtypesForGroup("events")}
+                activeSubtype={activeSubtype}
+                onSelect={setActiveSubtype}
+                allLabel="All events"
+                className="mt-4"
+              />
             </div>
 
             <div

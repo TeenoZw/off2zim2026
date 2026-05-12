@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import SectionHeader from "@/components/ui/SectionHeader";
+import { getSubtypesForGroup } from "@/lib/taxonomy";
 import {
   ArrowRight,
   Bus,
@@ -50,6 +51,7 @@ const transportTypes = [
     features: ["Airport pickup", "City rides", "Last-mile support"],
   },
 ];
+const transportSubtypes = getSubtypesForGroup("transport");
 
 export default function TransportPage() {
   return (
@@ -107,6 +109,18 @@ export default function TransportPage() {
           eyebrow="Modes"
           title="Choose the transport option that fits your route"
         />
+        <div className="mb-6 flex flex-wrap gap-2">
+          {transportSubtypes.map((subtype) => (
+            <Link
+              key={subtype.id}
+              href={`/marketplace?serviceGroup=transport&subtype=${encodeURIComponent(subtype.id)}`}
+              className="theme-chip rounded-full px-3 py-2 text-xs font-semibold"
+              title={subtype.travelerHint}
+            >
+              {subtype.label}
+            </Link>
+          ))}
+        </div>
         <div className="grid gap-5 md:grid-cols-2">
           {transportTypes.map((transport) => {
             const Icon = transport.icon;

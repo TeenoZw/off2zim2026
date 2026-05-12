@@ -8,6 +8,8 @@ import {
   isMatchingDestination,
   type ExplorerDestinationSummary,
 } from "@/lib/destination-explorer";
+import { inferServiceGroup } from "@/lib/taxonomy";
+import { getDemoPublicListings } from "@/lib/demo-taxonomy-listings";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +37,7 @@ export async function GET(
       return apiError("Destination not found.", 404);
     }
 
-    const [allStays, listings, restaurants, guides, forumQuestions] = await Promise.all([
+    const [allStaysResult, listingsResult, restaurantsResult, guidesResult, forumQuestionsResult] = await Promise.allSettled([
       getMobileStays(),
       prisma.providerListing.findMany({
         where: {
@@ -118,25 +120,44 @@ export async function GET(
         take: 6,
       }),
     ]);
+    const allStays = settledValue(allStaysResult, []);
+    const listings = settledValue(listingsResult, []);
+    const restaurants = settledValue(restaurantsResult, []);
+    const guides = settledValue(guidesResult, []);
+    const forumQuestions = settledValue(forumQuestionsResult, []);
 
     const stays = allStays.filter((stay) =>
       isMatchingDestination(stay.destinations?.name ?? stay.location, destination)
     );
 
-    const activityListings = listings
-      .map(serializePublicListing)
-      .filter((listing) => {
-        const type = listing.listingType.toLowerCase();
-        const category = listing.category.toLowerCase();
-        return (
-          !type.includes("accommodation") &&
-          !type.includes("dining") &&
-          !type.includes("transport") &&
-          !category.includes("accommodation") &&
-          !category.includes("dining") &&
-          !category.includes("transport")
-        );
-      });
+    const publicListings =
+      listings.length > 0
+        ? listings.map(serializePublicListing)
+        : getDemoPublicListings().filter((listing) =>
+            isMatchingDestination(
+              listing.destinationId || listing.destinationName || listing.location,
+              destination
+            )
+          );
+    const listingsByGroup = publicListings.reduce(
+      (groups, listing) => {
+        const group = inferServiceGroup(listing);
+        groups[group.id].push(listing);
+        return groups;
+      },
+      {
+        stays: [],
+        transport: [],
+        dining: [],
+        activities: [],
+        events: [],
+      } as Record<ReturnType<typeof inferServiceGroup>["id"], typeof publicListings>
+    );
+
+    const activityListings = listingsByGroup.activities;
+    const transportListings = listingsByGroup.transport;
+    const eventListings = listingsByGroup.events;
+    const diningListings = listingsByGroup.dining;
 
     const restaurantItems = restaurants.map((restaurant) => ({
       id: restaurant.id,
@@ -187,6 +208,9 @@ export async function GET(
       scoped: {
         stays,
         activities: activityListings,
+        transport: transportListings,
+        diningListings,
+        events: eventListings,
         restaurants: restaurantItems,
         guides: guideItems,
         forumQuestions: questionItems,
@@ -194,6 +218,9 @@ export async function GET(
       counts: {
         stays: stays.length,
         activities: activityListings.length,
+        transport: transportListings.length,
+        diningListings: diningListings.length,
+        events: eventListings.length,
         restaurants: restaurantItems.length,
         guides: guideItems.length,
         questions: questionItems.length,
@@ -203,4 +230,13 @@ export async function GET(
     console.error("Destination context route error:", error);
     return apiError("Unable to load destination context right now.", 500);
   }
+}
+
+function settledValue<T>(result: PromiseSettledResult<T>, fallback: T): T {
+  if (result.status === "fulfilled") {
+    return result.value;
+  }
+
+  console.warn("Destination context source unavailable:", result.reason);
+  return fallback;
 }

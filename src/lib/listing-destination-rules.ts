@@ -3,11 +3,13 @@ import {
   getDestinationById,
   type ExplorerDestinationSummary,
 } from "@/lib/destination-explorer";
+import { normalizeTaxonomyValue, serviceGroups } from "@/lib/taxonomy";
 
 const destinationRequiredCategories = new Set([
   "accommodation",
   "experience",
   "dining",
+  "event",
 ]);
 
 export type ListingDestinationMetadata = {
@@ -17,7 +19,23 @@ export type ListingDestinationMetadata = {
 };
 
 export function listingRequiresDestination(category: string | null | undefined) {
-  return destinationRequiredCategories.has((category || "").trim().toLowerCase());
+  const normalizedCategory = (category || "").trim().toLowerCase();
+
+  if (destinationRequiredCategories.has(normalizedCategory)) {
+    return true;
+  }
+
+  const matchedGroup = serviceGroups.find((group) =>
+    [
+      group.id,
+      group.label,
+      group.providerCategory,
+    ]
+      .map(normalizeTaxonomyValue)
+      .includes(normalizeTaxonomyValue(category))
+  );
+
+  return matchedGroup?.destinationScoped ?? false;
 }
 
 export function getListingDestinationMetadata(

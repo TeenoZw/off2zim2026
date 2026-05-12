@@ -6,6 +6,7 @@ import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import { ArrowRight, Compass, Heart, MapPinned, ReceiptText, ShieldCheck, UserRoundCheck } from "lucide-react";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { TRIP_PLANNER_STORAGE_KEY } from "@/contexts/TripPlannerContext";
 import { explorerWorkspaceCards } from "@/lib/surface-config";
 import { apiFetch } from "@/lib/client-api";
 
@@ -22,7 +23,7 @@ function useDashboardStats(): DashboardStats {
     // Read planner item count from localStorage (no API needed)
     let plannerItemCount = 0;
     try {
-      const raw = localStorage.getItem("off2zim_trip_planner_v1");
+      const raw = localStorage.getItem(TRIP_PLANNER_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         plannerItemCount = Array.isArray(parsed.items) ? parsed.items.length : 0;

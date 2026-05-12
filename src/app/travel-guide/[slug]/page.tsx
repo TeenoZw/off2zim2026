@@ -14,6 +14,8 @@ import {
   ArrowLeft,
   ArrowRight,
   BedDouble,
+  Bus,
+  CalendarDays,
   MessageCircle,
   MapPin,
   Sparkles,
@@ -34,6 +36,9 @@ interface DestinationContextResponse {
       destinations?: { name?: string | null } | null;
     }>;
     activities: PublicListingRecord[];
+    transport: PublicListingRecord[];
+    diningListings: PublicListingRecord[];
+    events: PublicListingRecord[];
     restaurants: Array<{
       id: string;
       name: string;
@@ -66,6 +71,9 @@ interface DestinationContextResponse {
   counts: {
     stays: number;
     activities: number;
+    transport: number;
+    diningListings: number;
+    events: number;
     restaurants: number;
     guides: number;
     questions: number;
@@ -88,11 +96,25 @@ const serviceCards = [
     description: "See activities, tours, and experiences available in this destination.",
   },
   {
+    label: "Transport",
+    key: "transport",
+    href: "/transport",
+    icon: Bus,
+    description: "See taxis, shuttles, game drives, boat cruises, and route support linked to this destination.",
+  },
+  {
     label: "Restaurants",
     key: "restaurants",
     href: "/restaurants",
     icon: UtensilsCrossed,
     description: "Find restaurants and dining options once this destination is on your plan.",
+  },
+  {
+    label: "Events",
+    key: "events",
+    href: "/events",
+    icon: CalendarDays,
+    description: "Browse concerts, festivals, Boma nights, and local happenings connected to this destination.",
   },
   {
     label: "Ask a Local",
@@ -195,7 +217,8 @@ export default function DestinationDetailPage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard label="Stays" value={counts.stays} />
               <StatCard label="Things to do" value={counts.activities} />
-              <StatCard label="Restaurants" value={counts.restaurants} />
+              <StatCard label="Transport" value={counts.transport} />
+              <StatCard label="Dining and events" value={counts.restaurants + counts.diningListings + counts.events} />
               <StatCard label="Local guidance" value={counts.guides + counts.questions} />
             </div>
           </div>
@@ -252,10 +275,13 @@ export default function DestinationDetailPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
           {serviceCards.map((service) => {
             const Icon = service.icon;
-            const count = counts[service.key];
+            const count =
+              service.key === "restaurants"
+                ? counts.restaurants + counts.diningListings
+                : counts[service.key];
 
             return (
               <Link
@@ -307,6 +333,75 @@ export default function DestinationDetailPage() {
               ))}
               {scoped.stays.length === 0 ? (
                 <EmptyScopedState label="stays" destinationName={destination.name} />
+              ) : null}
+            </div>
+          </div>
+
+          <div className="theme-panel rounded-[28px] p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="theme-heading text-xl font-semibold">Transport here</h2>
+              <Link
+                href={withDestinationContext("/transport", destination.id)}
+                className="text-sm font-medium text-[#ff5630]"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {scoped.transport.slice(0, 3).map((transport) => (
+                <ListingPreview key={transport.id} listing={transport} />
+              ))}
+              {scoped.transport.length === 0 ? (
+                <EmptyScopedState label="transport options" destinationName={destination.name} />
+              ) : null}
+            </div>
+          </div>
+
+          <div className="theme-panel rounded-[28px] p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="theme-heading text-xl font-semibold">Dining</h2>
+              <Link
+                href={withDestinationContext("/restaurants", destination.id)}
+                className="text-sm font-medium text-[#ff5630]"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {scoped.restaurants.slice(0, 2).map((restaurant) => (
+                <div key={restaurant.id} className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
+                  <div className="theme-heading text-base font-semibold">{restaurant.name}</div>
+                  <div className="theme-muted mt-1 text-sm">{restaurant.cuisine} · {restaurant.location}</div>
+                  {restaurant.description ? (
+                    <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">{restaurant.description}</p>
+                  ) : null}
+                </div>
+              ))}
+              {scoped.diningListings.slice(0, Math.max(0, 3 - scoped.restaurants.length)).map((dining) => (
+                <ListingPreview key={dining.id} listing={dining} />
+              ))}
+              {scoped.restaurants.length === 0 && scoped.diningListings.length === 0 ? (
+                <EmptyScopedState label="dining options" destinationName={destination.name} />
+              ) : null}
+            </div>
+          </div>
+
+          <div className="theme-panel rounded-[28px] p-6">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="theme-heading text-xl font-semibold">Events</h2>
+              <Link
+                href={withDestinationContext("/events", destination.id)}
+                className="text-sm font-medium text-[#ff5630]"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="mt-4 space-y-3">
+              {scoped.events.slice(0, 3).map((event) => (
+                <ListingPreview key={event.id} listing={event} />
+              ))}
+              {scoped.events.length === 0 ? (
+                <EmptyScopedState label="events" destinationName={destination.name} />
               ) : null}
             </div>
           </div>
@@ -373,6 +468,18 @@ export default function DestinationDetailPage() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function ListingPreview({ listing }: { listing: PublicListingRecord }) {
+  return (
+    <div className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
+      <div className="theme-heading text-base font-semibold">{listing.title}</div>
+      <div className="theme-muted mt-1 text-sm">{listing.location}</div>
+      <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">
+        {listing.shortDescription || listing.description}
+      </p>
     </div>
   );
 }

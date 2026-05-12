@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
 import SectionHeader from "@/components/ui/SectionHeader";
+import ServiceSubtypeChips from "@/components/ui/ServiceSubtypeChips";
 import { apiFetch } from "@/lib/client-api";
 import {
   getDestinationById,
   type ExplorerDestinationSummary,
 } from "@/lib/destination-explorer";
+import { getSubtypesForGroup, inferServiceSubtype } from "@/lib/taxonomy";
 import type { PublicListingRecord } from "@/types/platform";
 import { ArrowRight, Clock3, MapPin, Search, Star, Users, Zap } from "lucide-react";
 
@@ -27,6 +29,7 @@ export default function ActivitiesPage() {
   const [selectedDestination, setSelectedDestination] = useState<ExplorerDestinationSummary | null>(null);
   const [results, setResults] = useState<PublicListingRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeSubtype, setActiveSubtype] = useState(searchParams?.get("subtype") || "all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -60,17 +63,15 @@ export default function ActivitiesPage() {
   const filteredActivities = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
-    if (!query) {
-      return results;
-    }
-
     return results.filter((activity) =>
-      [activity.title, activity.description, activity.shortDescription, activity.location, activity.category]
-        .join(" ")
-        .toLowerCase()
-        .includes(query)
+      (activeSubtype === "all" || inferServiceSubtype(activity)?.id === activeSubtype) &&
+      (!query ||
+        [activity.title, activity.description, activity.shortDescription, activity.location, activity.category]
+          .join(" ")
+          .toLowerCase()
+          .includes(query))
     );
-  }, [results, searchTerm]);
+  }, [activeSubtype, results, searchTerm]);
 
   return (
     <div className="theme-page pb-20">
@@ -135,6 +136,13 @@ export default function ActivitiesPage() {
                   Back to destination hub
                 </Link>
               </div>
+              <ServiceSubtypeChips
+                subtypes={getSubtypesForGroup("activities")}
+                activeSubtype={activeSubtype}
+                onSelect={setActiveSubtype}
+                allLabel="All activities"
+                className="mt-4"
+              />
             </div>
           </section>
 
@@ -169,7 +177,9 @@ export default function ActivitiesPage() {
                       <div className="flex flex-1 flex-col p-6">
                         <Link href={`/marketplace/${activity.slug}`} className="block flex-1">
                           <div className="flex items-center justify-between gap-3">
-                            <p className="theme-label text-sm">{activity.category}</p>
+                            <p className="theme-label text-sm">
+                              {inferServiceSubtype(activity)?.label || activity.category}
+                            </p>
                             <div className="inline-flex items-center gap-1 text-sm text-[#ffc247]">
                               <Star className="h-4 w-4" />
                               <span className="theme-heading">

@@ -11,6 +11,9 @@ export interface ExplorerDestinationSummary {
   highlights?: string[];
   stays_count?: number;
   activities_count?: number;
+  transport_count?: number;
+  dining_count?: number;
+  events_count?: number;
   featured?: boolean;
   category?: string | null;
   price_range?: string | null;
