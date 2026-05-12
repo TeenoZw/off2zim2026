@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
-import SectionHeader from "@/components/ui/SectionHeader";
+import CompactPageHero from "@/components/ui/CompactPageHero";
+import CompactRailCard from "@/components/ui/CompactRailCard";
+import CompactSectionHeader from "@/components/ui/CompactSectionHeader";
+import HorizontalRail from "@/components/ui/HorizontalRail";
 import ServiceSubtypeChips from "@/components/ui/ServiceSubtypeChips";
 import { apiFetch } from "@/lib/client-api";
 import {
@@ -12,7 +15,7 @@ import {
   type ExplorerDestinationSummary,
 } from "@/lib/destination-explorer";
 import { getSubtypesForGroup, normalizeTaxonomyValue } from "@/lib/taxonomy";
-import { MapPin, Search, Star, UtensilsCrossed } from "lucide-react";
+import { Search, UtensilsCrossed } from "lucide-react";
 
 interface DestinationContextResponse {
   destination: ExplorerDestinationSummary;
@@ -86,29 +89,12 @@ export default function RestaurantsPage() {
 
   return (
     <div className="theme-page pb-20">
-      <section className="mx-auto max-w-7xl px-4 pb-6 pt-6 sm:px-6 lg:px-8">
-        <div className="theme-panel-strong overflow-hidden rounded-[34px]">
-          <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="p-6 md:p-8 lg:p-10">
-              <div className="theme-chip inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]">
-                Dining
-              </div>
-              <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-semibold md:text-5xl">
-                Find restaurants inside the destination you chose
-              </h1>
-              <p className="theme-muted mt-4 max-w-2xl text-sm leading-7 md:text-base">
-                Choose your destination first, then browse the restaurants and dining options that fit that stop on your trip.
-              </p>
-            </div>
-            <div
-              className="min-h-[260px] bg-cover bg-center"
-              style={{
-                backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.5)), url('/images/victoria-falls.jpg')",
-              }}
-            />
-          </div>
-        </div>
-      </section>
+      <CompactPageHero
+        eyebrow="Dining"
+        title="Find restaurants inside the destination you chose"
+        description="Choose your destination first, then browse the restaurants and dining options that fit that stop on your trip."
+        imageUrl="/images/victoria-falls.jpg"
+      />
 
       <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
         <AppServiceStrip
@@ -164,45 +150,24 @@ export default function RestaurantsPage() {
               />
             ) : (
               <>
-                <SectionHeader
+                <CompactSectionHeader
                   eyebrow={selectedDestination?.name || "Destination-selected"}
                   title={`Dining in ${selectedDestination?.name || "this destination"}`}
+                  count={filteredRestaurants.length}
                 />
-                <div className="grid gap-5 lg:grid-cols-3">
+                <HorizontalRail itemClassName="w-[76vw] max-w-[280px] sm:w-[260px]">
                   {filteredRestaurants.map((restaurant) => (
-                    <article key={restaurant.id} className="theme-card overflow-hidden">
-                      <div
-                        className="min-h-[220px] bg-cover bg-center"
-                        style={{
-                          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.48)), url('${restaurant.images[0] || "/images/background.png"}')`,
-                        }}
-                      />
-                      <div className="p-5">
-                        <div className="theme-label text-xs uppercase tracking-[0.24em]">{restaurant.cuisine}</div>
-                        <h2 className="theme-heading mt-2 text-xl font-semibold">{restaurant.name}</h2>
-                        {restaurant.description ? (
-                          <p className="theme-muted mt-3 text-sm leading-6">{restaurant.description}</p>
-                        ) : null}
-
-                        <div className="theme-muted mt-4 space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-[#ff7352]" />
-                            {restaurant.location}
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span>{restaurant.priceRange}</span>
-                            {restaurant.rating ? (
-                              <span className="inline-flex items-center gap-1 text-[#ffc247]">
-                                <Star className="h-4 w-4 fill-[#ffc247] text-[#ffc247]" />
-                                <span className="theme-heading">{restaurant.rating}</span>
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-                    </article>
+                    <CompactRailCard
+                      key={restaurant.id}
+                      title={restaurant.name}
+                      imageUrl={restaurant.images[0] || "/images/background.png"}
+                      meta={restaurant.cuisine}
+                      detail={restaurant.location}
+                      badge={restaurant.rating || restaurant.priceRange}
+                      description={restaurant.description}
+                    />
                   ))}
-                </div>
+                </HorizontalRail>
               </>
             )}
           </section>
@@ -215,28 +180,27 @@ export default function RestaurantsPage() {
 function DestinationChooser({ destinations }: { destinations: ExplorerDestinationSummary[] }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="theme-panel rounded-[32px] p-8">
-        <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/[0.08]">
+      <div className="theme-panel rounded-2xl p-4 md:p-5">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.05] dark:bg-white/[0.08]">
           <UtensilsCrossed className="h-5 w-5 text-[#ff5630]" />
         </div>
-        <h2 className="theme-heading mt-4 text-2xl font-semibold">Choose a destination to view its restaurants</h2>
-        <p className="theme-muted mt-3 max-w-2xl text-sm leading-7">
+        <h2 className="theme-heading mt-3 text-xl font-semibold">Choose a destination to view its restaurants</h2>
+        <p className="theme-muted mt-2 max-w-2xl text-sm leading-6">
           Dining is organized by destination so you can see the restaurants that match the place you plan to visit.
         </p>
-        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <HorizontalRail className="mt-4" itemClassName="w-[72vw] max-w-[240px] sm:w-[220px]">
           {destinations.map((destination) => (
-            <Link
+            <CompactRailCard
               key={destination.id}
               href={`/restaurants?destination=${encodeURIComponent(destination.id)}`}
-              className="theme-panel-soft rounded-[22px] p-4 transition hover:-translate-y-0.5"
-            >
-              <div className="theme-heading text-lg font-semibold">{destination.name}</div>
-              <div className="theme-muted mt-2 text-sm">
-                Open dining for this destination
-              </div>
-            </Link>
+              title={destination.name}
+              imageUrl={destination.image_url}
+              meta="Dining"
+              badge={destination.dining_count || 0}
+              description={destination.description}
+            />
           ))}
-        </div>
+        </HorizontalRail>
       </div>
     </section>
   );

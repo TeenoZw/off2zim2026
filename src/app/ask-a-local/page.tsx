@@ -115,15 +115,16 @@ export default function AskALocalPage() {
         />
       </section>
 
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-4 rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.04] sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#8dc9ff]/25 bg-[#13283a] px-4 py-2 text-sm font-medium text-[#8dc9ff]">
+            <div className="inline-flex items-center gap-2 rounded-lg border border-[#8dc9ff]/25 bg-[#13283a] px-3 py-1.5 text-xs font-medium text-[#8dc9ff]">
               <MessageCircle className="h-4 w-4" />
               {selectedDestination ? `${selectedDestination.name} local guidance` : "Ask a Local"}
             </div>
-            <h1 className="theme-heading mt-4 text-4xl font-semibold">
+            <h1 className="theme-heading mt-3 text-3xl font-semibold">
               {selectedDestination ? `Ask about ${selectedDestination.name}` : "Travel questions"}
             </h1>
             <p className="theme-muted mt-2 text-sm leading-6">
@@ -135,22 +136,23 @@ export default function AskALocalPage() {
           {user ? (
             <button
               onClick={() => setShowAsk(true)}
-              className="shrink-0 rounded-full bg-[#ff5630] px-5 py-2.5 text-sm font-semibold text-white"
+              className="shrink-0 rounded-lg bg-[#ff5630] px-4 py-2.5 text-sm font-semibold text-white"
             >
               Ask a question
             </button>
           ) : (
             <Link
               href="/login?redirect=/ask-a-local"
-              className="shrink-0 rounded-full bg-[#ff5630] px-5 py-2.5 text-sm font-semibold text-white"
+              className="shrink-0 rounded-lg bg-[#ff5630] px-4 py-2.5 text-sm font-semibold text-white"
             >
               Traveler login to ask
             </Link>
           )}
+          </div>
         </div>
 
         {/* Search */}
-        <form onSubmit={handleSearch} className="mb-6 flex gap-3">
+        <form onSubmit={handleSearch} className="mb-4 flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
             <input
@@ -161,12 +163,12 @@ export default function AskALocalPage() {
                   ? `Search questions about ${selectedDestination.name}...`
                   : "Search questions..."
               }
-              className="theme-input h-12 w-full rounded-2xl pl-11 pr-4 text-sm"
+              className="theme-input h-11 w-full rounded-xl pl-11 pr-4 text-sm"
             />
           </div>
           <button
             type="submit"
-            className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/70 hover:bg-white/[0.09]"
+            className="rounded-xl border border-white/10 bg-white/[0.05] px-4 text-sm font-medium text-white/70 hover:bg-white/[0.09]"
           >
             Search
           </button>
@@ -195,7 +197,7 @@ export default function AskALocalPage() {
               ))}
             </div>
           ) : questions.length === 0 ? (
-            <div className="theme-panel rounded-[28px] p-10 text-center space-y-3">
+            <div className="theme-panel rounded-xl p-6 text-center space-y-3">
               <p className="theme-heading font-semibold">
                 {searchQuery ? "No matching questions" : "No questions yet"}
               </p>
@@ -210,7 +212,7 @@ export default function AskALocalPage() {
               <Link
                 key={q.id}
                 href={`/ask-a-local/${q.id}`}
-                className="theme-panel block rounded-[24px] p-5 transition hover:shadow-md"
+                className="theme-panel block rounded-xl p-4 transition hover:shadow-md"
               >
                 <div className="flex items-start gap-3">
                   {q.isPinned ? (

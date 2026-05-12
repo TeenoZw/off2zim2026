@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
-import SectionHeader from "@/components/ui/SectionHeader";
+import CompactPageHero from "@/components/ui/CompactPageHero";
+import CompactRailCard from "@/components/ui/CompactRailCard";
+import CompactSectionHeader from "@/components/ui/CompactSectionHeader";
+import HorizontalRail from "@/components/ui/HorizontalRail";
 import ServiceSubtypeChips from "@/components/ui/ServiceSubtypeChips";
 import { apiFetch } from "@/lib/client-api";
 import {
@@ -13,7 +16,7 @@ import {
 } from "@/lib/destination-explorer";
 import { getSubtypesForGroup, inferServiceSubtype } from "@/lib/taxonomy";
 import type { PublicListingRecord } from "@/types/platform";
-import { ArrowRight, Clock3, MapPin, Search, Star, Users, Zap } from "lucide-react";
+import { Search } from "lucide-react";
 
 interface DestinationContextResponse {
   destination: ExplorerDestinationSummary;
@@ -75,30 +78,12 @@ export default function ActivitiesPage() {
 
   return (
     <div className="theme-page pb-20">
-      <section className="mx-auto max-w-7xl px-4 pb-8 pt-8 sm:px-6 lg:px-8">
-        <div className="theme-panel-strong overflow-hidden rounded-[38px]">
-          <div className="grid lg:grid-cols-[1fr_1fr]">
-            <div className="p-6 md:p-8 lg:p-10">
-              <div className="theme-chip inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]">
-                Things to do
-              </div>
-              <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
-                Find things to do after you choose your destination
-              </h1>
-              <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                Activities are tied to the place you plan to visit. Choose a destination first, then compare the tours, experiences, and local options available there.
-              </p>
-            </div>
-            <div
-              className="min-h-[320px] bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.45)), url('/images/rafting.jpg')",
-              }}
-            />
-          </div>
-        </div>
-      </section>
+      <CompactPageHero
+        eyebrow="Things to do"
+        title="Find things to do after you choose your destination"
+        description="Activities are tied to the place you plan to visit. Choose a destination first, then compare the tours, experiences, and local options available there."
+        imageUrl="/images/rafting.jpg"
+      />
 
       <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
         <AppServiceStrip
@@ -158,94 +143,38 @@ export default function ActivitiesPage() {
               />
             ) : (
               <>
-                <SectionHeader
+                <CompactSectionHeader
                   eyebrow={selectedDestination?.name || "Destination-selected"}
                   title={`Things to do in ${selectedDestination?.name || "this destination"}`}
+                  count={filteredActivities.length}
                 />
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                <HorizontalRail itemClassName="w-[78vw] max-w-[300px] sm:w-[280px]">
                   {filteredActivities.map((activity) => (
-                    <article key={activity.id} className="theme-card flex flex-col overflow-hidden">
-                      <Link href={`/marketplace/${activity.slug}`} className="block">
-                        <div
-                          className="relative h-56 bg-cover bg-center"
-                          style={{
-                            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.42)), url('${activity.images[0] || "/images/background.png"}')`,
-                          }}
-                        />
-                      </Link>
-
-                      <div className="flex flex-1 flex-col p-6">
-                        <Link href={`/marketplace/${activity.slug}`} className="block flex-1">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="theme-label text-sm">
-                              {inferServiceSubtype(activity)?.label || activity.category}
-                            </p>
-                            <div className="inline-flex items-center gap-1 text-sm text-[#ffc247]">
-                              <Star className="h-4 w-4" />
-                              <span className="theme-heading">
-                                {activity.provider.hasVerifiedBadge ? "4.8" : "4.5"}
-                              </span>
-                            </div>
-                          </div>
-
-                          <h3 className="theme-heading mt-2 text-2xl font-semibold">{activity.title}</h3>
-                          <div className="theme-muted mt-3 flex items-center gap-2 text-sm">
-                            <MapPin className="h-4 w-4 text-[#ff7352]" />
-                            {activity.location}
-                          </div>
-
-                          <div className="theme-muted mt-3 flex flex-wrap gap-4 text-sm">
-                            {typeof activity.metadata.duration === "string" ? (
-                              <span className="inline-flex items-center gap-2">
-                                <Clock3 className="h-4 w-4 text-[#5aa7ff]" />
-                                {activity.metadata.duration}
-                              </span>
-                            ) : null}
-                            {activity.capacity ? (
-                              <span className="inline-flex items-center gap-2">
-                                <Users className="h-4 w-4 text-[#7ddf8c]" />
-                                Up to {activity.capacity}
-                              </span>
-                            ) : null}
-                          </div>
-
-                          <p className="theme-muted mt-4 text-sm leading-6 line-clamp-3">
-                            {activity.shortDescription || activity.description}
-                          </p>
-                        </Link>
-
-                        <div className="mt-5 border-t border-white/[0.06] pt-4">
-                          <div className="mb-3 flex items-center justify-between gap-3">
-                            <div>
-                              <span className="theme-heading text-2xl font-bold">
-                                {activity.basePrice ? `$${activity.basePrice}` : "Quote"}
-                              </span>
-                              <span className="theme-subtle ml-1 text-sm">
-                                {activity.pricingModel === "per_person" ? "per person" : "per service"}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Link
-                              href={`/marketplace/${activity.slug}`}
-                              className="theme-button-secondary flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-semibold transition"
-                            >
-                              <ArrowRight className="h-3.5 w-3.5" />
-                              See details
-                            </Link>
-                            <Link
-                              href={`/marketplace/${activity.slug}#booking`}
-                              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-[#ff5630] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#ff7352]"
-                            >
-                              <Zap className="h-3.5 w-3.5" />
-                              Book now
-                            </Link>
-                          </div>
-                        </div>
+                    <CompactRailCard
+                      key={activity.id}
+                      title={activity.title}
+                      href={`/marketplace/${activity.slug}`}
+                      imageUrl={activity.images[0] || "/images/background.png"}
+                      meta={inferServiceSubtype(activity)?.label || activity.category}
+                      detail={activity.location}
+                      badge={activity.basePrice ? `$${activity.basePrice}` : "Quote"}
+                      description={activity.shortDescription || activity.description}
+                    >
+                      <div className="flex gap-1 overflow-hidden text-[10px] text-white/82">
+                        {typeof activity.metadata.duration === "string" ? (
+                          <span className="truncate rounded-full bg-black/35 px-2 py-1">
+                            {activity.metadata.duration}
+                          </span>
+                        ) : null}
+                        {activity.capacity ? (
+                          <span className="truncate rounded-full bg-black/35 px-2 py-1">
+                            Up to {activity.capacity}
+                          </span>
+                        ) : null}
                       </div>
-                    </article>
+                    </CompactRailCard>
                   ))}
-                </div>
+                </HorizontalRail>
               </>
             )}
           </section>
@@ -266,23 +195,22 @@ function DestinationChooser({
 }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="theme-panel rounded-[32px] p-8">
-        <h2 className="theme-heading text-2xl font-semibold">{title}</h2>
-        <p className="theme-muted mt-3 max-w-2xl text-sm leading-7">{description}</p>
-        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="theme-panel rounded-2xl p-4 md:p-5">
+        <h2 className="theme-heading text-xl font-semibold">{title}</h2>
+        <p className="theme-muted mt-2 max-w-2xl text-sm leading-6">{description}</p>
+        <HorizontalRail className="mt-4" itemClassName="w-[72vw] max-w-[240px] sm:w-[220px]">
           {destinations.map((destination) => (
-            <Link
+            <CompactRailCard
               key={destination.id}
               href={`/activities?destination=${encodeURIComponent(destination.id)}`}
-              className="theme-panel-soft rounded-[22px] p-4 transition hover:-translate-y-0.5"
-            >
-              <div className="theme-heading text-lg font-semibold">{destination.name}</div>
-              <div className="theme-muted mt-2 text-sm">
-                {destination.activities_count || 0} activities available
-              </div>
-            </Link>
+              title={destination.name}
+              imageUrl={destination.image_url}
+              meta="Destination"
+              badge={destination.activities_count || 0}
+              description={destination.description}
+            />
           ))}
-        </div>
+        </HorizontalRail>
       </div>
     </section>
   );

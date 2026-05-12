@@ -12,7 +12,9 @@ import {
   Ticket,
   UtensilsCrossed,
 } from "lucide-react";
-import SectionHeader from "@/components/ui/SectionHeader";
+import CompactRailCard from "@/components/ui/CompactRailCard";
+import CompactSectionHeader from "@/components/ui/CompactSectionHeader";
+import HorizontalRail from "@/components/ui/HorizontalRail";
 import WeatherBadge from "@/components/ui/WeatherBadge";
 import { getSurfaceHref, getSurfaceHome, resolveAppSurface } from "@/lib/app-surface";
 
@@ -109,29 +111,29 @@ export default async function HomePage() {
       <div className="absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top,rgba(255,106,61,0.22),transparent_58%)]" />
       <div className="absolute inset-x-0 top-48 h-[32rem] bg-[radial-gradient(circle_at_center,rgba(75,120,255,0.14),transparent_62%)]" />
 
-      <section className="relative px-0 pb-12 pt-0">
+      <section className="relative px-0 pb-4 pt-0">
         <div
-          className="relative min-h-[calc(100svh-5rem)] overflow-hidden"
+          className="relative min-h-[520px] overflow-hidden"
           style={{
             backgroundImage: `linear-gradient(90deg, rgba(4,4,4,0.78) 0%, rgba(4,4,4,0.48) 42%, rgba(4,4,4,0.62) 100%), url('${hero.image}')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          <div className="mx-auto flex min-h-[calc(100svh-5rem)] max-w-7xl flex-col justify-between px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          <div className="mx-auto flex min-h-[520px] max-w-7xl flex-col justify-between px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
             <div className="max-w-3xl pt-6 lg:pt-12">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/25 px-4 py-2 text-xs uppercase tracking-[0.28em] text-white/82 backdrop-blur">
                 <span className="h-2 w-2 rounded-full bg-[#ff5630]" />
                 {hero.eyebrow}
               </div>
-              <h1 className="mt-6 max-w-4xl text-4xl font-bold leading-tight text-white md:text-6xl">
+              <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight text-white md:text-6xl">
                 {hero.title}
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-white/76 md:text-xl">
+              <p className="mt-4 max-w-2xl text-base leading-7 text-white/76 md:text-lg">
                 {hero.body}
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                 <Link
                   href={getSurfaceHref("explorer", "/login")}
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6c4d]"
@@ -154,24 +156,24 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-[1.2fr_0.8fr] lg:max-w-5xl">
-              <div className="rounded-[30px] border border-white/12 bg-black/36 p-5 text-white backdrop-blur-md">
+            <div className="flex max-w-5xl gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="min-w-[270px] rounded-xl border border-white/12 bg-black/36 p-4 text-white backdrop-blur-md">
                 <div className="text-xs uppercase tracking-[0.28em] text-white/52">
                   Featured atmosphere
                 </div>
-                <div className="mt-2 text-2xl font-semibold">Eastern Highlands</div>
-                <div className="mt-3 max-w-xl text-sm leading-6 text-white/72">
+                <div className="mt-2 text-xl font-semibold">Eastern Highlands</div>
+                <div className="mt-2 max-w-xl text-sm leading-6 text-white/72">
                   Forest roads, mountain air, tea country, waterfalls, and a calm route for travelers who want scenery before noise.
                 </div>
               </div>
-              <div className="rounded-[30px] border border-white/12 bg-black/36 p-5 text-white backdrop-blur-md">
+              <div className="min-w-[240px] rounded-xl border border-white/12 bg-black/36 p-4 text-white backdrop-blur-md">
                 <div className="text-xs uppercase tracking-[0.28em] text-white/52">
                   Conditions
                 </div>
-                <div className="mt-2 text-2xl font-semibold">
+                <div className="mt-2 text-xl font-semibold">
                   <WeatherBadge location={hero.location} className="text-white" compact />
                 </div>
-                <div className="mt-3 text-sm leading-6 text-white/72">
+                <div className="mt-2 text-sm leading-6 text-white/72">
                   Live weather helps you plan with the latest local conditions.
                 </div>
               </div>
@@ -196,102 +198,86 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <SectionHeader
+      <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        <CompactSectionHeader
           eyebrow="What the platform does"
           title="Off2Zim helps travelers explore, plan, and book Zimbabwe with confidence"
-          description="Browse destinations first, then move into planning, events, and local services for the places you choose."
         />
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <HorizontalRail itemClassName="w-[74vw] max-w-[260px] sm:w-[240px]">
           {platformMoments.map((item) => {
             const Icon = item.icon;
 
             return (
-              <Link
+              <CompactRailCard
                 key={item.title}
                 href={item.href}
-                className="theme-card-soft group p-6 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/8">
-                    <Icon className="h-5 w-5 text-[#ff5630]" />
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-slate-400 transition group-hover:text-[#ff5630] dark:text-white/32" />
-                </div>
-                <h3 className="theme-heading mt-5 text-2xl font-semibold">{item.title}</h3>
-                <p className="theme-muted mt-3 max-w-xl text-sm leading-7">{item.body}</p>
-              </Link>
+                icon={Icon}
+                meta="Start here"
+                title={item.title}
+                description={item.body}
+                actionLabel="Open"
+              />
             );
           })}
-        </div>
+        </HorizontalRail>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <SectionHeader
+      <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        <CompactSectionHeader
           eyebrow="Across the journey"
           title="Plan, book, and explore Zimbabwe from one platform"
-          description="Use global tools like flights, transport, events, and trip planning anytime, then open destination-specific services when you choose where to go."
         />
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <HorizontalRail itemClassName="w-[72vw] max-w-[250px] sm:w-[230px]">
           {serviceAtlas.map((item) => {
             const Icon = item.icon;
 
             return (
-              <div
+              <CompactRailCard
                 key={item.label}
-                className="theme-card-soft p-5"
-              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/[0.07]">
-                  <Icon className="h-5 w-5 text-[#ff5630]" />
-                </div>
-                <h3 className="theme-heading mt-4 text-lg font-semibold">{item.label}</h3>
-                <p className="theme-muted mt-2 text-sm leading-6">{item.detail}</p>
-              </div>
+                icon={Icon}
+                meta="Journey"
+                title={item.label}
+                description={item.detail}
+              />
             );
           })}
-        </div>
+        </HorizontalRail>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <SectionHeader
+      <section className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        <CompactSectionHeader
           eyebrow="Zimbabwe at a glance"
           title="Three destinations that show the full range of what Zimbabwe offers"
         />
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <HorizontalRail itemClassName="w-[78vw] max-w-[300px] sm:w-[280px]">
           {destinationFrames.map((destination) => (
-            <article
+            <CompactRailCard
               key={destination.title}
-              className="theme-card overflow-hidden rounded-[34px]"
-            >
-              <div
-                className="h-64 bg-cover bg-center"
-                style={{
-                  backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.62)), url('${destination.image}')`,
-                }}
-              />
-              <div className="p-5">
-                <h3 className="theme-heading text-2xl font-semibold">{destination.title}</h3>
-                <p className="theme-muted mt-3 text-sm leading-7">{destination.body}</p>
-              </div>
-            </article>
+              href="/travel-guide"
+              title={destination.title}
+              imageUrl={destination.image}
+              meta="Destination"
+              description={destination.body}
+              actionLabel="Explore destinations"
+            />
           ))}
-        </div>
+        </HorizontalRail>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pb-24">
-        <div className="theme-panel rounded-[32px] p-6 md:p-8">
-          <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+      <section className="mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6 lg:px-8 lg:pb-20">
+        <div className="theme-panel rounded-2xl p-4 md:p-5">
+          <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
             <div>
-              <p className="theme-label text-sm uppercase tracking-[0.28em]">Built with clarity</p>
-              <h2 className="theme-heading mt-3 text-2xl font-semibold">
+              <p className="theme-label text-xs uppercase tracking-[0.24em]">Built with clarity</p>
+              <h2 className="theme-heading mt-2 text-xl font-semibold">
                 A simpler way to plan your trip as the details come together
               </h2>
-              <div className="mt-5 space-y-3">
+              <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {trustPoints.map((point) => (
-                  <div key={point} className="border-b border-black/8 pb-3 text-sm leading-6 text-slate-700 dark:border-white/8 dark:text-white/70">
+                  <div key={point} className="min-w-[220px] rounded-xl border border-black/10 px-3 py-2 text-xs leading-5 text-slate-700 dark:border-white/10 dark:text-white/70">
                     {point}
                   </div>
                 ))}
@@ -299,45 +285,38 @@ export default async function HomePage() {
             </div>
 
             <div>
-              <SectionHeader
+              <CompactSectionHeader
                 eyebrow="Start with the right door"
                 title="Choose the next step that matches why you came to Off2Zim"
-                description="Explore the public platform first, or go straight to the account area that fits what you need."
               />
 
-              <div className="grid gap-3 md:grid-cols-3">
+              <div className="grid gap-2 md:grid-cols-3">
                 <Link
                   href={getSurfaceHref("explorer", "/login")}
-                  className="theme-card-soft p-5 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
+                  title="Return to saved places, trip plans, bookings, and account details."
+                  className="theme-card-soft rounded-xl p-4 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
                 >
-                  <h3 className="theme-heading text-xl font-semibold">Traveler login</h3>
-                  <p className="theme-muted mt-2 text-sm leading-6">
-                    Return to saved places, trip plans, bookings, and account details.
-                  </p>
+                  <h3 className="theme-heading text-base font-semibold">Traveler login</h3>
                 </Link>
 
                 <Link
                   href="/trip-planner"
-                  className="theme-card-soft p-5 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
+                  title="Build your route, organize each day, and keep your plans in one place."
+                  className="theme-card-soft rounded-xl p-4 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
                 >
-                  <h3 className="theme-heading text-xl font-semibold">Trip planner</h3>
-                  <p className="theme-muted mt-2 text-sm leading-6">
-                    Build your route, organize each day, and keep your plans in one place.
-                  </p>
+                  <h3 className="theme-heading text-base font-semibold">Trip planner</h3>
                 </Link>
 
                 <Link
                   href="/community-guides"
-                  className="theme-card-soft p-5 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
+                  title="Ask locals for practical advice and connect with guides before you travel."
+                  className="theme-card-soft rounded-xl p-4 transition hover:bg-black/[0.045] dark:hover:bg-white/[0.05]"
                 >
-                  <h3 className="theme-heading text-xl font-semibold">Guides</h3>
-                  <p className="theme-muted mt-2 text-sm leading-6">
-                    Ask locals for practical advice and connect with guides before you travel.
-                  </p>
+                  <h3 className="theme-heading text-base font-semibold">Guides</h3>
                 </Link>
               </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <Link
                   href="/contact"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#ff6c4d]"

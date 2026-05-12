@@ -3,24 +3,30 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import CompactRailCard from "@/components/ui/CompactRailCard";
+import CompactSectionHeader from "@/components/ui/CompactSectionHeader";
 import FavoriteButton from "@/components/ui/FavoriteButton";
-import SectionHeader from "@/components/ui/SectionHeader";
+import HorizontalRail from "@/components/ui/HorizontalRail";
 import WeatherBadge from "@/components/ui/WeatherBadge";
 import { apiFetch } from "@/lib/client-api";
 import {
   type ExplorerDestinationSummary,
   enrichDestination,
 } from "@/lib/destination-explorer";
-import { destinationBrowseModes, serviceGroups } from "@/lib/taxonomy";
+import { serviceGroups } from "@/lib/taxonomy";
 import {
   ArrowRight,
   Banknote,
+  CalendarDays,
   CloudRain,
   FileText,
+  Globe2,
   Info,
   Languages,
+  MapPin,
   Search,
   SunMedium,
+  Users,
 } from "lucide-react";
 
 const travelTips = [
@@ -166,155 +172,100 @@ export default function TravelGuidePage() {
 
   return (
     <div className="theme-page pb-20">
-      <section className="mx-auto max-w-7xl px-4 pb-8 pt-8 sm:px-6 lg:px-8">
-        <div className="theme-panel-strong overflow-hidden rounded-[38px]">
-          <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
-            <div className="p-6 md:p-8 lg:p-10">
-              <div className="theme-chip inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em]">
-                Zimbabwe destination guide
-              </div>
-              <h1 className="theme-heading mt-4 max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
-                Start with the destination, then plan everything around it.
-              </h1>
-              <p className="theme-muted mt-4 max-w-2xl text-base leading-7 md:text-lg">
-                Explore Zimbabwe by destination first. Once you choose where to go, you can discover the
-                stays, experiences, dining, and local insight that make that place worth the trip.
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="#destinations"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#ff5630] px-6 py-3 text-sm font-semibold text-white"
-                >
-                  Browse destinations
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/events"
-                  className="theme-button-secondary inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold"
-                >
-                  Explore events
-                </Link>
-              </div>
-
-              <div className="mt-8">
-                <div className="relative">
-                  <Search className="theme-subtle absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="Search by destination, region, season, or travel style"
-                    className="theme-input w-full rounded-2xl py-3 pl-12 pr-4 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-8 grid grid-cols-3 gap-3 text-center">
-                <div className="theme-panel-soft rounded-[20px] px-4 py-3">
-                  <div className="theme-heading text-2xl font-bold">{destinations.length || "—"}</div>
-                  <div className="theme-subtle mt-1 text-xs">Destinations</div>
-                </div>
-                <div className="theme-panel-soft rounded-[20px] px-4 py-3">
-                  <div className="theme-heading text-2xl font-bold">
-                    {destinations.filter((item) => item.region).length || "—"}
-                  </div>
-                  <div className="theme-subtle mt-1 text-xs">Regions covered</div>
-                </div>
-                <div className="theme-panel-soft rounded-[20px] px-4 py-3">
-                  <div className="theme-heading text-2xl font-bold">{featuredCount || "—"}</div>
-                  <div className="theme-subtle mt-1 text-xs">Featured routes</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 border-t border-black/10 bg-black/[0.03] p-6 dark:border-white/10 dark:bg-white/[0.03] md:p-8 lg:border-l lg:border-t-0">
-              <div
-                className="min-h-[220px] rounded-[28px] bg-cover bg-center"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.45)), url('/images/victoria-falls.jpg')",
-                }}
-              />
-
-              <div>
-                <div className="text-xs uppercase tracking-[0.24em] text-black/45 dark:text-white/45">
-                  Seasonality
-                </div>
-                <div className="mt-4 grid gap-4">
-                  {seasons.map((season) => {
-                    const Icon = season.icon;
-
-                    return (
-                      <div key={season.name} className="theme-panel-soft rounded-[24px] p-5">
-                        <div className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ${season.accent}`}>
-                          <Icon className="mr-1.5 h-4 w-4" />
-                          {season.months}
-                        </div>
-                        <h3 className="theme-heading mt-4 text-xl font-semibold">{season.name}</h3>
-                        <p className="theme-muted mt-2 text-sm leading-6">{season.description}</p>
-                        <p className="theme-subtle mt-3 text-xs uppercase tracking-[0.24em]">
-                          Average temperatures {season.temperature}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-xs uppercase tracking-[0.24em] text-black/45 dark:text-white/45">
-                  Quick facts
-                </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {facts.map(([label, value]) => (
-                    <div key={label} className="theme-panel-soft rounded-[20px] p-4">
-                      <p className="theme-subtle text-xs uppercase tracking-[0.22em]">{label}</p>
-                      <p className="theme-heading mt-2 text-lg font-semibold">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+      <section className="relative border-b border-black/10 dark:border-white/10">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "linear-gradient(180deg, rgba(0,0,0,0.42), rgba(0,0,0,0.72)), url('/images/victoria-falls.jpg')",
+          }}
+        />
+        <div className="relative mx-auto flex min-h-[360px] max-w-7xl flex-col justify-end px-4 pb-24 pt-12 text-white sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/72">
+            Zimbabwe destination guide
+          </p>
+          <h1 className="mt-3 max-w-3xl text-4xl font-bold leading-tight md:text-6xl">
+            Explore Zimbabwe
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/78 md:text-base">
+            Pick a destination, then compare the stays, activities, dining, transport, events, and local help available there.
+          </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-        <AppServiceStrip activeLabel="Destinations" />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="theme-panel rounded-[32px] p-6 md:p-7">
-          <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-            <div>
-              <p className="theme-label text-xs uppercase tracking-[0.24em]">Explore your way</p>
-              <h2 className="theme-heading mt-3 text-2xl font-semibold">
-                Browse destinations by region, province, city, or activity
-              </h2>
-              <p className="theme-muted mt-3 text-sm leading-6">
-                Off2Zim starts with where you want to go. You can then open a destination to see
-                the stays, transport, dining, activities, and events connected to that place.
-              </p>
+      <section className="relative z-10 mx-auto -mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-xl border border-black/10 bg-white p-3 shadow-[0_12px_36px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-[#101010]">
+          <div className="grid gap-2 lg:grid-cols-[1.25fr_0.78fr_auto]">
+            <label className="flex min-h-12 items-center gap-3 rounded-lg border-2 border-[#ffca74] bg-white px-3 dark:bg-[#171717]">
+              <Search className="h-5 w-5 shrink-0 text-[#ff5630]" />
+              <span className="sr-only">Search destinations</span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Where in Zimbabwe are you going?"
+                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-500 dark:text-white dark:placeholder:text-white/45"
+              />
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <MetricPill icon={MapPin} label="Destinations" value={destinations.length || "—"} />
+              <MetricPill
+                icon={Globe2}
+                label="Regions"
+                value={destinations.filter((item) => item.region).length || "—"}
+              />
+              <MetricPill icon={Users} label="Featured" value={featuredCount || "—"} />
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              {destinationBrowseModes.map((mode) => (
-                <div key={mode.id} className="theme-panel-soft rounded-[22px] p-4">
-                  <h3 className="theme-heading text-base font-semibold">{mode.label}</h3>
-                  <p className="theme-muted mt-2 text-sm leading-6">{mode.description}</p>
-                </div>
-              ))}
-            </div>
+            <Link
+              href="#destinations"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#ff5630] px-5 text-sm font-semibold text-white"
+            >
+              Search
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            <FacetGroup label="Regions" values={browseFacets.regions} onChoose={setSearchTerm} />
-            <FacetGroup label="Provinces and cities" values={browseFacets.provinces} onChoose={setSearchTerm} />
-            <FacetGroup label="Activities and highlights" values={browseFacets.activities} onChoose={setSearchTerm} />
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {seasons.map((season) => {
+              const Icon = season.icon;
+
+              return (
+                <button
+                  key={season.name}
+                  type="button"
+                  onClick={() => setSearchTerm(season.months)}
+                  title={season.description}
+                  className="flex min-w-[190px] items-center gap-3 rounded-lg border border-black/10 px-3 py-2 text-left transition hover:border-[#ff5630] dark:border-white/10"
+                >
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${season.accent}`}>
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="theme-heading block truncate text-sm font-semibold">{season.name}</span>
+                    <span className="theme-muted block truncate text-xs">
+                      {season.months} · {season.temperature}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+            {facts.slice(0, 6).map(([label, value]) => (
+              <button
+                key={label}
+                type="button"
+                title={`${label}: ${value}`}
+                className="flex min-w-[150px] items-center gap-3 rounded-lg border border-black/10 px-3 py-2 text-left dark:border-white/10"
+              >
+                <CalendarDays className="h-4 w-4 shrink-0 text-[#ff5630]" />
+                <span className="min-w-0">
+                  <span className="theme-subtle block truncate text-[10px] uppercase tracking-[0.16em]">{label}</span>
+                  <span className="theme-heading block truncate text-sm font-semibold">{value}</span>
+                </span>
+              </button>
+            ))}
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {serviceGroups.map((group) => (
               <Link
                 key={group.id}
@@ -322,7 +273,8 @@ export default function TravelGuidePage() {
                 onClick={() => {
                   if (!group.globalBrowse) setSearchTerm(group.label);
                 }}
-                className="theme-chip rounded-full px-3 py-2 text-xs font-semibold"
+                title={group.description}
+                className="theme-chip inline-flex shrink-0 items-center rounded-lg px-3 py-2 text-xs font-semibold"
               >
                 {group.label}
               </Link>
@@ -331,10 +283,23 @@ export default function TravelGuidePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+        <AppServiceStrip activeLabel="Destinations" />
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="grid gap-3 lg:grid-cols-3">
+          <FacetGroup label="Regions" values={browseFacets.regions} onChoose={setSearchTerm} />
+          <FacetGroup label="Provinces and cities" values={browseFacets.provinces} onChoose={setSearchTerm} />
+          <FacetGroup label="Activities and highlights" values={browseFacets.activities} onChoose={setSearchTerm} />
+        </div>
+      </section>
+
       <section id="destinations" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <SectionHeader
+        <CompactSectionHeader
           eyebrow="Choose the place"
-          title="Explore Zimbabwe by route, region, mood, and season"
+          title="Explore Zimbabwe"
+          count={filteredDestinations.length}
         />
 
         {error ? (
@@ -363,56 +328,22 @@ export default function TravelGuidePage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <HorizontalRail itemClassName="w-[78vw] max-w-[300px] sm:w-[280px]">
             {filteredDestinations.map((destination) => (
-              <article key={destination.id} className="theme-card overflow-hidden">
-                <div
-                  className="relative h-56 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.52)), url('${destination.heroImage}')`,
-                  }}
+              <div key={destination.id} className="relative">
+                <CompactRailCard
+                  title={destination.name}
+                  href={`/travel-guide/${destination.id}`}
+                  imageUrl={destination.heroImage}
+                  meta={destination.meta}
+                  detail={destination.region || destination.location || "Zimbabwe"}
+                  badge={destination.bestTime || "Year-round"}
+                  description={
+                    destination.description || "Open this destination to explore what makes it worth visiting."
+                  }
+                  actionLabel="View destination"
                 >
-                  <div className="absolute left-4 top-4 rounded-full bg-black/45 px-3 py-2 text-sm text-white backdrop-blur">
-                    {destination.meta}
-                  </div>
-                  <FavoriteButton
-                    itemId={destination.name}
-                    itemType="destination"
-                    className="absolute right-4 top-4 rounded-full bg-black/45 p-3 text-white backdrop-blur"
-                    iconClassName="h-4 w-4"
-                  />
-                  <div className="absolute inset-x-4 bottom-4">
-                    <h3 className="text-2xl font-semibold text-white">{destination.name}</h3>
-                    <p className="mt-2 text-sm text-white/75">
-                      {destination.description || "Open this destination to explore what makes it worth visiting."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-5">
-                  <div className="theme-muted flex items-center justify-between gap-3 text-sm">
-                    <span>{destination.bestTime || "Year-round"}</span>
-                    <WeatherBadge location={destination.name} compact />
-                  </div>
-                  <div className="theme-muted mt-3 flex flex-wrap gap-2 text-xs">
-                    <span className="rounded-full bg-black/[0.04] px-3 py-1 dark:bg-white/[0.06]">
-                      {destination.region || destination.location || "Zimbabwe"}
-                    </span>
-                    <span className="rounded-full bg-black/[0.04] px-3 py-1 dark:bg-white/[0.06]">
-                      {destination.explorerFocus || destination.meta}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {(destination.highlights || []).slice(0, 3).map((highlight) => (
-                      <span
-                        key={highlight}
-                        className="rounded-full border border-black/10 px-3 py-1 text-xs theme-muted dark:border-white/10"
-                      >
-                        {highlight}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="theme-panel-soft mt-4 grid grid-cols-3 gap-2 rounded-[18px] p-3 text-center">
+                  <div className="mt-2 grid grid-cols-3 gap-1 rounded-lg bg-black/35 p-2 text-center text-white backdrop-blur">
                     <DestinationCount label="Stays" value={destination.stays_count} />
                     <DestinationCount label="Things" value={destination.activities_count} />
                     <DestinationCount
@@ -424,44 +355,44 @@ export default function TravelGuidePage() {
                       }
                     />
                   </div>
-                  <Link
-                    href={`/travel-guide/${destination.id}`}
-                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#ff5630] px-4 py-2.5 text-sm font-semibold text-white"
-                  >
-                    View destination
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                </CompactRailCard>
+                <div className="absolute right-3 top-3">
+                  <FavoriteButton
+                    itemId={destination.name}
+                    itemType="destination"
+                    className="rounded-full bg-black/45 p-2 text-white backdrop-blur"
+                    iconClassName="h-4 w-4"
+                  />
                 </div>
-              </article>
+                <div className="absolute left-3 bottom-3">
+                  <WeatherBadge location={destination.name} compact />
+                </div>
+              </div>
             ))}
-          </div>
+          </HorizontalRail>
         )}
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <SectionHeader
+        <CompactSectionHeader
           eyebrow="Travel essentials"
-          title="What to know before you choose where to go"
+          title="Before you go"
         />
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <HorizontalRail itemClassName="w-[72vw] max-w-[240px] sm:w-[220px]">
           {travelTips.map((tip) => {
             const Icon = tip.icon;
 
             return (
-              <div key={tip.category} className="theme-panel rounded-[28px] p-5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/[0.07]">
-                  <Icon className="h-5 w-5 text-[#ff5630]" />
-                </div>
-                <h3 className="theme-heading mt-4 text-lg font-semibold">{tip.category}</h3>
-                <ul className="theme-muted mt-3 space-y-3 text-sm leading-6">
-                  {tip.tips.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
+              <CompactRailCard
+                key={tip.category}
+                title={tip.category}
+                icon={Icon}
+                meta="Guide"
+                description={tip.tips.join(" ")}
+              />
             );
           })}
-        </div>
+        </HorizontalRail>
       </section>
     </div>
   );
@@ -476,8 +407,30 @@ function DestinationCount({
 }) {
   return (
     <div>
-      <div className="theme-heading text-base font-semibold">{value || 0}</div>
-      <div className="theme-subtle text-[10px] uppercase tracking-[0.18em]">{label}</div>
+      <div className="text-base font-semibold">{value || 0}</div>
+      <div className="text-[10px] uppercase tracking-[0.18em] opacity-70">{label}</div>
+    </div>
+  );
+}
+
+function MetricPill({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof MapPin;
+  label: string;
+  value: number | string;
+}) {
+  return (
+    <div className="flex min-h-12 items-center gap-2 rounded-lg border border-black/10 px-3 py-2 dark:border-white/10">
+      <Icon className="h-4 w-4 shrink-0 text-[#ff5630]" />
+      <span className="min-w-0">
+        <span className="theme-heading block text-sm font-semibold">{value}</span>
+        <span className="theme-subtle block truncate text-[10px] uppercase tracking-[0.16em]">
+          {label}
+        </span>
+      </span>
     </div>
   );
 }
@@ -504,15 +457,16 @@ function FacetGroup({
   }
 
   return (
-    <div>
+    <div className="rounded-xl border border-black/10 bg-white px-3 py-3 dark:border-white/10 dark:bg-white/[0.03]">
       <p className="theme-subtle text-xs uppercase tracking-[0.22em]">{label}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {cleanValues.map((value) => (
           <button
             key={value}
             type="button"
             onClick={() => onChoose(value)}
-            className="rounded-full border border-black/10 px-3 py-1.5 text-xs theme-muted transition hover:border-[#ff5630] hover:text-[#ff5630] dark:border-white/10"
+            title={`Filter destinations by ${value}`}
+            className="shrink-0 rounded-lg border border-black/10 px-3 py-1.5 text-xs theme-muted transition hover:border-[#ff5630] hover:text-[#ff5630] dark:border-white/10"
           >
             {value}
           </button>

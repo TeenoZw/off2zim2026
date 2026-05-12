@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import AppServiceStrip from "@/components/ui/AppServiceStrip";
+import CompactRailCard from "@/components/ui/CompactRailCard";
+import CompactSectionHeader from "@/components/ui/CompactSectionHeader";
+import HorizontalRail from "@/components/ui/HorizontalRail";
 import { apiFetch } from "@/lib/client-api";
 import {
   type ExplorerDestinationSummary,
@@ -184,12 +187,12 @@ export default function DestinationDetailPage() {
   return (
     <div className="theme-page min-h-screen pb-20">
       <div
-        className="relative min-h-[460px] bg-cover bg-center"
+        className="relative min-h-[380px] bg-cover bg-center"
         style={{
           backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.14), rgba(0,0,0,0.74)), url('${heroImage}')`,
         }}
       >
-        <div className="mx-auto flex min-h-[460px] max-w-7xl flex-col justify-between px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[380px] max-w-7xl flex-col justify-between px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-3">
             <Link
               href="/travel-guide"
@@ -208,13 +211,13 @@ export default function DestinationDetailPage() {
               <MapPin className="h-3.5 w-3.5" />
               {destination.location || "Zimbabwe"}
             </div>
-            <h1 className="mt-4 text-4xl font-bold text-white md:text-6xl">{destination.name}</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/78 md:text-base">
+            <h1 className="mt-3 text-4xl font-bold text-white md:text-5xl">{destination.name}</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/78 md:text-base">
               {destination.description ||
                 "Choose this destination to see the stays, activities, restaurants, and local insight connected to it."}
             </p>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <StatCard label="Stays" value={counts.stays} />
               <StatCard label="Things to do" value={counts.activities} />
               <StatCard label="Transport" value={counts.transport} />
@@ -233,49 +236,46 @@ export default function DestinationDetailPage() {
         />
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="theme-panel rounded-[32px] p-6 md:p-8">
-            <p className="theme-label text-xs uppercase tracking-[0.24em]">Selected destination</p>
-            <h2 className="theme-heading mt-3 text-3xl font-semibold">
-              Services now narrow into {destination.name}
+      <section className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-3 rounded-xl border border-black/10 bg-white p-3 dark:border-white/10 dark:bg-white/[0.03] lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <p className="theme-label text-[10px] uppercase tracking-[0.22em]">Selected destination</p>
+            <h2 className="theme-heading mt-1 truncate text-base font-semibold">
+              Services are filtered to {destination.name}
             </h2>
-            <p className="theme-muted mt-4 max-w-2xl text-sm leading-7">
-              Start with destinations, events, transport, flights, and the trip planner. Once you choose a destination, Off2Zim shows the stays, restaurants, local advice, and activities available there.
-            </p>
           </div>
-
-          <div className="theme-panel rounded-[32px] p-6 md:p-8">
-            <p className="theme-label text-xs uppercase tracking-[0.24em]">Keep global tools close</p>
-            <div className="mt-4 space-y-3">
-              <Link
-                href="/events"
-                className="theme-button-secondary flex items-center justify-between rounded-[18px] px-4 py-3 text-sm font-semibold"
-              >
-                Explore all events
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/transport"
-                className="theme-button-secondary flex items-center justify-between rounded-[18px] px-4 py-3 text-sm font-semibold"
-              >
-                View transport options
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/transport/flights"
-                className="theme-button-secondary flex items-center justify-between rounded-[18px] px-4 py-3 text-sm font-semibold"
-              >
-                Browse flights
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link
+              href="/events"
+              title="Browse events across Zimbabwe"
+              className="theme-button-secondary inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold"
+            >
+              All events
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/transport"
+              title="Browse transport options across Zimbabwe"
+              className="theme-button-secondary inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold"
+            >
+              Transport
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="/transport/flights"
+              title="Browse flights separately from destination-specific services"
+              className="theme-button-secondary inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold"
+            >
+              Flights
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+        <CompactSectionHeader eyebrow="Destination services" title="Explore this stop" />
+        <HorizontalRail itemClassName="w-[62vw] max-w-[210px] sm:w-[210px]">
           {serviceCards.map((service) => {
             const Icon = service.icon;
             const count =
@@ -284,188 +284,159 @@ export default function DestinationDetailPage() {
                 : counts[service.key];
 
             return (
-              <Link
+              <CompactRailCard
                 key={service.label}
                 href={withDestinationContext(service.href, destination.id)}
-                className="theme-panel group rounded-[28px] p-6 transition hover:-translate-y-0.5"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/[0.05] dark:bg-white/[0.08]">
-                    <Icon className="h-5 w-5 text-[#ff5630]" />
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-slate-400 transition group-hover:text-[#ff5630] dark:text-white/32" />
-                </div>
-                <h3 className="theme-heading mt-5 text-2xl font-semibold">{service.label}</h3>
-                <p className="theme-muted mt-3 text-sm leading-6">{service.description}</p>
-                <div className="theme-heading mt-5 text-sm font-semibold">
-                  {count} linked {service.label.toLowerCase()}
-                  
-                </div>
-              </Link>
+                icon={Icon}
+                meta="Service"
+                badge={count}
+                title={service.label}
+                description={service.description}
+                actionLabel={`Open ${service.label}`}
+              />
             );
           })}
-        </div>
+        </HorizontalRail>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="theme-panel rounded-[28px] p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="theme-heading text-xl font-semibold">Featured stays</h2>
-              <Link
-                href={withDestinationContext("/accommodation", destination.id)}
-                className="text-sm font-medium text-[#ff5630]"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
+      <section className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <div>
+          <CompactSectionHeader
+            title="Featured stays"
+            count={scoped.stays.length}
+            actionHref={withDestinationContext("/accommodation", destination.id)}
+          />
+          {scoped.stays.length > 0 ? (
+            <HorizontalRail>
               {scoped.stays.slice(0, 3).map((stay) => (
-                <div key={stay.id} className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
-                  <div className="theme-heading text-base font-semibold">{stay.name}</div>
-                  <div className="theme-muted mt-1 text-sm">
-                    {stay.location || stay.destinations?.name || destination.name}
-                  </div>
-                  {stay.description ? (
-                    <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">{stay.description}</p>
-                  ) : null}
-                </div>
+                <CompactRailCard
+                  key={stay.id}
+                  title={stay.name}
+                  imageUrl={stay.image_url || destination.image_url}
+                  meta="Stay"
+                  detail={stay.location || stay.destinations?.name || destination.name}
+                  badge={stay.rating ? stay.rating.toFixed(1) : null}
+                  description={stay.description}
+                />
               ))}
-              {scoped.stays.length === 0 ? (
-                <EmptyScopedState label="stays" destinationName={destination.name} />
-              ) : null}
-            </div>
-          </div>
+            </HorizontalRail>
+          ) : (
+            <EmptyScopedState label="stays" destinationName={destination.name} />
+          )}
+        </div>
 
-          <div className="theme-panel rounded-[28px] p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="theme-heading text-xl font-semibold">Transport here</h2>
-              <Link
-                href={withDestinationContext("/transport", destination.id)}
-                className="text-sm font-medium text-[#ff5630]"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
+        <div>
+          <CompactSectionHeader
+            title="Transport here"
+            count={scoped.transport.length}
+            actionHref={withDestinationContext("/transport", destination.id)}
+          />
+          {scoped.transport.length > 0 ? (
+            <HorizontalRail>
               {scoped.transport.slice(0, 3).map((transport) => (
                 <ListingPreview key={transport.id} listing={transport} />
               ))}
-              {scoped.transport.length === 0 ? (
-                <EmptyScopedState label="transport options" destinationName={destination.name} />
-              ) : null}
-            </div>
-          </div>
+            </HorizontalRail>
+          ) : (
+            <EmptyScopedState label="transport options" destinationName={destination.name} />
+          )}
+        </div>
 
-          <div className="theme-panel rounded-[28px] p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="theme-heading text-xl font-semibold">Dining</h2>
-              <Link
-                href={withDestinationContext("/restaurants", destination.id)}
-                className="text-sm font-medium text-[#ff5630]"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
+        <div>
+          <CompactSectionHeader
+            title="Dining"
+            count={scoped.restaurants.length + scoped.diningListings.length}
+            actionHref={withDestinationContext("/restaurants", destination.id)}
+          />
+          {scoped.restaurants.length > 0 || scoped.diningListings.length > 0 ? (
+            <HorizontalRail>
               {scoped.restaurants.slice(0, 2).map((restaurant) => (
-                <div key={restaurant.id} className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
-                  <div className="theme-heading text-base font-semibold">{restaurant.name}</div>
-                  <div className="theme-muted mt-1 text-sm">{restaurant.cuisine} · {restaurant.location}</div>
-                  {restaurant.description ? (
-                    <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">{restaurant.description}</p>
-                  ) : null}
-                </div>
+                <CompactRailCard
+                  key={restaurant.id}
+                  title={restaurant.name}
+                  imageUrl={restaurant.images[0] || destination.image_url}
+                  meta={restaurant.cuisine}
+                  detail={restaurant.location}
+                  badge={restaurant.rating ? restaurant.rating.toFixed(1) : restaurant.priceRange}
+                  description={restaurant.description}
+                />
               ))}
               {scoped.diningListings.slice(0, Math.max(0, 3 - scoped.restaurants.length)).map((dining) => (
                 <ListingPreview key={dining.id} listing={dining} />
               ))}
-              {scoped.restaurants.length === 0 && scoped.diningListings.length === 0 ? (
-                <EmptyScopedState label="dining options" destinationName={destination.name} />
-              ) : null}
-            </div>
-          </div>
+            </HorizontalRail>
+          ) : (
+            <EmptyScopedState label="dining options" destinationName={destination.name} />
+          )}
+        </div>
 
-          <div className="theme-panel rounded-[28px] p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="theme-heading text-xl font-semibold">Events</h2>
-              <Link
-                href={withDestinationContext("/events", destination.id)}
-                className="text-sm font-medium text-[#ff5630]"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
+        <div>
+          <CompactSectionHeader
+            title="Events"
+            count={scoped.events.length}
+            actionHref={withDestinationContext("/events", destination.id)}
+          />
+          {scoped.events.length > 0 ? (
+            <HorizontalRail>
               {scoped.events.slice(0, 3).map((event) => (
                 <ListingPreview key={event.id} listing={event} />
               ))}
-              {scoped.events.length === 0 ? (
-                <EmptyScopedState label="events" destinationName={destination.name} />
-              ) : null}
-            </div>
-          </div>
+            </HorizontalRail>
+          ) : (
+            <EmptyScopedState label="events" destinationName={destination.name} />
+          )}
+        </div>
 
-          <div className="theme-panel rounded-[28px] p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="theme-heading text-xl font-semibold">Things to do</h2>
-              <Link
-                href={withDestinationContext("/activities", destination.id)}
-                className="text-sm font-medium text-[#ff5630]"
-              >
-                View all
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
+        <div>
+          <CompactSectionHeader
+            title="Things to do"
+            count={scoped.activities.length}
+            actionHref={withDestinationContext("/activities", destination.id)}
+          />
+          {scoped.activities.length > 0 ? (
+            <HorizontalRail>
               {scoped.activities.slice(0, 3).map((activity) => (
-                <div key={activity.id} className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
-                  <div className="theme-heading text-base font-semibold">{activity.title}</div>
-                  <div className="theme-muted mt-1 text-sm">{activity.location}</div>
-                  <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">
-                    {activity.shortDescription || activity.description}
-                  </p>
-                </div>
+                <ListingPreview key={activity.id} listing={activity} />
               ))}
-              {scoped.activities.length === 0 ? (
-                <EmptyScopedState label="activities" destinationName={destination.name} />
-              ) : null}
-            </div>
-          </div>
+            </HorizontalRail>
+          ) : (
+            <EmptyScopedState label="activities" destinationName={destination.name} />
+          )}
+        </div>
 
-          <div className="theme-panel rounded-[28px] p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="theme-heading text-xl font-semibold">Ask a Local</h2>
-              <Link
-                href={withDestinationContext("/ask-a-local", destination.id)}
-                className="text-sm font-medium text-[#ff5630]"
-              >
-                Open forum
-              </Link>
-            </div>
-            <div className="mt-4 space-y-3">
+        <div>
+          <CompactSectionHeader
+            title="Ask a Local"
+            count={scoped.guides.length + scoped.forumQuestions.length}
+            actionHref={withDestinationContext("/ask-a-local", destination.id)}
+            actionLabel="Open forum"
+          />
+          {scoped.guides.length > 0 || scoped.forumQuestions.length > 0 ? (
+            <HorizontalRail>
               {scoped.forumQuestions.slice(0, 2).map((question) => (
-                <div key={question.id} className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
-                  <div className="theme-heading text-base font-semibold">{question.title}</div>
-                  <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">{question.body}</p>
-                  <div className="theme-subtle mt-3 text-xs">
-                    {question.answerCount} answers by travelers and local guides
-                  </div>
-                </div>
+                <CompactRailCard
+                  key={question.id}
+                  title={question.title}
+                  icon={MessageCircle}
+                  meta="Question"
+                  badge={`${question.answerCount} answers`}
+                  description={question.body}
+                />
               ))}
               {scoped.guides.slice(0, 1).map((guide) => (
-                <div key={guide.id} className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
-                  <div className="theme-heading text-base font-semibold">{guide.name}</div>
-                  <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">{guide.bio}</p>
-                  <div className="theme-subtle mt-3 text-xs">
-                    {guide.rating.toFixed(1)} rating · {guide.reviewCount} reviews
-                  </div>
-                </div>
+                <CompactRailCard
+                  key={guide.id}
+                  title={guide.name}
+                  icon={MessageCircle}
+                  meta="Guide"
+                  badge={guide.rating.toFixed(1)}
+                  description={guide.bio}
+                />
               ))}
-              {scoped.guides.length === 0 && scoped.forumQuestions.length === 0 ? (
-                <EmptyScopedState label="local guidance" destinationName={destination.name} />
-              ) : null}
-            </div>
-          </div>
+            </HorizontalRail>
+          ) : (
+            <EmptyScopedState label="local guidance" destinationName={destination.name} />
+          )}
         </div>
       </section>
     </div>
@@ -474,21 +445,23 @@ export default function DestinationDetailPage() {
 
 function ListingPreview({ listing }: { listing: PublicListingRecord }) {
   return (
-    <div className="rounded-[18px] border border-black/8 p-4 dark:border-white/8">
-      <div className="theme-heading text-base font-semibold">{listing.title}</div>
-      <div className="theme-muted mt-1 text-sm">{listing.location}</div>
-      <p className="theme-muted mt-2 text-sm leading-6 line-clamp-2">
-        {listing.shortDescription || listing.description}
-      </p>
-    </div>
+    <CompactRailCard
+      title={listing.title}
+      href={`/marketplace/${listing.slug}`}
+      imageUrl={listing.images[0]}
+      meta={listing.category}
+      detail={listing.location}
+      badge={listing.basePrice ? `$${listing.basePrice}` : "Quote"}
+      description={listing.shortDescription || listing.description}
+    />
   );
 }
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-black/28 px-4 py-4 text-white backdrop-blur">
-      <div className="text-3xl font-semibold">{value}</div>
-      <div className="mt-1 text-sm text-white/72">{label}</div>
+    <div className="min-w-[136px] rounded-xl border border-white/10 bg-black/32 px-3 py-2.5 text-white backdrop-blur">
+      <div className="text-xl font-semibold">{value}</div>
+      <div className="mt-0.5 truncate text-xs text-white/72">{label}</div>
     </div>
   );
 }
@@ -501,7 +474,7 @@ function EmptyScopedState({
   destinationName: string;
 }) {
   return (
-    <div className="rounded-[18px] border border-dashed border-black/15 p-4 text-sm theme-muted dark:border-white/12">
+    <div className="rounded-xl border border-dashed border-black/15 p-4 text-sm theme-muted dark:border-white/12">
       No {label} are linked to {destinationName} yet.
     </div>
   );
